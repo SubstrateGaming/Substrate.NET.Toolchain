@@ -1,6 +1,7 @@
-﻿using Ajuna.ServiceLayer.Storage.Subscription.Model;
+﻿using Ajuna.ServiceLayer.Model;
+using Ajuna.ServiceLayer.Storage;
 
-namespace Ajuna.ServiceLayer.Storage.Subscription
+namespace Ajuna.AspNetCore
 {
     public class StorageSubscriptionChangeDelegate : IStorageChangeDelegate
     {

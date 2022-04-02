@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Ajuna.ServiceLayer.Storage.Subscription.Model
+namespace Ajuna.ServiceLayer.Model
 {
     /// <summary>
     /// This class implements a serializable message to register for storage changes.

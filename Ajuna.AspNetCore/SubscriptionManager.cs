@@ -5,7 +5,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ajuna.ServiceLayer
+namespace Ajuna.AspNetCore
 {
     public class SubscriptionManager
     {

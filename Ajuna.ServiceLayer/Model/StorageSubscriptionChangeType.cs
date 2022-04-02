@@ -1,4 +1,4 @@
-﻿namespace Ajuna.ServiceLayer.Storage.Subscription.Model
+﻿namespace Ajuna.ServiceLayer.Model
 {
     public enum StorageSubscriptionChangeType
     {

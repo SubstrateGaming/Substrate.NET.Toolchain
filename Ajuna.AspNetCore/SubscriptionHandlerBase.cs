@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ajuna.ServiceLayer
+namespace Ajuna.AspNetCore
 {
     public abstract class SubscriptionHandlerBase
     {

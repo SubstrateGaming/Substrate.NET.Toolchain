@@ -1,5 +1,5 @@
 using Ajuna.ServiceLayer.Extensions;
-using Ajuna.ServiceLayer.Storage.Subscription.Model;
+using Ajuna.ServiceLayer.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ajuna.ServiceLayer.Storage.Subscription
+namespace Ajuna.AspNetCore
 {
     public class StorageSubscriptionHandler : SubscriptionHandlerBase
     {

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace Ajuna.ServiceLayer.Storage.Subscription.Model
+namespace Ajuna.ServiceLayer.Model
 {
     /// <summary>
     /// This class implements a serializable message to inform web socket clients

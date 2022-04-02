@@ -278,7 +278,7 @@
             </summary>
             <param name="services">Service collection to configure.</param>
         </member>
-        <member name="M:Ajuna.RestService.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Ajuna.ServiceLayer.Storage.Subscription.StorageSubscriptionHandler)">
+        <member name="M:Ajuna.RestService.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Ajuna.AspNetCore.StorageSubscriptionHandler)">
             <summary>
             This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 
             </summary>

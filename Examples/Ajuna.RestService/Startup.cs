@@ -3,7 +3,6 @@ using Ajuna.Infrastructure.Storages;
 using Ajuna.RestService.Formatters;
 using Ajuna.ServiceLayer;
 using Ajuna.ServiceLayer.Storage;
-using Ajuna.ServiceLayer.Storage.Subscription;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
