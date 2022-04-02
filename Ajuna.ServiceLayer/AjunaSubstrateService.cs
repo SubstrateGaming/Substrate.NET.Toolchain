@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 namespace Ajuna.ServiceLayer
 {
-    public class GameService
+    public class AjunaSubstrateService
     {
         private SubstrateClient Client;
 
-        private readonly GameStorage GameStorage = new GameStorage();
+        private readonly AjunaSubstrateStorage GameStorage = new AjunaSubstrateStorage();
 
         public async Task InitializeAsync(AjunaStorageServiceConfiguration configuration)
         {
-            Log.Information("initialize GameService");
+            Log.Information("initialize Ajuna substrate service");
 
             //
             // Initialize substrate client API
@@ -32,10 +32,6 @@ namespace Ajuna.ServiceLayer
             //
             // While we are loading storages any storage subscription notification will
             // wait to be processed until the initialization is complete.
-
-            //var keys = Utils.Bytes2HexString(RequestGenerator.GetStorageKeyBytesHash("System","Account"), Utils.HexStringFormat.Prefixed);
-            //var keys = Utils.Bytes2HexString(RequestGenerator.GetStorageKeyBytesHash("Balances", "Account"), Utils.HexStringFormat.Prefixed);
-            //await Client.State.SubscribeStorageAsync(new JArray { keys }, GameStorage.OnStorageUpdate);
             await Client.State.SubscribeStorageAsync(null, GameStorage.OnStorageUpdate);
 
             // Load storages we are interested in.

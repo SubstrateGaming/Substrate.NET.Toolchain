@@ -4,6 +4,6 @@ namespace Ajuna.AspNetCore
 {
     internal static class AjunaRuntime
     {
-        internal static GameService GameService { get; set; }
+        internal static AjunaSubstrateService GameService { get; set; }
     }
 }

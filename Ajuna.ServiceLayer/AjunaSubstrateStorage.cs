@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Ajuna.ServiceLayer
 {
-    internal class GameStorage
+    internal class AjunaSubstrateStorage
     {
         private readonly ManualResetEvent StorageStartProcessingEvent = new ManualResetEvent(false);
         private readonly object Lock = new object();

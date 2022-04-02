@@ -9,7 +9,7 @@ namespace Ajuna.AspNetCore
     {
         public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, AjunaStorageServiceConfiguration configuration)
         {
-            var game = new GameService();
+            var game = new AjunaSubstrateService();
 
             Task.Run(async () =>
             {
