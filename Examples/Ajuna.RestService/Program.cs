@@ -5,8 +5,16 @@ using Serilog.Events;
 
 namespace Ajuna.RestService
 {
+    /// <summary>
+    /// >> Program
+    /// Setting up the Rest Service.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// Entrypoint
+        /// </summary>
+        /// <param name="args">Command line arguments.</param>
         public static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -21,6 +29,11 @@ namespace Ajuna.RestService
             CreateHostBuilder(args).Build().Run();
         }
 
+        /// <summary>
+        /// Setup the Rest Service host.
+        /// </summary>
+        /// <param name="args">Command line arguments.</param>
+        /// <returns>The host.</returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseSerilog()
