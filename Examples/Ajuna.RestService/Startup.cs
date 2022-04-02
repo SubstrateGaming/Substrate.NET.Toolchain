@@ -49,7 +49,7 @@ namespace Ajuna.RestService
         public void ConfigureServices(IServiceCollection services)
         {
             // Configure web sockets to allow clients to subscribe to storage changes.
-            services.AddGameServiceSubscriptions();
+            services.AddGameServiceSubscriptions<StorageSubscriptionHandler>();
             
             services.AddGameService(new GameServiceConfiguration()
             {

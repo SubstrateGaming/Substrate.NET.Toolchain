@@ -43,18 +43,10 @@ namespace Ajuna.AspNetCore
             return services;
         }
 
-        public static IServiceCollection AddGameServiceSubscriptions(this IServiceCollection services)
+        public static IServiceCollection AddGameServiceSubscriptions<TService>(this IServiceCollection services) where TService : class
         {
             services.AddTransient<SubscriptionManager>();
-
-            foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
-            {
-                if (type.GetTypeInfo().BaseType == typeof(SubscriptionHandlerBase))
-                {
-                    services.AddSingleton(type);
-                }
-            }
-
+            services.AddSingleton<TService>();
             return services;
         }
     }
