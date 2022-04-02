@@ -1,17 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+	<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 	<PropertyGroup>
 		<PackageId>Ajuna.ServiceLayer.Model</PackageId>
+		<AssemblyTitle>Ajuna.ServiceLayer.Model</AssemblyTitle>
+		<AssemblyName>Ajuna.ServiceLayer.Model</AssemblyName>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<Version>0.1.5</Version>
-		<Company>BloGa Tech AG</Company>
-		<Authors>Cedric Decoster</Authors>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageDescription>Ajuna Service Layer model classes that are shared between services and clients.</PackageDescription>
-		<PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<RepositoryUrl>https://github.com/ajuna-network/Ajuna.SDK</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
 	<ItemGroup>
