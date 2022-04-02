@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Ajuna.NetApiGenerator</PackageId>
+    <TargetFramework>net5.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Version>0.1.0</Version>
+    <Company>BloGa Tech AG</Company>
+    <Authors>Cedric Decoster</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Ajuna .NET API Extension Generator</Description>
+    <Copyright>Copyright © BloGa Tech AG, Switzerland. All rights Reserved.</Copyright>
+    <PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ajuna-network/Ajuna.NetApiGenerator</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Ajuna.NetApi" Version="0.1.2" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="metadata_ajuna.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ajuna.RestService</name>
+    </assembly>
+    <members>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.AssetsController.GetAsset(System.String)">
+            <summary>
+            >> Asset
+             Details of an asset.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.AssetsController.GetAccount(System.String)">
+            <summary>
+            >> Account
+             The number of units of assets held by any given account.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.AssetsController.GetApprovals(System.String)">
+            <summary>
+            >> Approvals
+             Approved balance transfers. First balance is the amount approved for transfer. Second
+             is the amount of `T::Currency` reserved for storing this.
+             First key is the asset ID, second key is the owner and third key is the delegate.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.AssetsController.GetMetadata(System.String)">
+            <summary>
+            >> Metadata
+             Metadata of an asset.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.BalancesController.GetTotalIssuance">
+            <summary>
+            >> TotalIssuance
+             The total units issued in the system.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.BalancesController.GetAccount(System.String)">
+            <summary>
+            >> Account
+             The balance of an account.
+            
+             NOTE: This is only used in the case that this pallet is used to store balances.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.BalancesController.GetLocks(System.String)">
+            <summary>
+            >> Locks
+             Any liquidity locks on some account balances.
+             NOTE: Should only be accessed when setting, changing and freeing a lock.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.BalancesController.GetReserves(System.String)">
+            <summary>
+            >> Reserves
+             Named reserves on some account balances.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.BalancesController.GetStorageVersion">
+            <summary>
+            >> StorageVersion
+             Storage version of the pallet.
+            
+             This is set to v2.0.0 for new networks.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourController.GetSomething">
+            <summary>
+            >> Something
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourController.GetFounderKey">
+            <summary>
+            >> FounderKey
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourController.GetBoards(System.String)">
+            <summary>
+            >> Boards
+             Store all boards that are currently being played.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourController.GetPlayerBoard(System.String)">
+            <summary>
+            >> PlayerBoard
+             Store players active board, currently only one board per player allowed.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourController.GetBoardSchedules(System.String)">
+            <summary>
+            >> BoardSchedules
+             Store boards open schedules.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourController.GetNonce">
+            <summary>
+            >> Nonce
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourMamaController.GetBracketsCount">
+            <summary>
+            >> BracketsCount
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourMamaController.GetBracketIndices(System.String)">
+            <summary>
+            >> BracketIndices
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourMamaController.GetBracketIndexKeyMap(System.String)">
+            <summary>
+            >> BracketIndexKeyMap
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.ConnectFourMamaController.GetBracketKeyValueMap(System.String)">
+            <summary>
+            >> BracketKeyValueMap
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetAccount(System.String)">
+            <summary>
+            >> Account
+             The full account information for a particular account ID.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetExtrinsicCount">
+            <summary>
+            >> ExtrinsicCount
+             Total extrinsics count for the current block.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetBlockWeight">
+            <summary>
+            >> BlockWeight
+             The current weight for the block.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetAllExtrinsicsLen">
+            <summary>
+            >> AllExtrinsicsLen
+             Total length (in bytes) for all extrinsics put together, for the current block.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetBlockHash(System.String)">
+            <summary>
+            >> BlockHash
+             Map of block numbers to block hashes.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetExtrinsicData(System.String)">
+            <summary>
+            >> ExtrinsicData
+             Extrinsics data for the current block (maps an extrinsic's index to its data).
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetNumber">
+            <summary>
+            >> Number
+             The current block number being processed. Set by `execute_block`.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetParentHash">
+            <summary>
+            >> ParentHash
+             Hash of the previous block.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetDigest">
+            <summary>
+            >> Digest
+             Digest of the current block, also part of the block header.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetEvents">
+            <summary>
+            >> Events
+             Events deposited for the current block.
+            
+             NOTE: This storage item is explicitly unbounded since it is never intended to be read
+             from within the runtime.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetEventCount" -->
+        <!-- Badly formed XML comment ignored for member "M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetEventTopics(System.String)" -->
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetLastRuntimeUpgrade">
+            <summary>
+            >> LastRuntimeUpgrade
+             Stores the `spec_version` and `spec_name` of when the last runtime upgrade happened.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetUpgradedToU32RefCount">
+            <summary>
+            >> UpgradedToU32RefCount
+             True if we have upgraded so that `type RefCount` is `u32`. False (default) if not.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetUpgradedToTripleRefCount">
+            <summary>
+            >> UpgradedToTripleRefCount
+             True if we have upgraded so that AccountInfo contains three types of `RefCount`. False
+             (default) if not.
+            </summary>
+        </member>
+        <member name="M:Ajuna.Infrastructure.RestService.Controller.SystemController.GetExecutionPhase">
+            <summary>
+            >> ExecutionPhase
+             The execution phase of the block.
+            </summary>
+        </member>
+    </members>
+</doc>
