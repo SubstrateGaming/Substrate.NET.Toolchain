@@ -1,23 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>Ajuna.ServiceLayer</PackageId>
+    <PackageId>Ajuna.NetApiExt</PackageId>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.1.4</Version>
+    <Version>0.0.1</Version>
     <Company>BloGa Tech AG</Company>
     <Authors>Cedric Decoster</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageDescription>Ajuna Service Layer module to easily implement substrate storage services.</PackageDescription>
+    <Description>Ajuna .NET API Extension for substrate test node.</Description>
     <PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <RepositoryUrl>https://github.com/ajuna-network/Ajuna.ServiceLayer</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ajuna-network/Ajuna.NetApiExt</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Ajuna.NetApi" Version="0.1.4" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
   </ItemGroup>
 
 </Project>
