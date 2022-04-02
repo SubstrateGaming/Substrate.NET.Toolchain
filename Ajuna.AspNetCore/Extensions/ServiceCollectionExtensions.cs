@@ -8,7 +8,7 @@ namespace Ajuna.AspNetCore
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddGameService(this IServiceCollection services, GameServiceConfiguration configuration)
+        public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, AjunaStorageServiceConfiguration configuration)
         {
             var game = new GameService();
 
@@ -43,7 +43,7 @@ namespace Ajuna.AspNetCore
             return services;
         }
 
-        public static IServiceCollection AddGameServiceSubscriptions<TService>(this IServiceCollection services) where TService : class
+        public static IServiceCollection AddAjunaSubscriptionHandler<TService>(this IServiceCollection services) where TService : class
         {
             services.AddTransient<SubscriptionManager>();
             services.AddSingleton<TService>();

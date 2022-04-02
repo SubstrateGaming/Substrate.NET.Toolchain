@@ -49,9 +49,10 @@ namespace Ajuna.RestService
         public void ConfigureServices(IServiceCollection services)
         {
             // Configure web sockets to allow clients to subscribe to storage changes.
-            services.AddGameServiceSubscriptions<StorageSubscriptionHandler>();
+            services.AddAjunaSubscriptionHandler<StorageSubscriptionHandler>();
             
-            services.AddGameService(new GameServiceConfiguration()
+            // Configure storage services
+            services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
             {
                 CancellationToken = CTS.Token,
                 Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944"),

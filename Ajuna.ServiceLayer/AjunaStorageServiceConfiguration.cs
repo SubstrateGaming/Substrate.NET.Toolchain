@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Ajuna.ServiceLayer
 {
-    public class GameServiceConfiguration
+    public class AjunaStorageServiceConfiguration
     {
         public CancellationToken CancellationToken { get; set; }
 

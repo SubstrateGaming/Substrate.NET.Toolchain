@@ -11,7 +11,7 @@ namespace Ajuna.ServiceLayer
 
         private readonly GameStorage GameStorage = new GameStorage();
 
-        public async Task InitializeAsync(GameServiceConfiguration configuration)
+        public async Task InitializeAsync(AjunaStorageServiceConfiguration configuration)
         {
             Log.Information("initialize GameService");
 
