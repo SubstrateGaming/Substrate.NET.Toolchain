@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ajuna.NetApiExt", "Examples
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ajuna.NetApiExt.Test", "Examples\Ajuna.NetApiExt\Ajuna.NetApiExt.Test\Ajuna.NetApiExt.Test.csproj", "{A1B4AC57-E06A-4203-B312-171698866FA0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ajuna.ServiceLayer.Model", "Ajuna.ServiceLayer.Model\Ajuna.ServiceLayer.Model.csproj", "{37867865-7C62-4797-908F-FC151C91A4AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{A1B4AC57-E06A-4203-B312-171698866FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1B4AC57-E06A-4203-B312-171698866FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1B4AC57-E06A-4203-B312-171698866FA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37867865-7C62-4797-908F-FC151C91A4AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37867865-7C62-4797-908F-FC151C91A4AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37867865-7C62-4797-908F-FC151C91A4AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37867865-7C62-4797-908F-FC151C91A4AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

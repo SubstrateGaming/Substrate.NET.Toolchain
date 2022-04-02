@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Ajuna.ServiceLayer.Model\Ajuna.ServiceLayer.Model.csproj" />
     <ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
   </ItemGroup>
 

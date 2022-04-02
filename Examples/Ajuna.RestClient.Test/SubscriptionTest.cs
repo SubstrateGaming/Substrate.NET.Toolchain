@@ -1,4 +1,4 @@
-using Ajuna.Restclient.Subscription.Model;
+using Ajuna.ServiceLayer.Model;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System;

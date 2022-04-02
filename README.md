@@ -19,6 +19,7 @@ Below is a high level technical overview about libraries and tools avaiiable in 
 | Project | Description | NuGet 
 |---|---|---|
 | Ajuna.ServiceLayer | Implements the fundamental layer to access substrate node storage changes with a convenient API. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer)](https://www.nuget.org/packages/Ajuna.ServiceLayer/) |
+| Ajuna.ServiceLayer.Model | Implements common classes to easily share classes between services and clients. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer.Model)](https://www.nuget.org/packages/Ajuna.ServiceLayer.Model/) |
 | Ajuna.AspNetCore | Extends the service layer and implements .ASP Net Core extensions to easily build a RESTful service to access you substrate node storages. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.AspNetCore)](https://www.nuget.org/packages/Ajuna.AspNetCore/) |
 | Ajuna.NetApiGenerator, Ajuna.RestService.ClientGenerator | .NET developer toolchain to scaffold actual projects such as a RESTful service including all the storage classes, types and consumer clients. The projects generated with the generator toolchain are intended to be used to easily scaffold and start a substrate node storage node services. |
 
