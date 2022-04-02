@@ -1,5 +1,5 @@
-using Ajuna.AspNetCore;
-using Ajuna.RestService.Subscription.Model;
+using Ajuna.ServiceLayer.Extensions;
+using Ajuna.ServiceLayer.Storage.Subscription.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,12 +9,12 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ajuna.RestService
+namespace Ajuna.ServiceLayer.Storage.Subscription
 {
-    public class StorageSubscriptionHandler : SubscriptionHandler
+    public class StorageSubscriptionHandler : SubscriptionHandlerBase
     {
-        private static object _subscriptionsLock = new();
-        private Dictionary<string, List<string>> _subscriptions = new();
+        private static object _subscriptionsLock = new object();
+        private Dictionary<string, List<string>> _subscriptions = new Dictionary<string, List<string>>();
 
         public StorageSubscriptionHandler(SubscriptionManager subscriptionManager) : base(subscriptionManager)
         {
@@ -121,8 +121,7 @@ namespace Ajuna.RestService
 
         private string[] GetSubscribedSockets(string identifier, string key)
         {
-            List<string> result = new();
-
+            var result = new List<string>();
             var subscriptionKeyExact = GetSubscriptionKey(identifier, key);
             var subscriptionKeyAny = GetSubscriptionKey(identifier, string.Empty);
 

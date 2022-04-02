@@ -30,8 +30,4 @@
     <ProjectReference Include="..\Ajuna.RestService.Storages\Ajuna.RestService.Storage.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>

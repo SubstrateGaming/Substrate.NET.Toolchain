@@ -4,13 +4,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ajuna.AspNetCore
+namespace Ajuna.ServiceLayer
 {
-    public abstract class SubscriptionHandler
+    public abstract class SubscriptionHandlerBase
     {
         protected SubscriptionManager Manager { get; set; }
 
-        public SubscriptionHandler(SubscriptionManager subscriptionManager)
+        public SubscriptionHandlerBase(SubscriptionManager subscriptionManager)
         {
             Manager = subscriptionManager;
         }

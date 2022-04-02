@@ -1,3 +1,4 @@
+using Ajuna.ServiceLayer;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Net.WebSockets;
@@ -9,9 +10,9 @@ namespace Ajuna.AspNetCore
     public class SubscriptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private SubscriptionHandler _webSocketHandler { get; set; }
+        private SubscriptionHandlerBase _webSocketHandler { get; set; }
 
-        public SubscriptionMiddleware(RequestDelegate next, SubscriptionHandler webSocketHandler)
+        public SubscriptionMiddleware(RequestDelegate next, SubscriptionHandlerBase webSocketHandler)
         {
             _next = next;
             _webSocketHandler = webSocketHandler;

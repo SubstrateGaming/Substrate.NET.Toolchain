@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Ajuna.RestService
+namespace Ajuna.ServiceLayer.Extensions
 {
     public static class TaskExtensions
     {

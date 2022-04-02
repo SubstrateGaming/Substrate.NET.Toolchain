@@ -49,7 +49,7 @@ namespace Ajuna.AspNetCore
 
             foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
             {
-                if (type.GetTypeInfo().BaseType == typeof(SubscriptionHandler))
+                if (type.GetTypeInfo().BaseType == typeof(SubscriptionHandlerBase))
                 {
                     services.AddSingleton(type);
                 }

@@ -1,9 +1,8 @@
-﻿using Ajuna.RestService.Subscription.Model;
-using Ajuna.ServiceLayer.Storage;
+﻿using Ajuna.ServiceLayer.Storage.Subscription.Model;
 
-namespace Ajuna.RestService
+namespace Ajuna.ServiceLayer.Storage.Subscription
 {
-    internal class StorageSubscriptionChangeDelegate : IStorageChangeDelegate
+    public class StorageSubscriptionChangeDelegate : IStorageChangeDelegate
     {
         private StorageSubscriptionHandler _handler;
 
@@ -22,7 +21,7 @@ namespace Ajuna.RestService
             _handler?.BroadcastChange(identifier, key, data, StorageSubscriptionChangeType.Update);
         }
 
-        internal void SetSubscriptionHandler(StorageSubscriptionHandler handler)
+        public void SetSubscriptionHandler(StorageSubscriptionHandler handler)
         {
             _handler = handler;
         }

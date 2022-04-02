@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Ajuna.RestService.Subscription.Model
+namespace Ajuna.ServiceLayer.Storage.Subscription.Model
 {
     /// <summary>
     /// This class implements a serializable status message that indicates the 
