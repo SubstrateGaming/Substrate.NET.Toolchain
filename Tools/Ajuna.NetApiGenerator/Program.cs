@@ -36,7 +36,7 @@ namespace RuntimeMetadata
             else
             {
                 result = File.ReadAllText("metadata_ajuna.txt");
-                var mdv14 = new Ajuna.NetApi.Model.Types.Struct.RuntimeMetadata();
+                var mdv14 = new Ajuna.NetApi.Model.Types.Metadata.RuntimeMetadata();
                 mdv14.Create(result);
 
                 metadata = new MetaData(mdv14, "");
