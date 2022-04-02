@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Ajuna.ServiceLayer.Model\Ajuna.ServiceLayer.Model.csproj" />
-    <ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Ajuna.ServiceLayer.Model\Ajuna.ServiceLayer.Model.csproj" />
+		<ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
+	</ItemGroup>
 
 </Project>

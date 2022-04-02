@@ -1,34 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <PackageId>Ajuna.ServiceLayer</PackageId>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.1.5</Version>
-    <Company>BloGa Tech AG</Company>
-    <Authors>Cedric Decoster</Authors>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageDescription>Ajuna Service Layer module to easily implement substrate storage services.</PackageDescription>
-    <PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <RepositoryUrl>https://github.com/ajuna-network/Ajuna.SDK</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
+	<PropertyGroup>
+		<PackageId>Ajuna.ServiceLayer</PackageId>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Version>0.1.5</Version>
+		<Company>BloGa Tech AG</Company>
+		<Authors>Cedric Decoster</Authors>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageDescription>Ajuna Service Layer module to easily implement substrate storage services.</PackageDescription>
+		<PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<RepositoryUrl>https://github.com/ajuna-network/Ajuna.SDK</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Ajuna.NetApi" Version="0.1.4" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Ajuna.NetApi" Version="0.1.4" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+		<PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Ajuna.ServiceLayer.Model\Ajuna.ServiceLayer.Model.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Ajuna.ServiceLayer.Model\Ajuna.ServiceLayer.Model.csproj" />
+	</ItemGroup>
 
 </Project>

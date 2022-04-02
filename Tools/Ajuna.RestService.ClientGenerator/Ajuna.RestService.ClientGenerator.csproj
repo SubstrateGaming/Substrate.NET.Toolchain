@@ -4,7 +4,7 @@
 		<TargetFramework>net5.0</TargetFramework>
 		<Version>0.1.5</Version>
 		<Company>BloGa Tech AG</Company>
-		<Authors>Sven Scharmentke</Authors>
+		<Authors>Cedric Decoster</Authors>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Description>Ajuna REST Client Generator for its REST Service.</Description>
 		<PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
