@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "NodeTemplateCore.Infrastructure.RestService": {
+    "Ajuna.RestService": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,
