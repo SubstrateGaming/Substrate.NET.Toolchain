@@ -14,7 +14,7 @@ The project behind Ajuna.SDK is [Ajuna Network](https://ajuna.io/) and the flags
 This toolchain is under heavy development and things may change quickly. Use with caution until there is a stable release available.
 
 ## Projects
-Below is a high level technical overview about librariies and tools avaiiable in Ajuna.SDK.
+Below is a high level technical overview about libraries and tools avaiiable in Ajuna.SDK.
 
 | Project | Description | NuGet 
 |---|---|---|
