@@ -1,21 +1,16 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi.Model.Meta;
+﻿using Ajuna.NetApi.Model.Meta;
+using Ajuna.NetApi.Model.Types;
 using System;
 using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using Ajuna.NetApi.Model.Types;
-using Ajuna.NetApi.Model.Types.Base;
 
 namespace RuntimeMetadata
 {
     public class EnumGenBuilder : TypeBuilder
     {
-        private EnumGenBuilder(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict) 
+        private EnumGenBuilder(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
             : base(id, typeDef, typeDict)
         {
         }
@@ -100,11 +95,11 @@ namespace RuntimeMetadata
                                 }
                             }
                         }
-                    } 
+                    }
                     // Unhandled enumerations are manually done
                     else
                     {
-                        codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));                       
+                        codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));
 
                         switch (enumName)
                         {

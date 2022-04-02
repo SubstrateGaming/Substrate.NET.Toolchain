@@ -1,23 +1,18 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi.Model.Meta;
-using System;
+﻿using Ajuna.NetApi.Model.Meta;
 using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace RuntimeMetadata
 {
     public class StructGenBuilder : TypeBuilder
     {
-        private StructGenBuilder(uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict) 
+        private StructGenBuilder(uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
             : base(id, typeDef, typeDict)
         {
         }
-        
+
         private CodeMemberField GetPropertyField(string name, string baseType)
         {
             CodeMemberField field = new()
@@ -28,7 +23,7 @@ namespace RuntimeMetadata
             };
             return field;
         }
-        
+
         private CodeMemberProperty GetProperty(string name, CodeMemberField propertyField)
         {
             CodeMemberProperty prop = new()
@@ -154,7 +149,7 @@ namespace RuntimeMetadata
                     var fullItem = GetFullItemPath(typeField.TypeId);
 
                     var field = GetPropertyField(fieldName, fullItem.Item1);
-                    
+
                     // add comment to field if exists
                     field.Comments.AddRange(GetComments(typeField.Docs, null, fieldName));
 
@@ -183,12 +178,12 @@ namespace RuntimeMetadata
                     if (typeField.TypeName == null)
                     {
                         return alterName + index;
-                    } 
+                    }
                     else
                     {
                         return typeField.TypeName;
                     }
-                } 
+                }
                 else
                 {
                     return alterName;

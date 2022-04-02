@@ -1,19 +1,16 @@
 ﻿using Ajuna.NetApi.Model.Meta;
 using System;
 using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace RuntimeMetadata
 {
     public class ArrayGenBuilder : TypeBuilder
     {
         public static int Counter = 0;
-        private ArrayGenBuilder(uint id, NodeTypeArray typeDef, Dictionary<uint, (string, List<string>)> typeDict) 
+        private ArrayGenBuilder(uint id, NodeTypeArray typeDef, Dictionary<uint, (string, List<string>)> typeDict)
             : base(id, typeDef, typeDict)
         {
         }

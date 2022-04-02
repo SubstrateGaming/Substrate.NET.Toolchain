@@ -1,15 +1,9 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Calls;
-using Ajuna.NetApi.Model.Extrinsics;
+﻿using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Meta;
-using Ajuna.NetApi.Model.Types;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace RuntimeMetadata
 {
@@ -75,7 +69,7 @@ namespace RuntimeMetadata
                     IsClass = true,
                     TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
 
-                }; 
+                };
                 targetClass.BaseTypes.Add(new CodeTypeReference(targetInterface.Name));
                 typeNamespace.Types.Add(targetClass);
 
@@ -170,8 +164,8 @@ namespace RuntimeMetadata
                         // constructor initialize storage properties
                         constructor.Statements.Add(new CodeAssignStatement(
                             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), prop.Name),
-                        new CodeObjectCreateExpression(field.Type, 
-                            new CodeExpression[] { 
+                        new CodeObjectCreateExpression(field.Type,
+                            new CodeExpression[] {
                                 new CodePrimitiveExpression($"{Module.Storage.Prefix}.{entry.Name}"),
                                 new CodeVariableReferenceExpression("storageChangeDelegate")
                             })));
@@ -194,8 +188,8 @@ namespace RuntimeMetadata
                         };
 
                         onUpdateMethod.CustomAttributes.Add(
-                            new CodeAttributeDeclaration("StorageChange", 
-                            new CodeAttributeArgument[] { 
+                            new CodeAttributeDeclaration("StorageChange",
+                            new CodeAttributeArgument[] {
                                 new CodeAttributeArgument(new CodePrimitiveExpression(Module.Storage.Prefix)),
                                 new CodeAttributeArgument(new CodePrimitiveExpression(entry.Name))
                                 }));
@@ -225,7 +219,7 @@ namespace RuntimeMetadata
                                     new CodeMethodInvokeExpression(
                                         new CodeVariableReferenceExpression(prop.Name),
                                         "Get", Array.Empty<CodeExpression>())));
-                        } 
+                        }
                         else
                         {
                             onUpdateMethod.Parameters.Add(keyParamter);

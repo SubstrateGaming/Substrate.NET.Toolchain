@@ -2,19 +2,19 @@
 
 namespace Ajuna.RestService.ClientGenerator.Interfaces
 {
-   /// <summary>
-   /// Interface that represents a REST Service controller.
-   /// </summary>
-   internal interface IReflectedController
-   { 
-      /// <summary>
-      /// The controller name.
-      /// </summary>
-      string Name { get; }
+    /// <summary>
+    /// Interface that represents a REST Service controller.
+    /// </summary>
+    internal interface IReflectedController
+    {
+        /// <summary>
+        /// The controller name.
+        /// </summary>
+        string Name { get; }
 
-      /// <summary>
-      /// An enumerable set of controller methods (endpoints).
-      /// </summary>
-      IEnumerable<IReflectedEndpoint> GetEndpoints();
-   }
+        /// <summary>
+        /// An enumerable set of controller methods (endpoints).
+        /// </summary>
+        IEnumerable<IReflectedEndpoint> GetEndpoints();
+    }
 }

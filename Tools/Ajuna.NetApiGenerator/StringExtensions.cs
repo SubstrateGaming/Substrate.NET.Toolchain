@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RuntimeMetadata
 {
-    public static class StringExtensions 
+    public static class StringExtensions
     {
         public static string ToLowerFirst(this string str)
         {

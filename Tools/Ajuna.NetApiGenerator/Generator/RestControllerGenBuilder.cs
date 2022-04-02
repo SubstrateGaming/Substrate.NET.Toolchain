@@ -1,15 +1,8 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Calls;
-using Ajuna.NetApi.Model.Extrinsics;
-using Ajuna.NetApi.Model.Meta;
-using Ajuna.NetApi.Model.Types;
+﻿using Ajuna.NetApi.Model.Meta;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace RuntimeMetadata
 {
@@ -66,7 +59,7 @@ namespace RuntimeMetadata
                     IsClass = true,
                     TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
 
-                }; 
+                };
                 targetClass.BaseTypes.Add(new CodeTypeReference("ControllerBase"));
                 typeNamespace.Types.Add(targetClass);
                 targetClass.CustomAttributes.Add(

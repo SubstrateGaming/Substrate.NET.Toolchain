@@ -1,19 +1,14 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi.Model.Meta;
-using System;
+﻿using Ajuna.NetApi.Model.Meta;
 using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace RuntimeMetadata
 {
     public class RuntimeGenBuilder : TypeBuilder
     {
-        private RuntimeGenBuilder(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict) 
+        private RuntimeGenBuilder(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
             : base(id, typeDef, typeDict)
         {
         }

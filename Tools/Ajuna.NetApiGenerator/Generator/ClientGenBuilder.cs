@@ -1,12 +1,10 @@
 ﻿using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Meta;
-using Ajuna.NetApi.Model.Types;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace RuntimeMetadata
 {
@@ -27,7 +25,7 @@ namespace RuntimeMetadata
             public override ClientGenBuilder Create()
             {
                 #region CREATE
- 
+
                 ClassName = "SubstrateClientExt";
                 NameSpace = "Ajuna.NetApi";
 
@@ -59,7 +57,7 @@ namespace RuntimeMetadata
                 {
                     Attributes = MemberAttributes.Public,
                     Name = "StorageKeyDict",
-                    Type = new CodeTypeReference(typeof(Dictionary<Tuple<string,string>, Tuple<Storage.Hasher[], Type, Type>>)),
+                    Type = new CodeTypeReference(typeof(Dictionary<Tuple<string, string>, Tuple<Storage.Hasher[], Type, Type>>)),
                 };
                 storageKeyField.Comments.AddRange(GetComments(new string[] { $"{storageKeyField.Name} for key definition informations." }, null, null));
                 targetClass.Members.Add(storageKeyField);

@@ -1,7 +1,4 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Calls;
-using Ajuna.NetApi.Model.Extrinsics;
+﻿using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types;
 using System;
@@ -9,7 +6,6 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace RuntimeMetadata
 {
@@ -139,8 +135,8 @@ namespace RuntimeMetadata
                             storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
                             CodeMethodInvokeExpression methodInvoke = new(
-                                new CodeTypeReferenceExpression(targetClass.Name), 
-                                parameterMethod.Name,Array.Empty<CodeExpression>());
+                                new CodeTypeReferenceExpression(targetClass.Name),
+                                parameterMethod.Name, Array.Empty<CodeExpression>());
 
                             CodeVariableDeclarationStatement variableDeclaration = new(typeof(string), "parameters", methodInvoke);
 
@@ -167,7 +163,7 @@ namespace RuntimeMetadata
                             storageMethod.ReturnType = new CodeTypeReference($"async Task<{value.Item1}>");
                             storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.Item1, "key"));
                             storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
-                           
+
                             CodeMethodInvokeExpression methodInvoke = new(new CodeTypeReferenceExpression(targetClass.Name), parameterMethod.Name,
                                 new CodeExpression[] { new CodeArgumentReferenceExpression("key") });
                             CodeVariableDeclarationStatement variableDeclaration = new(typeof(string), "parameters", methodInvoke);
@@ -201,7 +197,7 @@ namespace RuntimeMetadata
                     TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
                 };
                 typeNamespace.Types.Add(targetClass);
-               
+
                 if (calls != null)
                 {
                     if (NodeTypes.TryGetValue(calls.TypeId, out NodeType nodeType))
@@ -368,7 +364,7 @@ namespace RuntimeMetadata
             private CodeMethodInvokeExpression GetStorageString(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
             {
 
-                CodeExpression[] codeExpressions = 
+                CodeExpression[] codeExpressions =
                     new CodeExpression[] {
                         new CodePrimitiveExpression(module),
                         new CodePrimitiveExpression(item),
@@ -390,7 +386,7 @@ namespace RuntimeMetadata
                                     new CodeTypeReferenceExpression(typeof(Storage.Hasher)), p.ToString())).ToArray()),
                         new CodeArrayCreateExpression(
                             new CodeTypeReference(typeof(IType)),
-                            new CodeArgumentReferenceExpression[] { 
+                            new CodeArgumentReferenceExpression[] {
                                 new CodeArgumentReferenceExpression("key") })
                     };
                 }
@@ -398,7 +394,7 @@ namespace RuntimeMetadata
                 return new CodeMethodInvokeExpression(new CodeTypeReferenceExpression("RequestGenerator"), "GetStorage", codeExpressions);
             }
 
-            private CodeExpression[] GetStorageMapString(string keyType, string returnType,  string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
+            private CodeExpression[] GetStorageMapString(string keyType, string returnType, string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
             {
                 var typeofReturn = new CodeTypeOfExpression(returnType);
 
@@ -436,8 +432,8 @@ namespace RuntimeMetadata
                             }),
                         new CodeObjectCreateExpression(
                             new CodeTypeReference(typeof(Tuple<Storage.Hasher[], Type, Type>)),
-                            new CodeExpression[] { 
-                                arrayExpression, 
+                            new CodeExpression[] {
+                                arrayExpression,
                                 typeofType,
                                 typeofReturn
                             })

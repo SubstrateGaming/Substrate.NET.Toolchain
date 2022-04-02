@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json;
-using Ajuna.NetApi;
+﻿using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Meta;
-using Ajuna.NetApi.Model.Types.Base;
 using Ajuna.NetApi.Model.Types.Metadata.V14;
 using Ajuna.NetApi.Model.Types.Primitive;
-using Ajuna.NetApi.Model.Types.Struct;
-using Ajuna.NetApi.Modules;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,7 +47,7 @@ namespace RuntimeMetadata
 
             // generate types
             var typeDict = GenerateTypes(metadata.NodeMetadata.Types);
-            
+
             // generate modules
             GenerateModules(metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types);
 
@@ -86,7 +83,7 @@ namespace RuntimeMetadata
                     if (_countPaths.ContainsKey(key))
                     {
                         _countPaths[key]++;
-                    } 
+                    }
                     else
                     {
                         _countPaths[key] = 1;
@@ -97,7 +94,7 @@ namespace RuntimeMetadata
             var generics = _countPaths.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
             generics.ForEach(p => Console.WriteLine($"Fixing generic: {p} - please do it properly, once you've more time!!!"));
 
-           _countPaths.Clear();
+            _countPaths.Clear();
             for (uint id = 0; id < nodeTypes.Keys.Max(); id++)
             {
                 if (!nodeTypes.TryGetValue(id, out NodeType nodeType))
@@ -132,7 +129,7 @@ namespace RuntimeMetadata
         private static void GenerateModules(Dictionary<uint, PalletModule> modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
         {
             List<(string, List<string>)> moduleNames = new();
-            foreach (var module in modules.Values) 
+            foreach (var module in modules.Values)
             {
                 var moduleNameTuple = ModuleGenBuilder
                     .Init(module.Index, module, typeDict, nodeTypes)
@@ -144,13 +141,13 @@ namespace RuntimeMetadata
             ClientGenBuilder.Init(0, moduleNames, typeDict).Create().Build(write: true, out bool _);
         }
 
- //       private static void GenerateBaseEvents(Dictionary<uint, PalletModule> modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
- //       {
- //           var moduleNameTuple = BaseEventGenBuilder
- //               .Init(0, modules.Values.ToArray(), typeDict, nodeTypes)
- //               .Create()
- //               .Build(write: true, out bool _);
- //       }
+        //       private static void GenerateBaseEvents(Dictionary<uint, PalletModule> modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+        //       {
+        //           var moduleNameTuple = BaseEventGenBuilder
+        //               .Init(0, modules.Values.ToArray(), typeDict, nodeTypes)
+        //               .Create()
+        //               .Build(write: true, out bool _);
+        //       }
 
         private static void GenerateRestAPI(Dictionary<uint, PalletModule> modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
         {
@@ -259,13 +256,13 @@ namespace RuntimeMetadata
                     }
                 }
             }
-            
+
             return typeDict;
         }
 
         private static Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
         {
-            foreach(var test in nodeTypes)
+            foreach (var test in nodeTypes)
             {
                 if (test.Value.Path != null && test.Value.Path.Length == 2)
                 {
@@ -454,7 +451,7 @@ namespace RuntimeMetadata
                     }
 
                 default:
-                        throw new NotImplementedException();
+                    throw new NotImplementedException();
             }
         }
 

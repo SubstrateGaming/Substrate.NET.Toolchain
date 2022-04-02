@@ -12,7 +12,7 @@ namespace RuntimeMetadata
     {
         public NodeType TypeDef { get; }
 
-        public TypeBuilder(uint id, NodeType typeDef, Dictionary<uint, (string, List<string>)> typeDict) 
+        public TypeBuilder(uint id, NodeType typeDef, Dictionary<uint, (string, List<string>)> typeDict)
             : base(id, typeDict)
         {
             TypeDef = typeDef;
@@ -120,7 +120,7 @@ namespace RuntimeMetadata
             {
                 Success = false;
                 fullItem = ("Unknown", new List<string>() { "Unknown" });
-            } 
+            }
             else
             {
                 fullItem.Item2.ForEach(p => ImportsNamespace.Imports.Add(new CodeNamespaceImport(p)));
@@ -197,7 +197,7 @@ namespace RuntimeMetadata
                 {
                     Console.WriteLine($"Overwriting[BUG]: {path}");
                     //path += _index++;
-                } 
+                }
                 else
                 {
                     Files.Add(path);

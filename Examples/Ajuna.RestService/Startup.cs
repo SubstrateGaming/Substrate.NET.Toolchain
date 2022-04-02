@@ -50,7 +50,7 @@ namespace Ajuna.RestService
         {
             // Configure web sockets to allow clients to subscribe to storage changes.
             services.AddAjunaSubscriptionHandler<StorageSubscriptionHandler>();
-            
+
             // Configure storage services
             services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
             {

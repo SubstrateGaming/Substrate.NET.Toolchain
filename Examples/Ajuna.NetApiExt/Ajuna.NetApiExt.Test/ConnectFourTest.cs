@@ -1,25 +1,17 @@
+using Ajuna.NetApi;
+using Ajuna.NetApi.Model.PalletConnectfour;
+using Ajuna.NetApi.Model.Rpc;
+using Ajuna.NetApi.Model.SpCore;
+using Ajuna.NetApi.Model.Types;
+using Ajuna.NetApi.Model.Types.Primitive;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
 using NUnit.Framework;
 using Schnorrkel.Keys;
-using Ajuna.NetApi;
-
-using Ajuna.NetApi.Model.Extrinsics;
-using Ajuna.NetApi.Model.FrameSystem;
-using Ajuna.NetApi.Model.PalletBalances;
-using Ajuna.NetApi.Model.Rpc;
-using Ajuna.NetApi.Model.SpCore;
-using Ajuna.NetApi.Model.SpRuntime;
-using Ajuna.NetApi.Model.Types;
-using Ajuna.NetApi.Model.Types.Base;
-using Ajuna.NetApi.Model.Types.Primitive;
-using Ajuna.NetApi.TypeConverters;
 using System;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using Ajuna.NetApi.Model.PalletConnectfour;
 
 namespace ConnectFourTest
 {
@@ -61,7 +53,7 @@ namespace ConnectFourTest
             // Apply config           
             LogManager.Configuration = config;
 
-            _substrateClient = new SubstrateClientExt(new Uri(WebSocketUrl));            
+            _substrateClient = new SubstrateClientExt(new Uri(WebSocketUrl));
         }
 
         [TearDown]
@@ -142,7 +134,7 @@ namespace ConnectFourTest
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, newGameMethod, Alice, 0, 64, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
-           
+
             var board_id_a = await _substrateClient.ConnectFourStorage.PlayerBoard(accountId32Alice, cts.Token);
             Assert.AreEqual("H256", board_id_a.GetType().Name);
 

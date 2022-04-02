@@ -1,19 +1,16 @@
-using NLog;
-using NLog.Config;
-using NLog.Targets;
-using NUnit.Framework;
-using Schnorrkel.Keys;
 using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.FrameSystem;
-using Ajuna.NetApi.Model.PalletBalances;
 using Ajuna.NetApi.Model.Rpc;
 using Ajuna.NetApi.Model.SpCore;
 using Ajuna.NetApi.Model.SpRuntime;
 using Ajuna.NetApi.Model.Types;
 using Ajuna.NetApi.Model.Types.Base;
 using Ajuna.NetApi.Model.Types.Primitive;
-using Ajuna.NetApi.TypeConverters;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using NUnit.Framework;
+using Schnorrkel.Keys;
 using System;
 using System.Numerics;
 using System.Threading;
@@ -59,7 +56,7 @@ namespace ExentsionTest
             // Apply config           
             LogManager.Configuration = config;
 
-            _substrateClient = new SubstrateClientExt(new Uri(WebSocketUrl));            
+            _substrateClient = new SubstrateClientExt(new Uri(WebSocketUrl));
         }
 
         [TearDown]
@@ -102,7 +99,7 @@ namespace ExentsionTest
             await _substrateClient.ConnectAsync(false, CancellationToken.None);
 
             var result1 = await _substrateClient.Chain.GetFinalizedHeadAsync(CancellationToken.None);
-            Assert.AreEqual("0x", result1.Value.Substring(0,2));
+            Assert.AreEqual("0x", result1.Value.Substring(0, 2));
 
             var result2 = await _substrateClient.Chain.GetFinalizedTestHeadAsync(CancellationToken.None);
             Assert.AreEqual("0x", result2.Substring(0, 2));
@@ -314,7 +311,7 @@ namespace ExentsionTest
             var subscription = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, extrinsicMethod, Alice, 0, 64, cts.Token);
 
             Thread.Sleep(extrinsic_wait);
-            
+
             var endValueBob = startValueBob + amount.Value.Value;
 
             var freeAfter = await _substrateClient.SystemStorage.Account(bobAccountId32, CancellationToken.None);
