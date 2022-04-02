@@ -208,5 +208,148 @@
              The execution phase of the block.
             </summary>
         </member>
+        <member name="T:Ajuna.RestService.Formatters.AjunaOutputFormatter">
+            <summary>
+            >> AjunaOutputFormatter
+            The AjunaOutputFormatter implements a custom formatter to easily encode any substrate type.
+            Types are hex-encoded and uses the media type text/ajuna.
+            </summary>
+        </member>
+        <member name="M:Ajuna.RestService.Formatters.AjunaOutputFormatter.#ctor">
+            <summary>
+            Initializes the custom output formatter.
+            </summary>
+        </member>
+        <member name="M:Ajuna.RestService.Formatters.AjunaOutputFormatter.CanWriteType(System.Type)">
+            <summary>
+            Validates the given runtime type and checks whether it is assignable from BaseType class that is the base
+            type of any substrate custom type.
+            </summary>
+            <param name="type">The given type to check against.</param>
+            <returns>Returns true whether the requested type is formattable or not.</returns>
+        </member>
+        <member name="M:Ajuna.RestService.Formatters.AjunaOutputFormatter.WriteResponseBodyAsync(Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterWriteContext,System.Text.Encoding)">
+            <summary>
+            Encodes and writes the given context object to the output stream.
+            </summary>
+            <param name="context">The given context.</param>
+            <param name="selectedEncoding">The given encoding.</param>
+        </member>
+        <member name="T:Ajuna.RestService.Program">
+            <summary>
+            >> Program
+            Setting up the Rest Service.
+            </summary>
+        </member>
+        <member name="M:Ajuna.RestService.Program.Main(System.String[])">
+            <summary>
+            Entrypoint
+            </summary>
+            <param name="args">Command line arguments.</param>
+        </member>
+        <member name="M:Ajuna.RestService.Program.CreateHostBuilder(System.String[])">
+            <summary>
+            Setup the Rest Service host.
+            </summary>
+            <param name="args">Command line arguments.</param>
+            <returns>The host.</returns>
+        </member>
+        <member name="T:Ajuna.RestService.Startup">
+            <summary>
+            This class implements configuration and setting up services.
+            </summary>
+        </member>
+        <member name="M:Ajuna.RestService.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            >> Startup
+            Constructs and initializes the Startup class.
+            Stores the configuration object
+            </summary>
+            <param name="configuration">The service configuration.</param>
+        </member>
+        <member name="P:Ajuna.RestService.Startup.Configuration">
+            <summary>
+            Retreives the service configuration.
+            </summary>
+        </member>
+        <member name="M:Ajuna.RestService.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            This method gets called by the runtime. Use this method to add services to the container. 
+            </summary>
+            <param name="services">Service collection to configure.</param>
+        </member>
+        <member name="M:Ajuna.RestService.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Ajuna.RestService.StorageSubscriptionHandler)">
+            <summary>
+            This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 
+            </summary>
+            <param name="app">Application builder</param>
+            <param name="env">Service hosting environment</param>
+            <param name="handler">Middleware to handle web socket subscriptions</param>
+        </member>
+        <member name="T:Ajuna.RestService.Subscription.Model.StorageChangeMessage">
+            <summary>
+            This class implements a serializable message to inform web socket clients
+            about storage changes in real-time.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageChangeMessage.Type">
+            <summary>
+            Indicates what type of change this message is about.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageChangeMessage.Identifier">
+            <summary>
+            Indicates the storage identifier.
+            A typical storage identifier is Assets.Asset or Assets.Account or any other storage with its identifier.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageChangeMessage.Key">
+            <summary>
+            The key that was changed.
+            This may be null or empty for storages that do not have a key value based store.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageChangeMessage.Data">
+            <summary>
+            The hex-encoded data that was changed.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageChangeMessage.Timestamp">
+            <summary>
+            Indicates when the storage change was processed.
+            </summary>
+        </member>
+        <member name="T:Ajuna.RestService.Subscription.Model.StorageSubscribeMessage">
+            <summary>
+            This class implements a serializable message to register for storage changes.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageSubscribeMessage.Identifier">
+            <summary>
+            Indicates the storage identifier.
+            A typical storage identifier is Assets.Asset or Assets.Account or any other storage with its identifier.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageSubscribeMessage.Key">
+            <summary>
+            The key that was changed.
+            This may be null or empty for storages that do not have a key value based store
+            or if the client is interested in all changes for that given storage.
+            </summary>
+        </member>
+        <member name="T:Ajuna.RestService.Subscription.Model.StorageSubscribeMessageResult">
+            <summary>
+            This class implements a serializable status message that indicates the 
+            actual status of the subscribe operation.
+            </summary>
+        </member>
+        <member name="P:Ajuna.RestService.Subscription.Model.StorageSubscribeMessageResult.Status">
+            <summary>
+            The actual status code that indicates if the subscription was successful or not.
+            At this point this uses regular HttpStatus codes to indicate its status.
+            - 200: Success
+            - 400: BadRequest
+            </summary>
+        </member>
     </members>
 </doc>
