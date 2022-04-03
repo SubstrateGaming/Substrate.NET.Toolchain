@@ -50,7 +50,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Tickets
-        ///  Each ticket's owner.
+        ///  Each ticket&#39;s owner.
         /// 
         ///  May have residual storage from previous lotteries. Use `TicketsCount` to see which ones
         ///  are actually valid ticket mappings.
@@ -250,7 +250,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Tickets
-        ///  Each ticket's owner.
+        ///  Each ticket&#39;s owner.
         /// 
         ///  May have residual storage from previous lotteries. Use `TicketsCount` to see which ones
         ///  are actually valid ticket mappings.

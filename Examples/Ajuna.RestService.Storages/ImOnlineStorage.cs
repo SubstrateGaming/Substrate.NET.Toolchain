@@ -27,7 +27,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> HeartbeatAfter
-        ///  The block number after which it's ok to send heartbeats in the current
+        ///  The block number after which it&#39;s ok to send heartbeats in the current
         ///  session.
         /// 
         ///  At the beginning of each session we set this to a value that should fall
@@ -49,14 +49,14 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> ReceivedHeartbeats
-        ///  For each session index, we keep a mapping of 'SessionIndex` and `AuthIndex` to
-        ///  `WrapperOpaque<BoundedOpaqueNetworkState>`.
+        ///  For each session index, we keep a mapping of &#39;SessionIndex` and `AuthIndex` to
+        ///  `WrapperOpaque&lt;BoundedOpaqueNetworkState&gt;`.
         /// </summary>
         Ajuna.NetApi.Model.FrameSupport.WrapperOpaque GetReceivedHeartbeats(string key);
         
         /// <summary>
         /// >> AuthoredBlocks
-        ///  For each session index, we keep a mapping of `ValidatorId<T>` to the
+        ///  For each session index, we keep a mapping of `ValidatorId&lt;T&gt;` to the
         ///  number of blocks authored by the given authority.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U32 GetAuthoredBlocks(string key);
@@ -145,7 +145,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> HeartbeatAfter
-        ///  The block number after which it's ok to send heartbeats in the current
+        ///  The block number after which it&#39;s ok to send heartbeats in the current
         ///  session.
         /// 
         ///  At the beginning of each session we set this to a value that should fall
@@ -185,8 +185,8 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> ReceivedHeartbeats
-        ///  For each session index, we keep a mapping of 'SessionIndex` and `AuthIndex` to
-        ///  `WrapperOpaque<BoundedOpaqueNetworkState>`.
+        ///  For each session index, we keep a mapping of &#39;SessionIndex` and `AuthIndex` to
+        ///  `WrapperOpaque&lt;BoundedOpaqueNetworkState&gt;`.
         /// </summary>
         public Ajuna.NetApi.Model.FrameSupport.WrapperOpaque GetReceivedHeartbeats(string key)
         {
@@ -212,7 +212,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> AuthoredBlocks
-        ///  For each session index, we keep a mapping of `ValidatorId<T>` to the
+        ///  For each session index, we keep a mapping of `ValidatorId&lt;T&gt;` to the
         ///  number of blocks authored by the given authority.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U32 GetAuthoredBlocks(string key)

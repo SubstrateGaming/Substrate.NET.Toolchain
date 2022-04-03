@@ -60,7 +60,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> ExtrinsicData
-        ///  Extrinsics data for the current block (maps an extrinsic's index to its data).
+        ///  Extrinsics data for the current block (maps an extrinsic&#39;s index to its data).
         /// </summary>
         BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8> GetExtrinsicData(string key);
         
@@ -93,14 +93,14 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> EventCount
-        ///  The number of events in the `Events<T>` list.
+        ///  The number of events in the `Events&lt;T&gt;` list.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U32 GetEventCount();
         
         /// <summary>
         /// >> EventTopics
         ///  Mapping between a topic (represented by T::Hash) and a vector of indexes
-        ///  of events in the `<Events<T>>` list.
+        ///  of events in the `&lt;Events&lt;T&gt;&gt;` list.
         /// 
         ///  All topic vectors have deterministic storage locations depending on the topic. This
         ///  allows light-clients to leverage the changes trie storage tracking mechanism and
@@ -510,7 +510,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> ExtrinsicData
-        ///  Extrinsics data for the current block (maps an extrinsic's index to its data).
+        ///  Extrinsics data for the current block (maps an extrinsic&#39;s index to its data).
         /// </summary>
         public BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8> GetExtrinsicData(string key)
         {
@@ -599,7 +599,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> EventCount
-        ///  The number of events in the `Events<T>` list.
+        ///  The number of events in the `Events&lt;T&gt;` list.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U32 GetEventCount()
         {
@@ -615,7 +615,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> EventTopics
         ///  Mapping between a topic (represented by T::Hash) and a vector of indexes
-        ///  of events in the `<Events<T>>` list.
+        ///  of events in the `&lt;Events&lt;T&gt;&gt;` list.
         /// 
         ///  All topic vectors have deterministic storage locations depending on the topic. This
         ///  allows light-clients to leverage the changes trie storage tracking mechanism and

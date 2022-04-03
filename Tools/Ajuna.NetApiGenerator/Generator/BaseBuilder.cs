@@ -5,6 +5,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Web;
 
 namespace Ajuna.NetApiGenerator.Generator
 {
@@ -142,14 +143,20 @@ namespace Ajuna.NetApiGenerator.Generator
 
             if (typeName != null)
             {
-                comments.Add(new CodeCommentStatement($">> {typeName}", true));
+                // Code comments must be Html encoded to ensure Visual Studio is not arguing about
+                // invalid XML tags with template types such as Event<T>.
+                // Encoding them to Event&ltT&gt resolves that.
+                comments.Add(new CodeCommentStatement($">> { HttpUtility.HtmlEncode(typeName) }", true));
             }
 
             if (docs != null)
             {
                 foreach (var doc in docs)
                 {
-                    comments.Add(new CodeCommentStatement(doc, true));
+                    // Code comments must be Html encoded to ensure Visual Studio is not arguing about
+                    // invalid XML tags with template types such as Event<T>.
+                    // Encoding them to Event&ltT&gt resolves that.
+                    comments.Add(new CodeCommentStatement(HttpUtility.HtmlEncode(doc), true));
                 }
             }
             comments.Add(new CodeCommentStatement("</summary>", true));

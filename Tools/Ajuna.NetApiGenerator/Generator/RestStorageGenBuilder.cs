@@ -70,9 +70,9 @@ namespace RuntimeMetadata
                 {
                     IsClass = true,
                     TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-
                 };
                 targetClass.BaseTypes.Add(new CodeTypeReference(targetInterface.Name));
+
                 typeNamespace.Types.Add(targetClass);
 
                 CodeConstructor constructor = new()

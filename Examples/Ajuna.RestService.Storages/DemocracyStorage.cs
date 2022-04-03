@@ -34,7 +34,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> PublicProps
-        ///  The public proposals. Unsorted. The second item is the proposal's hash.
+        ///  The public proposals. Unsorted. The second item is the proposal&#39;s hash.
         /// </summary>
         BaseVec<BaseTuple<Ajuna.NetApi.Model.Types.Primitive.U32,Ajuna.NetApi.Model.PrimitiveTypes.H256,Ajuna.NetApi.Model.SpCore.AccountId32>> GetPublicProps();
         
@@ -62,7 +62,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> LowestUnbaked
         ///  The lowest referendum index representing an unbaked referendum. Equal to
-        ///  `ReferendumCount` if there isn't a unbaked referendum.
+        ///  `ReferendumCount` if there isn&#39;t a unbaked referendum.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U32 GetLowestUnbaked();
         
@@ -388,7 +388,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> PublicProps
-        ///  The public proposals. Unsorted. The second item is the proposal's hash.
+        ///  The public proposals. Unsorted. The second item is the proposal&#39;s hash.
         /// </summary>
         public BaseVec<BaseTuple<Ajuna.NetApi.Model.Types.Primitive.U32,Ajuna.NetApi.Model.PrimitiveTypes.H256,Ajuna.NetApi.Model.SpCore.AccountId32>> GetPublicProps()
         {
@@ -474,7 +474,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> LowestUnbaked
         ///  The lowest referendum index representing an unbaked referendum. Equal to
-        ///  `ReferendumCount` if there isn't a unbaked referendum.
+        ///  `ReferendumCount` if there isn&#39;t a unbaked referendum.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U32 GetLowestUnbaked()
         {

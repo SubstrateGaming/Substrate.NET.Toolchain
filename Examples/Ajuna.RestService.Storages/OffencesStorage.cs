@@ -44,7 +44,7 @@ namespace Ajuna.Infrastructure.Storages
         /// 
         ///  All reports are sorted by the time of offence.
         /// 
-        ///  Note that the actual type of this mapping is `Vec<u8>`, this is because values of
+        ///  Note that the actual type of this mapping is `Vec&lt;u8&gt;`, this is because values of
         ///  different types are not supported at the moment so we are doing the manual serialization.
         /// </summary>
         BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8> GetReportsByKindIndex(string key);
@@ -173,7 +173,7 @@ namespace Ajuna.Infrastructure.Storages
         /// 
         ///  All reports are sorted by the time of offence.
         /// 
-        ///  Note that the actual type of this mapping is `Vec<u8>`, this is because values of
+        ///  Note that the actual type of this mapping is `Vec&lt;u8&gt;`, this is because values of
         ///  different types are not supported at the moment so we are doing the manual serialization.
         /// </summary>
         public BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8> GetReportsByKindIndex(string key)

@@ -25,6 +25,9 @@ namespace Ajuna.Infrastructure.RestService.Controller
 {
     
     
+    /// <summary>
+    /// SystemController controller to access storages.
+    /// </summary>
     [ApiController()]
     [Route("[controller]")]
     public sealed class SystemController : ControllerBase
@@ -32,6 +35,9 @@ namespace Ajuna.Infrastructure.RestService.Controller
         
         private ISystemStorage _systemStorage;
         
+        /// <summary>
+        /// SystemController constructor.
+        /// </summary>
         public SystemController(ISystemStorage systemStorage)
         {
             _systemStorage = systemStorage;
@@ -94,7 +100,7 @@ namespace Ajuna.Infrastructure.RestService.Controller
         
         /// <summary>
         /// >> ExtrinsicData
-        ///  Extrinsics data for the current block (maps an extrinsic's index to its data).
+        ///  Extrinsics data for the current block (maps an extrinsic&#39;s index to its data).
         /// </summary>
         [HttpGet("ExtrinsicData")]
         [ProducesResponseType(typeof(BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8>), 200)]
@@ -152,7 +158,7 @@ namespace Ajuna.Infrastructure.RestService.Controller
         
         /// <summary>
         /// >> EventCount
-        ///  The number of events in the `Events<T>` list.
+        ///  The number of events in the `Events&lt;T&gt;` list.
         /// </summary>
         [HttpGet("EventCount")]
         [ProducesResponseType(typeof(Ajuna.NetApi.Model.Types.Primitive.U32), 200)]
@@ -164,7 +170,7 @@ namespace Ajuna.Infrastructure.RestService.Controller
         /// <summary>
         /// >> EventTopics
         ///  Mapping between a topic (represented by T::Hash) and a vector of indexes
-        ///  of events in the `<Events<T>>` list.
+        ///  of events in the `&lt;Events&lt;T&gt;&gt;` list.
         /// 
         ///  All topic vectors have deterministic storage locations depending on the topic. This
         ///  allows light-clients to leverage the changes trie storage tracking mechanism and

@@ -35,7 +35,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Reasons
-        ///  Simple preimage lookup from the reason's hash to the original data. Again, has an
+        ///  Simple preimage lookup from the reason&#39;s hash to the original data. Again, has an
         ///  insecure enumerable hash since the key is guaranteed to be the result of a secure hash.
         /// </summary>
         BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8> GetReasons(string key);
@@ -120,7 +120,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Reasons
-        ///  Simple preimage lookup from the reason's hash to the original data. Again, has an
+        ///  Simple preimage lookup from the reason&#39;s hash to the original data. Again, has an
         ///  insecure enumerable hash since the key is guaranteed to be the result of a secure hash.
         /// </summary>
         public BaseVec<Ajuna.NetApi.Model.Types.Primitive.U8> GetReasons(string key)

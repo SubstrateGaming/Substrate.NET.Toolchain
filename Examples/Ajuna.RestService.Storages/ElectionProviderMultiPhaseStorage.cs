@@ -81,8 +81,8 @@ namespace Ajuna.Infrastructure.Storages
         ///  submission for the duration of the election. On election finalization, the next index is
         ///  reset to 0.
         /// 
-        ///  We can't just use `SignedSubmissionIndices.len()`, because that's a bounded set; past its
-        ///  capacity, it will simply saturate. We can't just iterate over `SignedSubmissionsMap`,
+        ///  We can&#39;t just use `SignedSubmissionIndices.len()`, because that&#39;s a bounded set; past its
+        ///  capacity, it will simply saturate. We can&#39;t just iterate over `SignedSubmissionsMap`,
         ///  because iteration is slow. Instead, we store the value here.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U32 GetSignedSubmissionNextIndex();
@@ -93,7 +93,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  `SignedSubmissions`.
         /// 
         ///  We never need to process more than a single signed submission at a time. Signed submissions
-        ///  can be quite large, so we're willing to pay the cost of multiple database accesses to access
+        ///  can be quite large, so we&#39;re willing to pay the cost of multiple database accesses to access
         ///  them one at a time instead of reading and decoding all of them at once.
         /// </summary>
         Ajuna.NetApi.Model.FrameSupport.BoundedBTreeMap GetSignedSubmissionIndices();
@@ -106,13 +106,13 @@ namespace Ajuna.Infrastructure.Storages
         ///  allowing us to keep only a single one in memory at a time.
         /// 
         ///  Twox note: the key of the map is an auto-incrementing index which users cannot inspect or
-        ///  affect; we shouldn't need a cryptographically secure hasher.
+        ///  affect; we shouldn&#39;t need a cryptographically secure hasher.
         /// </summary>
         Ajuna.NetApi.Model.PalletElectionProviderMultiPhase.SignedSubmission GetSignedSubmissionsMap(string key);
         
         /// <summary>
         /// >> MinimumUntrustedScore
-        ///  The minimum score that each 'untrusted' solution must attain in order to be considered
+        ///  The minimum score that each &#39;untrusted&#39; solution must attain in order to be considered
         ///  feasible.
         /// 
         ///  Can be set via `set_minimum_untrusted_score`.
@@ -406,8 +406,8 @@ namespace Ajuna.Infrastructure.Storages
         ///  submission for the duration of the election. On election finalization, the next index is
         ///  reset to 0.
         /// 
-        ///  We can't just use `SignedSubmissionIndices.len()`, because that's a bounded set; past its
-        ///  capacity, it will simply saturate. We can't just iterate over `SignedSubmissionsMap`,
+        ///  We can&#39;t just use `SignedSubmissionIndices.len()`, because that&#39;s a bounded set; past its
+        ///  capacity, it will simply saturate. We can&#39;t just iterate over `SignedSubmissionsMap`,
         ///  because iteration is slow. Instead, we store the value here.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U32 GetSignedSubmissionNextIndex()
@@ -427,7 +427,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  `SignedSubmissions`.
         /// 
         ///  We never need to process more than a single signed submission at a time. Signed submissions
-        ///  can be quite large, so we're willing to pay the cost of multiple database accesses to access
+        ///  can be quite large, so we&#39;re willing to pay the cost of multiple database accesses to access
         ///  them one at a time instead of reading and decoding all of them at once.
         /// </summary>
         public Ajuna.NetApi.Model.FrameSupport.BoundedBTreeMap GetSignedSubmissionIndices()
@@ -449,7 +449,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  allowing us to keep only a single one in memory at a time.
         /// 
         ///  Twox note: the key of the map is an auto-incrementing index which users cannot inspect or
-        ///  affect; we shouldn't need a cryptographically secure hasher.
+        ///  affect; we shouldn&#39;t need a cryptographically secure hasher.
         /// </summary>
         public Ajuna.NetApi.Model.PalletElectionProviderMultiPhase.SignedSubmission GetSignedSubmissionsMap(string key)
         {
@@ -475,7 +475,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> MinimumUntrustedScore
-        ///  The minimum score that each 'untrusted' solution must attain in order to be considered
+        ///  The minimum score that each &#39;untrusted&#39; solution must attain in order to be considered
         ///  feasible.
         /// 
         ///  Can be set via `set_minimum_untrusted_score`.

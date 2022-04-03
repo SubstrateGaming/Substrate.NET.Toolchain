@@ -23,6 +23,9 @@ namespace Ajuna.Infrastructure.RestService.Controller
 {
     
     
+    /// <summary>
+    /// ConnectFourController controller to access storages.
+    /// </summary>
     [ApiController()]
     [Route("[controller]")]
     public sealed class ConnectFourController : ControllerBase
@@ -30,6 +33,9 @@ namespace Ajuna.Infrastructure.RestService.Controller
         
         private IConnectFourStorage _connectFourStorage;
         
+        /// <summary>
+        /// ConnectFourController constructor.
+        /// </summary>
         public ConnectFourController(IConnectFourStorage connectFourStorage)
         {
             _connectFourStorage = connectFourStorage;

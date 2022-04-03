@@ -22,6 +22,9 @@ namespace Ajuna.Infrastructure.RestService.Controller
 {
     
     
+    /// <summary>
+    /// AssetsController controller to access storages.
+    /// </summary>
     [ApiController()]
     [Route("[controller]")]
     public sealed class AssetsController : ControllerBase
@@ -29,6 +32,9 @@ namespace Ajuna.Infrastructure.RestService.Controller
         
         private IAssetsStorage _assetsStorage;
         
+        /// <summary>
+        /// AssetsController constructor.
+        /// </summary>
         public AssetsController(IAssetsStorage assetsStorage)
         {
             _assetsStorage = assetsStorage;

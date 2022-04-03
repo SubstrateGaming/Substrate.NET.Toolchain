@@ -36,7 +36,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> ProposalOf
-        ///  Actual proposal for a given hash, if it's current.
+        ///  Actual proposal for a given hash, if it&#39;s current.
         /// </summary>
         Ajuna.NetApi.Model.NodeRuntime.EnumNodeCall GetProposalOf(string key);
         
@@ -195,7 +195,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> ProposalOf
-        ///  Actual proposal for a given hash, if it's current.
+        ///  Actual proposal for a given hash, if it&#39;s current.
         /// </summary>
         public Ajuna.NetApi.Model.NodeRuntime.EnumNodeCall GetProposalOf(string key)
         {

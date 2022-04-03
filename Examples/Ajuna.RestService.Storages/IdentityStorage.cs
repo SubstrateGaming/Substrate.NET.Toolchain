@@ -36,14 +36,14 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> SuperOf
-        ///  The super-identity of an alternative "sub" identity together with its name, within that
-        ///  context. If the account is not some other account's sub-identity, then just `None`.
+        ///  The super-identity of an alternative &quot;sub&quot; identity together with its name, within that
+        ///  context. If the account is not some other account&#39;s sub-identity, then just `None`.
         /// </summary>
         BaseTuple<Ajuna.NetApi.Model.SpCore.AccountId32,Ajuna.NetApi.Model.PalletIdentity.EnumData> GetSuperOf(string key);
         
         /// <summary>
         /// >> SubsOf
-        ///  Alternative "sub" identities of this account.
+        ///  Alternative &quot;sub&quot; identities of this account.
         /// 
         ///  The first item is the deposit, the second is a vector of the accounts.
         /// 
@@ -172,8 +172,8 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> SuperOf
-        ///  The super-identity of an alternative "sub" identity together with its name, within that
-        ///  context. If the account is not some other account's sub-identity, then just `None`.
+        ///  The super-identity of an alternative &quot;sub&quot; identity together with its name, within that
+        ///  context. If the account is not some other account&#39;s sub-identity, then just `None`.
         /// </summary>
         public BaseTuple<Ajuna.NetApi.Model.SpCore.AccountId32,Ajuna.NetApi.Model.PalletIdentity.EnumData> GetSuperOf(string key)
         {
@@ -199,7 +199,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> SubsOf
-        ///  Alternative "sub" identities of this account.
+        ///  Alternative &quot;sub&quot; identities of this account.
         /// 
         ///  The first item is the deposit, the second is a vector of the accounts.
         /// 

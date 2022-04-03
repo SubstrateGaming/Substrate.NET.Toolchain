@@ -51,7 +51,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> CurrentSetId
         ///  The number of changes (both in terms of keys and underlying economic responsibilities)
-        ///  in the "set" of Grandpa validators from genesis.
+        ///  in the &quot;set&quot; of Grandpa validators from genesis.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U64 GetCurrentSetId();
         
@@ -241,7 +241,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> CurrentSetId
         ///  The number of changes (both in terms of keys and underlying economic responsibilities)
-        ///  in the "set" of Grandpa validators from genesis.
+        ///  in the &quot;set&quot; of Grandpa validators from genesis.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U64 GetCurrentSetId()
         {

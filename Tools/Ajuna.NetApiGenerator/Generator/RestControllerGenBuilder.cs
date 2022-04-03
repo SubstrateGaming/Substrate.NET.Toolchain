@@ -63,6 +63,9 @@ namespace RuntimeMetadata
 
                 };
                 targetClass.BaseTypes.Add(new CodeTypeReference("ControllerBase"));
+                targetClass.Comments.AddRange(GetComments(new string[] { $"{ClassName} controller to access storages." }));
+
+
                 typeNamespace.Types.Add(targetClass);
                 targetClass.CustomAttributes.Add(
                     new CodeAttributeDeclaration("ApiController"));
@@ -87,6 +90,7 @@ namespace RuntimeMetadata
                     MemberAttributes.Public | MemberAttributes.Final
                 };
                 targetClass.Members.Add(constructor);
+                constructor.Comments.AddRange(GetComments(new string[] { $"{ClassName} constructor." }));
 
                 constructor.Parameters.Add(new CodeParameterDeclarationExpression($"I{fieldName}", fieldName.MakePublicField()));
 

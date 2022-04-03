@@ -33,7 +33,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  Information is kept for eras in `[current_era - history_depth; current_era]`.
         /// 
         ///  Must be more than the number of eras delayed by session otherwise. I.e. active era must
-        ///  always be in history. I.e. `active_era > current_era - history_depth` must be
+        ///  always be in history. I.e. `active_era &gt; current_era - history_depth` must be
         ///  guaranteed.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U32 GetHistoryDepth();
@@ -52,7 +52,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Invulnerables
-        ///  Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
+        ///  Any validators that may never be slashed or forcibly kicked. It&#39;s a Vec since they&#39;re
         ///  easy to initialize and the performance hit is minimal (we expect no more than four
         ///  invulnerables) and restricted to testnets.
         /// </summary>
@@ -60,7 +60,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Bonded
-        ///  Map from all locked "stash" accounts to the controller account.
+        ///  Map from all locked &quot;stash&quot; accounts to the controller account.
         /// </summary>
         Ajuna.NetApi.Model.SpCore.AccountId32 GetBonded(string key);
         
@@ -78,7 +78,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Ledger
-        ///  Map from all (unlocked) "controller" accounts to the info regarding the staking.
+        ///  Map from all (unlocked) &quot;controller&quot; accounts to the info regarding the staking.
         /// </summary>
         Ajuna.NetApi.Model.PalletStaking.StakingLedger GetLedger(string key);
         
@@ -166,7 +166,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  This is keyed first by the era index to allow bulk deletion and then the stash account.
         /// 
         ///  Is it removed after `HISTORY_DEPTH` eras.
-        ///  If stakers hasn't been set or has been removed then empty exposure is returned.
+        ///  If stakers hasn&#39;t been set or has been removed then empty exposure is returned.
         /// </summary>
         Ajuna.NetApi.Model.PalletStaking.Exposure GetErasStakers(string key);
         
@@ -182,7 +182,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  This is keyed fist by the era index to allow bulk deletion and then the stash account.
         /// 
         ///  Is it removed after `HISTORY_DEPTH` eras.
-        ///  If stakers hasn't been set or has been removed then empty exposure is returned.
+        ///  If stakers hasn&#39;t been set or has been removed then empty exposure is returned.
         /// </summary>
         Ajuna.NetApi.Model.PalletStaking.Exposure GetErasStakersClipped(string key);
         
@@ -200,21 +200,21 @@ namespace Ajuna.Infrastructure.Storages
         /// >> ErasValidatorReward
         ///  The total validator era payout for the last `HISTORY_DEPTH` eras.
         /// 
-        ///  Eras that haven't finished yet or has been removed doesn't have reward.
+        ///  Eras that haven&#39;t finished yet or has been removed doesn&#39;t have reward.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U128 GetErasValidatorReward(string key);
         
         /// <summary>
         /// >> ErasRewardPoints
         ///  Rewards for the last `HISTORY_DEPTH` eras.
-        ///  If reward hasn't been set or has been removed then 0 reward is returned.
+        ///  If reward hasn&#39;t been set or has been removed then 0 reward is returned.
         /// </summary>
         Ajuna.NetApi.Model.PalletStaking.EraRewardPoints GetErasRewardPoints(string key);
         
         /// <summary>
         /// >> ErasTotalStake
         ///  The total amount staked for the last `HISTORY_DEPTH` eras.
-        ///  If total hasn't been set or has been removed then 0 stake is returned.
+        ///  If total hasn&#39;t been set or has been removed then 0 stake is returned.
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U128 GetErasTotalStake(string key);
         
@@ -928,7 +928,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  Information is kept for eras in `[current_era - history_depth; current_era]`.
         /// 
         ///  Must be more than the number of eras delayed by session otherwise. I.e. active era must
-        ///  always be in history. I.e. `active_era > current_era - history_depth` must be
+        ///  always be in history. I.e. `active_era &gt; current_era - history_depth` must be
         ///  guaranteed.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U32 GetHistoryDepth()
@@ -974,7 +974,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Invulnerables
-        ///  Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
+        ///  Any validators that may never be slashed or forcibly kicked. It&#39;s a Vec since they&#39;re
         ///  easy to initialize and the performance hit is minimal (we expect no more than four
         ///  invulnerables) and restricted to testnets.
         /// </summary>
@@ -991,7 +991,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Bonded
-        ///  Map from all locked "stash" accounts to the controller account.
+        ///  Map from all locked &quot;stash&quot; accounts to the controller account.
         /// </summary>
         public Ajuna.NetApi.Model.SpCore.AccountId32 GetBonded(string key)
         {
@@ -1047,7 +1047,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Ledger
-        ///  Map from all (unlocked) "controller" accounts to the info regarding the staking.
+        ///  Map from all (unlocked) &quot;controller&quot; accounts to the info regarding the staking.
         /// </summary>
         public Ajuna.NetApi.Model.PalletStaking.StakingLedger GetLedger(string key)
         {
@@ -1289,7 +1289,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  This is keyed first by the era index to allow bulk deletion and then the stash account.
         /// 
         ///  Is it removed after `HISTORY_DEPTH` eras.
-        ///  If stakers hasn't been set or has been removed then empty exposure is returned.
+        ///  If stakers hasn&#39;t been set or has been removed then empty exposure is returned.
         /// </summary>
         public Ajuna.NetApi.Model.PalletStaking.Exposure GetErasStakers(string key)
         {
@@ -1325,7 +1325,7 @@ namespace Ajuna.Infrastructure.Storages
         ///  This is keyed fist by the era index to allow bulk deletion and then the stash account.
         /// 
         ///  Is it removed after `HISTORY_DEPTH` eras.
-        ///  If stakers hasn't been set or has been removed then empty exposure is returned.
+        ///  If stakers hasn&#39;t been set or has been removed then empty exposure is returned.
         /// </summary>
         public Ajuna.NetApi.Model.PalletStaking.Exposure GetErasStakersClipped(string key)
         {
@@ -1383,7 +1383,7 @@ namespace Ajuna.Infrastructure.Storages
         /// >> ErasValidatorReward
         ///  The total validator era payout for the last `HISTORY_DEPTH` eras.
         /// 
-        ///  Eras that haven't finished yet or has been removed doesn't have reward.
+        ///  Eras that haven&#39;t finished yet or has been removed doesn&#39;t have reward.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U128 GetErasValidatorReward(string key)
         {
@@ -1410,7 +1410,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> ErasRewardPoints
         ///  Rewards for the last `HISTORY_DEPTH` eras.
-        ///  If reward hasn't been set or has been removed then 0 reward is returned.
+        ///  If reward hasn&#39;t been set or has been removed then 0 reward is returned.
         /// </summary>
         public Ajuna.NetApi.Model.PalletStaking.EraRewardPoints GetErasRewardPoints(string key)
         {
@@ -1437,7 +1437,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> ErasTotalStake
         ///  The total amount staked for the last `HISTORY_DEPTH` eras.
-        ///  If total hasn't been set or has been removed then 0 stake is returned.
+        ///  If total hasn&#39;t been set or has been removed then 0 stake is returned.
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U128 GetErasTotalStake(string key)
         {

@@ -47,7 +47,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> QueuedKeys
         ///  The queued keys for the next session. When the next session begins, these keys
-        ///  will be used to determine the validator's session keys.
+        ///  will be used to determine the validator&#39;s session keys.
         /// </summary>
         BaseVec<BaseTuple<Ajuna.NetApi.Model.SpCore.AccountId32,Ajuna.NetApi.Model.NodeRuntime.SessionKeys>> GetQueuedKeys();
         
@@ -250,7 +250,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> QueuedKeys
         ///  The queued keys for the next session. When the next session begins, these keys
-        ///  will be used to determine the validator's session keys.
+        ///  will be used to determine the validator&#39;s session keys.
         /// </summary>
         public BaseVec<BaseTuple<Ajuna.NetApi.Model.SpCore.AccountId32,Ajuna.NetApi.Model.NodeRuntime.SessionKeys>> GetQueuedKeys()
         {

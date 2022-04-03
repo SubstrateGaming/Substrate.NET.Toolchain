@@ -53,7 +53,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Pot
-        ///  Amount of our account balance that is specifically for the next round's bid(s).
+        ///  Amount of our account balance that is specifically for the next round&#39;s bid(s).
         /// </summary>
         Ajuna.NetApi.Model.Types.Primitive.U128 GetPot();
         
@@ -101,7 +101,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Votes
-        ///  Double map from Candidate -> Voter -> (Maybe) Vote.
+        ///  Double map from Candidate -&gt; Voter -&gt; (Maybe) Vote.
         /// </summary>
         Ajuna.NetApi.Model.PalletSociety.EnumVote GetVotes(string key);
         
@@ -471,7 +471,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Pot
-        ///  Amount of our account balance that is specifically for the next round's bid(s).
+        ///  Amount of our account balance that is specifically for the next round&#39;s bid(s).
         /// </summary>
         public Ajuna.NetApi.Model.Types.Primitive.U128 GetPot()
         {
@@ -635,7 +635,7 @@ namespace Ajuna.Infrastructure.Storages
         
         /// <summary>
         /// >> Votes
-        ///  Double map from Candidate -> Voter -> (Maybe) Vote.
+        ///  Double map from Candidate -&gt; Voter -&gt; (Maybe) Vote.
         /// </summary>
         public Ajuna.NetApi.Model.PalletSociety.EnumVote GetVotes(string key)
         {

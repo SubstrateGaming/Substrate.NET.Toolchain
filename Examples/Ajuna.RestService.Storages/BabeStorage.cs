@@ -115,7 +115,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> AuthorVrfRandomness
         ///  This field should always be populated during block processing unless
-        ///  secondary plain slots are enabled (which don't contain a VRF output).
+        ///  secondary plain slots are enabled (which don&#39;t contain a VRF output).
         /// 
         ///  It is set in `on_initialize`, before it will contain the value from the last block.
         /// </summary>
@@ -627,7 +627,7 @@ namespace Ajuna.Infrastructure.Storages
         /// <summary>
         /// >> AuthorVrfRandomness
         ///  This field should always be populated during block processing unless
-        ///  secondary plain slots are enabled (which don't contain a VRF output).
+        ///  secondary plain slots are enabled (which don&#39;t contain a VRF output).
         /// 
         ///  It is set in `on_initialize`, before it will contain the value from the last block.
         /// </summary>

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
 	<PropertyGroup>
+		<OutputType>Exe</OutputType>
 		<AssemblyTitle>Ajuna.NetApiGenerator</AssemblyTitle>
 		<AssemblyName>Ajuna.NetApiGenerator</AssemblyName>
 		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
