@@ -1,4 +1,3 @@
-using Ajuna.ServiceLayer;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Net.WebSockets;

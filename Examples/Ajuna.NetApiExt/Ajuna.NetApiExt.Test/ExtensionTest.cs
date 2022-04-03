@@ -17,7 +17,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ExentsionTest
+namespace Ajuna.NetApiExt.Test
 {
     public class ExentsionTest
     {
@@ -247,7 +247,7 @@ namespace ExentsionTest
             var amount = new BaseCom<U128>();
             amount.Create(new CompactInteger(new BigInteger(100000000000)));
 
-            var extrinsicMethod = Ajuna.NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
+            var extrinsicMethod = NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
             Assert.AreEqual("0x0600008eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a480700e8764817", Utils.Bytes2HexString(extrinsicMethod.Encode()).ToLower());
         }
 
@@ -271,7 +271,7 @@ namespace ExentsionTest
             var amount = new BaseCom<U128>();
             amount.Create(new CompactInteger(new BigInteger(100000000000)));
 
-            var extrinsicMethod = Ajuna.NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
+            var extrinsicMethod = NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
 
             var test = await _substrateClient.Author.SubmitExtrinsicAsync(extrinsicMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
 
@@ -306,7 +306,7 @@ namespace ExentsionTest
             var amount = new BaseCom<U128>();
             amount.Create(new CompactInteger(new BigInteger(100000000000)));
 
-            var extrinsicMethod = Ajuna.NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
+            var extrinsicMethod = NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
 
             // Alice sends bob some coins ...
             var subscription = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, extrinsicMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);

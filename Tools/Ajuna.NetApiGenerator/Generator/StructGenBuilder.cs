@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace RuntimeMetadata
+namespace Ajuna.NetApiGenerator.Generator
 {
     public class StructGenBuilder : TypeBuilder
     {

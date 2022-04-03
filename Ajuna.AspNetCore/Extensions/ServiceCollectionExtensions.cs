@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
-namespace Ajuna.AspNetCore
+namespace Ajuna.AspNetCore.Extensions
 {
     public static class ServiceCollectionExtension
     {

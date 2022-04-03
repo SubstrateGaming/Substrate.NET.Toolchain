@@ -1,6 +1,8 @@
 ﻿using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types;
+using Ajuna.NetApiGenerator;
+using Ajuna.NetApiGenerator.Generator;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;

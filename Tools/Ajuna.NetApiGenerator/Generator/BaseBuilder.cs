@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace RuntimeMetadata
+namespace Ajuna.NetApiGenerator.Generator
 {
     public abstract class TypeBuilder : BaseBuilder
     {
@@ -17,8 +17,8 @@ namespace RuntimeMetadata
         {
             TypeDef = typeDef;
             NameSpace = typeDef.Path != null && typeDef.Path[0].Contains("_") ?
-                $"{BaseBuilder.BASE_NAMESPACE}.Model.{typeDef.Path[0].MakeMethod()}"
-                : $"{BaseBuilder.BASE_NAMESPACE}.Model.Base";
+                $"{BASE_NAMESPACE}.Model.{typeDef.Path[0].MakeMethod()}"
+                : $"{BASE_NAMESPACE}.Model.Base";
         }
     }
 
@@ -36,7 +36,7 @@ namespace RuntimeMetadata
             NodeTypes = nodeTypes;
             Module = module;
             PrefixName = module.Name == "System" ? "Frame" : "Pallet";
-            NameSpace = $"{BaseBuilder.BASE_NAMESPACE}.Model.{PrefixName + module.Name.MakeMethod()}";
+            NameSpace = $"{BASE_NAMESPACE}.Model.{PrefixName + module.Name.MakeMethod()}";
         }
     }
 
@@ -64,7 +64,7 @@ namespace RuntimeMetadata
             : base(id, typeDict)
         {
             ModuleNames = moduleNames;
-            NameSpace = BaseBuilder.BASE_NAMESPACE;
+            NameSpace = BASE_NAMESPACE;
         }
     }
 
@@ -136,7 +136,7 @@ namespace RuntimeMetadata
 
             if (typeDef != null)
             {
-                var path = typeDef.Path != null ? "[" + String.Join('.', typeDef.Path) + "]" : "";
+                var path = typeDef.Path != null ? "[" + string.Join('.', typeDef.Path) + "]" : "";
                 comments.Add(new CodeCommentStatement($">> {typeDef.Id} - {typeDef.TypeDef}{path}", true));
             }
 

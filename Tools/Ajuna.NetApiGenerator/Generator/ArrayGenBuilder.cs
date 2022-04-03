@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace RuntimeMetadata
+namespace Ajuna.NetApiGenerator.Generator
 {
     public class ArrayGenBuilder : TypeBuilder
     {
@@ -80,7 +80,7 @@ namespace RuntimeMetadata
             CodeNamespace typeNamespace = new(NameSpace);
             TargetUnit.Namespaces.Add(typeNamespace);
 
-            if (ClassName.Any(ch => !Char.IsLetterOrDigit(ch)))
+            if (ClassName.Any(ch => !char.IsLetterOrDigit(ch)))
             {
                 Counter++;
                 ClassName = $"Arr{typeDef.Length}Special" + Counter++;
@@ -105,7 +105,7 @@ namespace RuntimeMetadata
             {
                 Attributes = MemberAttributes.Public | MemberAttributes.Override,
                 Name = "TypeName",
-                ReturnType = new CodeTypeReference(typeof(System.String))
+                ReturnType = new CodeTypeReference(typeof(string))
             };
             var methodRef1 = new CodeMethodReferenceExpression(new CodeObjectCreateExpression(fullItem.Item1, Array.Empty<CodeExpression>()), "TypeName()");
             var methodRef2 = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "TypeSize");
@@ -127,7 +127,7 @@ namespace RuntimeMetadata
             {
                 Attributes = MemberAttributes.Public | MemberAttributes.Override,
                 Name = "TypeSize",
-                Type = new CodeTypeReference(typeof(System.Int32))
+                Type = new CodeTypeReference(typeof(int))
             };
             sizeProperty.GetStatements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression((int)typeDef.Length)));
             targetClass.Members.Add(sizeProperty);

@@ -1,6 +1,6 @@
 ﻿using Ajuna.ServiceLayer;
 
-namespace Ajuna.AspNetCore
+namespace Ajuna.AspNetCore.Extensions
 {
     internal static class AjunaRuntime
     {

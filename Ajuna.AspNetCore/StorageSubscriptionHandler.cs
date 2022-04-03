@@ -44,7 +44,7 @@ namespace Ajuna.AspNetCore
                     {
                         Status = (int)HttpStatusCode.OK
                     }));
-                    
+
                     return;
                 }
 

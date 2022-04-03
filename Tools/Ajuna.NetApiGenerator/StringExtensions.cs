@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
-namespace RuntimeMetadata
+namespace Ajuna.NetApiGenerator
 {
     public static class StringExtensions
     {
@@ -46,7 +45,7 @@ namespace RuntimeMetadata
 
             str = Filter(str);
 
-            return String.Join(String.Empty, str.Split('_').Select(p => p.ToUpperFirst()).ToArray());
+            return string.Join(string.Empty, str.Split('_').Select(p => p.ToUpperFirst()).ToArray());
         }
 
         private static string Filter(string str)
@@ -63,7 +62,7 @@ namespace RuntimeMetadata
 
             str = Filter(str);
 
-            return "_" + String.Join(String.Empty, str.Split('_').Select(p => p.ToUpperFirst()).ToArray()).ToLowerFirst();
+            return "_" + string.Join(string.Empty, str.Split('_').Select(p => p.ToUpperFirst()).ToArray()).ToLowerFirst();
         }
 
         public static string MakePublicField(this string str)
@@ -75,7 +74,7 @@ namespace RuntimeMetadata
 
             str = Filter(str);
 
-            return String.Join(String.Empty, str.Split('_').Select(p => p.ToUpperFirst()).ToArray()).ToLowerFirst();
+            return string.Join(string.Empty, str.Split('_').Select(p => p.ToUpperFirst()).ToArray()).ToLowerFirst();
         }
     }
 }

@@ -2,6 +2,8 @@
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types.Metadata.V14;
 using Ajuna.NetApi.Model.Types.Primitive;
+using Ajuna.NetApiGenerator;
+using Ajuna.NetApiGenerator.Generator;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

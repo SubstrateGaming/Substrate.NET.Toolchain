@@ -1,8 +1,7 @@
-using Ajuna.ServiceLayer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
-namespace Ajuna.AspNetCore
+namespace Ajuna.AspNetCore.Extensions
 {
     public static class ApplicationBuilderExtensions
     {

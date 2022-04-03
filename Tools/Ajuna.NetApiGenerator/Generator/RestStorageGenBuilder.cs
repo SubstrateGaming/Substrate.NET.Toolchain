@@ -1,5 +1,7 @@
 ﻿using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Meta;
+using Ajuna.NetApiGenerator;
+using Ajuna.NetApiGenerator.Generator;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
