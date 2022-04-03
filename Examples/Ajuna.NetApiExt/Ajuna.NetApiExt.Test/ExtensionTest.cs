@@ -1,4 +1,5 @@
 using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.FrameSystem;
 using Ajuna.NetApi.Model.Rpc;
 using Ajuna.NetApi.Model.SpCore;
@@ -218,9 +219,9 @@ namespace ExentsionTest
             Assert.AreEqual("RuntimeVersion", runtime1.GetType().Name);
             var runtimeVersion = runtime0 as RuntimeVersion;
 
-            Assert.AreEqual("node", runtimeVersion.SpecName);
-            Assert.AreEqual("substrate-node", runtimeVersion.ImplName);
-            Assert.AreEqual(267, runtimeVersion.SpecVersion);
+            Assert.AreEqual("ajuna", runtimeVersion.SpecName);
+            Assert.AreEqual("ajuna-network", runtimeVersion.ImplName);
+            Assert.AreEqual(1, runtimeVersion.SpecVersion);
 
             var metaData0 = await _substrateClient.State.GetMetaDataAsync();
             var metaData1 = await _substrateClient.State.GetMetaDataAsync(cts.Token);
@@ -272,7 +273,7 @@ namespace ExentsionTest
 
             var extrinsicMethod = Ajuna.NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
 
-            var test = await _substrateClient.Author.SubmitExtrinsicAsync(extrinsicMethod, Alice, 0, 64, cts.Token);
+            var test = await _substrateClient.Author.SubmitExtrinsicAsync(extrinsicMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
 
             var extrinsics = await _substrateClient.Author.PendingExtrinsicAsync();
             Assert.AreEqual(1, extrinsics.Length);
@@ -308,7 +309,7 @@ namespace ExentsionTest
             var extrinsicMethod = Ajuna.NetApi.Model.PalletBalances.BalancesCalls.Transfer(enumMultiAddress, amount);
 
             // Alice sends bob some coins ...
-            var subscription = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, extrinsicMethod, Alice, 0, 64, cts.Token);
+            var subscription = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, extrinsicMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
 
             Thread.Sleep(extrinsic_wait);
 

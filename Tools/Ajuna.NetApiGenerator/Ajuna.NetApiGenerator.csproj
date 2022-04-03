@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ajuna.NetApi" Version="0.1.4" />
+		<PackageReference Include="Ajuna.NetApi" Version="0.1.6" />
 		<PackageReference Include="System.CodeDom" Version="5.0.0" />
 	</ItemGroup>
 

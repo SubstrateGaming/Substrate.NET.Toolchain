@@ -1,4 +1,5 @@
 using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.PalletConnectfour;
 using Ajuna.NetApi.Model.Rpc;
 using Ajuna.NetApi.Model.SpCore;
@@ -100,16 +101,16 @@ namespace ConnectFourTest
 
             //
             var emptyQueueMethod = Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.EmptyQueue();
-            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, emptyQueueMethod, Alice, 0, 64, cts.Token);
+            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, emptyQueueMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             // 
             var queueMethod = Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.Queue();
-            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, queueMethod, Alice, 0, 64, cts.Token);
+            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, queueMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             // 
-            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, emptyQueueMethod, Alice, 0, 64, cts.Token);
+            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, emptyQueueMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             Assert.IsTrue(true);
@@ -131,7 +132,7 @@ namespace ConnectFourTest
 
             // 
             var newGameMethod = Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.NewGame(accountId32Bob);
-            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, newGameMethod, Alice, 0, 64, cts.Token);
+            _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate, newGameMethod, Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
 
@@ -167,33 +168,33 @@ namespace ConnectFourTest
             if (boardStruct1.NextPlayer.Value == 1)
             {
                 _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                    Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, 0, 64, cts.Token);
+                    Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
                 Thread.Sleep(extrinsic_wait);
                 player1Start = true;
             }
 
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, 0, 64, cts.Token);
+                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, 0, 64, cts.Token);
+                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, 0, 64, cts.Token);
+                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, 0, 64, cts.Token);
+                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, 0, 64, cts.Token);
+                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, 0, 64, cts.Token);
+                Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col0), Alice, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
             Thread.Sleep(extrinsic_wait);
 
             var board2 = await _substrateClient.ConnectFourStorage.Boards(board_id_a, cts.Token);
@@ -210,7 +211,7 @@ namespace ConnectFourTest
             {
                 Assert.AreEqual("0x000000010101000000020202000000000000000000000000000000000000000000000000000000000000", Utils.Bytes2HexString(boardStruct2.Board.Bytes));
                 _ = await _substrateClient.Author.SubmitAndWatchExtrinsicAsync(ActionExtrinsicUpdate,
-                    Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, 0, 64, cts.Token);
+                    Ajuna.NetApi.Model.PalletConnectFour.ConnectFourCalls.PlayTurn(col1), Bob, new ChargeAssetTxPayment(0, 64), (uint)extrinsic_wait, cts.Token);
                 Thread.Sleep(extrinsic_wait);
 
                 var board3 = await _substrateClient.ConnectFourStorage.Boards(board_id_a, cts.Token);
