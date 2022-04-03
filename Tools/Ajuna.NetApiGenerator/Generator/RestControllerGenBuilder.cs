@@ -32,15 +32,15 @@ namespace RuntimeMetadata
                 }
 
                 #region CREATE
-                ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.Infrastructure.Storages"));
+                ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.RestService.Generated.Storage"));
                 ImportsNamespace.Imports.Add(new CodeNamespaceImport("Microsoft.AspNetCore.Mvc"));
                 ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
 
                 FileName = Module.Storage.Prefix + "Controller";
 
-                ReferenzName = "Ajuna.Infrastructure.RestService.Controller." + FileName;
+                ReferenzName = "Ajuna.RestService.Generated.Controller." + FileName;
 
-                NameSpace = "Ajuna.Infrastructure.RestService.Controller";
+                NameSpace = "Ajuna.RestService.Generated.Controller";
 
                 CodeNamespace typeNamespace = new(NameSpace);
                 TargetUnit.Namespaces.Add(typeNamespace);

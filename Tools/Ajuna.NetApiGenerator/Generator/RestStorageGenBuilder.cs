@@ -39,9 +39,9 @@ namespace RuntimeMetadata
 
                 FileName = Module.Storage.Prefix + "Storage";
 
-                ReferenzName = "Ajuna.Infrastructure.Storages." + FileName;
+                ReferenzName = "Ajuna.RestService.Generated.Storage." + FileName;
 
-                NameSpace = "Ajuna.Infrastructure.Storages";
+                NameSpace = "Ajuna.RestService.Generated.Storage";
 
                 CodeNamespace typeNamespace = new(NameSpace);
                 TargetUnit.Namespaces.Add(typeNamespace);
@@ -62,6 +62,7 @@ namespace RuntimeMetadata
                     IsInterface = true
 
                 };
+                targetInterface.Comments.AddRange(GetComments(new string[] { $"I{ClassName} interface definition." }));
                 targetInterface.BaseTypes.Add(new CodeTypeReference("IStorage"));
                 typeNamespace.Types.Add(targetInterface);
 
@@ -71,6 +72,8 @@ namespace RuntimeMetadata
                     IsClass = true,
                     TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
                 };
+
+                targetClass.Comments.AddRange(GetComments(new string[] { $"{ClassName} class definition." }));
                 targetClass.BaseTypes.Add(new CodeTypeReference(targetInterface.Name));
 
                 typeNamespace.Types.Add(targetClass);
@@ -81,6 +84,7 @@ namespace RuntimeMetadata
                 };
 
                 constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("IStorageChangeDelegate"), "storageChangeDelegate"));
+                constructor.Comments.AddRange(GetComments(new string[] { $"{ClassName} constructor." }));
 
                 targetClass.Members.Add(constructor);
 
@@ -94,6 +98,7 @@ namespace RuntimeMetadata
                 var clientParamter = new CodeParameterDeclarationExpression(typeof(SubstrateClient), "client");
                 initializeAsyncMethod.Parameters.Add(clientParamter);
                 targetClass.Members.Add(initializeAsyncMethod);
+                initializeAsyncMethod.Comments.AddRange(GetComments(new string[] { $"Connects to all storages and initializes the change subscription handling." }));
 
                 if (Module.Storage.Entries != null)
                 {
@@ -146,6 +151,8 @@ namespace RuntimeMetadata
                             Name = $"{entry.Name.MakePrivateField()}TypedStorage",
                             Type = returnType
                         };
+
+                        field.Comments.AddRange(GetComments(new string[] { $"{field.Name} typed storage field" }));
                         targetClass.Members.Add(field);
 
                         // create typed storage property
@@ -161,6 +168,9 @@ namespace RuntimeMetadata
                         prop.SetStatements.Add(new CodeAssignStatement(
                             new CodeVariableReferenceExpression(field.Name),
                                 new CodePropertySetValueReferenceExpression()));
+
+
+                        prop.Comments.AddRange(GetComments(new string[] { $"{field.Name} property" })); 
                         targetClass.Members.Add(prop);
 
                         // constructor initialize storage properties
@@ -200,6 +210,8 @@ namespace RuntimeMetadata
                             new CodeVariableReferenceExpression(prop.Name),
                             "Update", updateExpression);
                         onUpdateMethod.Statements.Add(updateInvoke);
+                        onUpdateMethod.Comments.AddRange(GetComments(new string[] { $"Implements any storage change for {Module.Storage.Prefix}.{entry.Name}" }));
+
                         targetClass.Members.Add(onUpdateMethod);
 
                         // create get and gets

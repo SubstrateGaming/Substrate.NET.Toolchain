@@ -27,7 +27,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Ajuna.AspNetCore\Ajuna.AspNetCore.csproj" />
 		<ProjectReference Include="..\..\Ajuna.ServiceLayer\Ajuna.ServiceLayer.csproj" />
-		<ProjectReference Include="..\Ajuna.RestService.Storages\Ajuna.RestService.Storage.csproj" />
+		<ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
 	</ItemGroup>
 
 </Project>
