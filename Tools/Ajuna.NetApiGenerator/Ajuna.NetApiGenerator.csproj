@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<AssemblyTitle>Ajuna.NetApiGenerator</AssemblyTitle>
 		<AssemblyName>Ajuna.NetApiGenerator</AssemblyName>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Description>Ajuna .NET API Extension Generator</Description>
 	</PropertyGroup>

@@ -4,15 +4,14 @@
 		<PackageId>Ajuna.ServiceLayer.Model</PackageId>
 		<AssemblyTitle>Ajuna.ServiceLayer.Model</AssemblyTitle>
 		<AssemblyName>Ajuna.ServiceLayer.Model</AssemblyName>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<CheckEolTargetFramework>False</CheckEolTargetFramework>
+		<TargetFrameworks>$(AjunaDefaultFrameworks)</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageDescription>Ajuna Service Layer model classes that are shared between services and clients.</PackageDescription>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
-		<PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>

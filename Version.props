@@ -15,6 +15,9 @@
 		<AjunaWebsite>https://ajuna.io</AjunaWebsite>
 		<AjunaLicenseFile>LICENSE</AjunaLicenseFile>
 		<AjunaCopyright>Copyright © BloGa Tech AG, Switzerland. All rights reserved.</AjunaCopyright>
+		
+		<!-- Default supported frameworks -->
+		<AjunaDefaultFrameworks>netstandard2.0</AjunaDefaultFrameworks>
 
 		<!-- Generic Project configuration -->
 		<Version>$(AjunaVersion)</Version>

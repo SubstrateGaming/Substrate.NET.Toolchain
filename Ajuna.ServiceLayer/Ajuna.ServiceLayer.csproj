@@ -4,7 +4,8 @@
 		<PackageId>Ajuna.ServiceLayer</PackageId>
 		<AssemblyTitle>Ajuna.ServiceLayer</AssemblyTitle>
 		<AssemblyName>Ajuna.ServiceLayer</AssemblyName>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<CheckEolTargetFramework>False</CheckEolTargetFramework>
+		<TargetFrameworks>$(AjunaDefaultFrameworks)</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageDescription>Ajuna ASP .NET Core Extensions to easily implement RESTful services using Substrate storages.</PackageDescription>
 	</PropertyGroup>

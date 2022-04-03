@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<AssemblyTitle>Ajuna.RestService.ClientGenerator</AssemblyTitle>
 		<AssemblyName>Ajuna.RestService.ClientGenerator</AssemblyName>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Description>Ajuna REST Client Generator for its REST Service.</Description>
 	</PropertyGroup>
