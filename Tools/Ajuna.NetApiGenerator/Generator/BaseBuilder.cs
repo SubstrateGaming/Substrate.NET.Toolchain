@@ -176,7 +176,7 @@ namespace RuntimeMetadata
             return nameMethod;
         }
 
-        private static int _index = 1;
+        // private static int _index = 1;
         public virtual (string, List<string>) Build(bool write, out bool success)
         {
             success = Success;

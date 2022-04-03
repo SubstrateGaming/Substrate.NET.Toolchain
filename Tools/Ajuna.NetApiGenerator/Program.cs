@@ -17,7 +17,7 @@ namespace RuntimeMetadata
         private const string Websocketurl = "ws://127.0.0.1:9944";
         private const string node_runtime = "node_runtime";
 
-        static async Task Main(string[] args)
+        static async Task MainAsync(string[] args)
         {
             string result;
 

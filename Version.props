@@ -17,7 +17,7 @@
 		<AjunaCopyright>Copyright © BloGa Tech AG, Switzerland. All rights reserved.</AjunaCopyright>
 		
 		<!-- Default supported frameworks -->
-		<AjunaDefaultFrameworks>netstandard2.0</AjunaDefaultFrameworks>
+		<AjunaDefaultFrameworks>netstandard2.0;net5.0;net6.0</AjunaDefaultFrameworks>
 
 		<!-- Generic Project configuration -->
 		<Version>$(AjunaVersion)</Version>

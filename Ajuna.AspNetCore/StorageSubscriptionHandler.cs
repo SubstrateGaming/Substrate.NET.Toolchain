@@ -20,12 +20,11 @@ namespace Ajuna.AspNetCore
         {
         }
 
-        public override Task ReceiveDelegateAsync(WebSocket socket, string socketId, WebSocketReceiveResult result, byte[] buffer)
+        public override async Task ReceiveDelegateAsync(WebSocket socket, string socketId, WebSocketReceiveResult result, byte[] buffer)
         {
             if (!result.EndOfMessage || buffer == null || buffer.Length == 0)
             {
-                OnDisconnectedAsync(socket).ConfigureAwait(false);
-                return Task.FromResult(0);
+                await OnDisconnectedAsync(socket);
             }
 
             try
@@ -34,33 +33,33 @@ namespace Ajuna.AspNetCore
                 if (command == null)
                 {
                     // Close the socket because the message is not interpreted.
-                    OnDisconnectedAsync(socket).ConfigureAwait(false);
-                    return Task.FromResult(0);
+                    await OnDisconnectedAsync(socket);
                 }
 
                 // Register the subscription.
                 if (RegisterSubscription(socketId, command))
                 {
                     // Confirm the subscription.
-                    return SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
+                    await SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
                     {
                         Status = (int)HttpStatusCode.OK
                     }));
-
+                    
+                    return;
                 }
 
-                return SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
+                await SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
                 {
                     Status = (int)HttpStatusCode.BadRequest
                 }));
+
+                return;
             }
             catch (Exception)
             {
                 // Close the socket because the message is not interpreted.
-                OnDisconnectedAsync(socket).ConfigureAwait(false);
+                await OnDisconnectedAsync(socket);
             }
-
-            return Task.FromResult(0);
         }
 
 
@@ -93,7 +92,7 @@ namespace Ajuna.AspNetCore
                 return;
 
             // Publish the message to all connected clients
-            sockets.ForEachAsync(Environment.ProcessorCount, async (WebSocket socket) => { await SendMessageAsync(socket, message); }).ConfigureAwait(false);
+            sockets.ForEachAsync(Environment.ProcessorCount, async (WebSocket socket) => { await SendMessageAsync(socket, message); });
         }
 
         private string FormatMessage(string identifier, string key, string data, StorageSubscriptionChangeType changeType)
