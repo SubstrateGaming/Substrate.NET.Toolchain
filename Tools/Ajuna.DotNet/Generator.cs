@@ -150,13 +150,13 @@ namespace Ajuna.DotNet
 
       public void GenerateNetApiSolution(MetaData metadata, ProjectSettings projectSettings)
       {
-         var netApiGenerator = new NetApiSolutionGenerator(Log.Logger, _settings.NodeRuntime, projectSettings);
+         var netApiGenerator = new NetApiGenerator(Log.Logger, _settings.NodeRuntime, projectSettings);
          netApiGenerator.Generate(metadata);
       }
 
       public void GenerateRestServiceSolution(MetaData metadata)
       {
-         var restServiceGenerator = new RestServiceSolutionGenerator(Log.Logger, _settings.NodeRuntime, _settings.RestService);
+         var restServiceGenerator = new RestServiceGenerator(Log.Logger, _settings.NodeRuntime, _settings.RestService);
          restServiceGenerator.Generate(metadata);
       }
    }

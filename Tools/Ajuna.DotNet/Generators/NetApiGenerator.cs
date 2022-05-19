@@ -1,30 +1,21 @@
 using Ajuna.DotNet.Generators.Base;
 using Ajuna.DotNet.Node;
 using Ajuna.NetApi.Model.Meta;
-
-/* Unmerged change from project 'Ajuna.DotNet (net6.0)'
-Before:
-using System;
-After:
-using Newtonsoft.Json;
-using System;
-*/
 using Newtonsoft.Json;
 using Serilog;
 using System.Collections.Generic;
 using System.IO;
-using Path = System.IO.Path;
 
 namespace Ajuna.DotNet.Generators
 {
    /// <summary>
    /// Responsible for generating the NetApi Solution
    /// </summary>
-   public class NetApiSolutionGenerator : SolutionGeneratorBase
+   public class NetApiGenerator : SolutionGeneratorBase
    {
       private readonly DotNetCli _dotNetSolutionGenerator;
 
-      public NetApiSolutionGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings) : base(logger, nodeRuntime, projectSettings)
+      public NetApiGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings) : base(logger, nodeRuntime, projectSettings)
       {
          _dotNetSolutionGenerator = new DotNetCli(logger, projectSettings.ProjectDirectory);
       }

@@ -11,10 +11,10 @@ namespace Ajuna.DotNet
 
       [AllowNull]
       internal string ProjectNamespace { get; set; }
-      
+
       [AllowNull]
       internal string ProjectSolutionName { get; set; }
-      
+
       [AllowNull]
       internal string ProjectDirectory { get; set; }
    }
