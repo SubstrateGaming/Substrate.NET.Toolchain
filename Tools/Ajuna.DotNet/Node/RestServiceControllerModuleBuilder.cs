@@ -8,19 +8,19 @@ using System.Reflection;
 
 namespace Ajuna.DotNet.Node
 {
-   public class RestControllerModuleBuilder : ModuleBuilderBase
+   public class RestServiceControllerModuleBuilder : ModuleBuilderBase
    {
-      private RestControllerModuleBuilder(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+      private RestServiceControllerModuleBuilder(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(id, module, typeDict, nodeTypes)
       {
       }
 
-      public static RestControllerModuleBuilder Init(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static RestServiceControllerModuleBuilder Init(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
-         return new RestControllerModuleBuilder(id, module, typeDict, nodeTypes);
+         return new RestServiceControllerModuleBuilder(id, module, typeDict, nodeTypes);
       }
 
-      public override RestControllerModuleBuilder Create()
+      public override RestServiceControllerModuleBuilder Create()
       {
 
          if (Module.Storage == null)

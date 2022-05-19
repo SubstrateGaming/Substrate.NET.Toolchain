@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <PropertyGroup>
+      <PackageType>Template</PackageType>
+      <PackageId>Ajuna.DotNet.Template</PackageId>
+      <AssemblyTitle>Ajuna.DotNet.Template</AssemblyTitle>
+      <AssemblyName>Ajuna.DotNet.Template</AssemblyName>
+      <Title>Ajuna.DotNet.Template</Title>
+      <Description>Ajuna .NET template toolchain to generate projects.</Description>
+      <PackageTags>dotnet-new;templates;ajuna-restservice;ajuna-restclient</PackageTags>
+      <TargetFramework>netstandard2.0</TargetFramework>
+      <IncludeContentInPack>true</IncludeContentInPack>
+      <IncludeBuildOutput>false</IncludeBuildOutput>
+      <ContentTargetFolders>content</ContentTargetFolders>
+      <NoWarn>$(NoWarn);NU5128</NoWarn>
+      <NoDefaultExcludes>true</NoDefaultExcludes>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+      <Compile Remove="**\*" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <None Include="..\..\LICENSE">
+         <Pack>True</Pack>
+         <PackagePath></PackagePath>
+      </None>
+   </ItemGroup>
+
+</Project>

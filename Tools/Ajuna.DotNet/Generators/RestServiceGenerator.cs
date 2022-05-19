@@ -31,12 +31,12 @@ namespace Ajuna.DotNet.Generators
 
          foreach (var module in metadata.NodeMetadata.Modules.Values)
          {
-            RestStorageModuleBuilder
+            RestServiceStorageModuleBuilder
                 .Init(module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: basePath);
 
-            RestControllerModuleBuilder
+            RestServiceControllerModuleBuilder
                 .Init(module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: basePath);
@@ -56,6 +56,10 @@ namespace Ajuna.DotNet.Generators
          _dotNetSolutionGenerator.AddNugetToProject(Constants.AjunaNetApiNugetPackage, ProjectSettings.ProjectName);
          _dotNetSolutionGenerator.AddNugetToProject(Constants.AjunaServiceLayerNugetPackage, ProjectSettings.ProjectName);
          _dotNetSolutionGenerator.AddNugetToProject(Constants.MicrosoftAspNetCoreMvcCoreNugetPackage, ProjectSettings.ProjectName);
+
+         _dotNetSolutionGenerator.AddNugetToProject(Constants.SerilogAspNetCoreNugetPackage, ProjectSettings.ProjectName);
+         _dotNetSolutionGenerator.AddNugetToProject(Constants.SerilogEnrichersThreadNugetPackage, ProjectSettings.ProjectName);
+         _dotNetSolutionGenerator.AddNugetToProject(Constants.SwashbuckeAspNetCoreNugetPackage, ProjectSettings.ProjectName);
 
          // This service needs to be build so that we can generate RESTful clients.
          // TODO (svnscha): Do we really need this here? We should probably just do this whenever we are building RESTful clients.
