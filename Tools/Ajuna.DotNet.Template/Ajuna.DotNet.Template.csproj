@@ -29,4 +29,17 @@
       </None>
    </ItemGroup>
 
+   <ItemGroup>
+     <Content Update="templates\Ajuna.RestService\appsettings.Development.json">
+       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+     </Content>
+     <Content Update="templates\Ajuna.RestService\appsettings.json">
+       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+     </Content>
+   </ItemGroup>
+
 </Project>
