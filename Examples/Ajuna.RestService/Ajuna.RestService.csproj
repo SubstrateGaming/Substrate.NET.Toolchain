@@ -6,7 +6,6 @@
 		<Version>0.1.5</Version>
 		<Company>BloGa Tech AG</Company>
 		<Authors>Cedric Decoster</Authors>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Description>Ajuna REST Service for substrate nodes.</Description>
 		<PackageProjectUrl>https://ajuna.io</PackageProjectUrl>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
