@@ -8,5 +8,15 @@
    "tags": {
       "language": "C#",
       "type": "project"
+   },
+   "symbols": {
+      "projectName": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Renames project name and namespace containing Ajuna.RestService (default).",
+         "defaultValue": "Ajuna.RestService",
+         "replaces": "Ajuna.RestService",
+         "fileRename": "Ajuna.RestService"
+      }
    }
 }

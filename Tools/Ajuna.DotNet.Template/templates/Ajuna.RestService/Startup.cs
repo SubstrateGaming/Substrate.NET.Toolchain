@@ -56,17 +56,7 @@ namespace Ajuna.RestService
          {
             CancellationToken = CTS.Token,
             Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944"),
-            Storages = new List<IStorage>()
-                {
-                    new AssetsStorage(_storageChangeDelegate),
-                    // new BalancesStorage(_storageChangeDelegate),
-                    //new ConnectFourStorage(_storageChangeDelegate),
-                    //new ConnectFourMamaStorage(_storageChangeDelegate),
-                    //new SchedulerStorage(),
-                    //new SudoStorage(),
-                    //new SystemStorage(_storageChangeDelegate),
-                    //new LotteryStorage(_storageChangeDelegate)
-                }
+            Storages = GetRuntimeStorages()
          });
 
 
@@ -79,13 +69,19 @@ namespace Ajuna.RestService
 
          services.AddSwaggerGen(c =>
          {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "NodeTemplateCore.Infrastructure.RestService", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ajuna.RestService", Version = "v1" });
 
             // Set the comments path for the Swagger JSON and UI.
             var filePath = Path.Combine(AppContext.BaseDirectory, "Ajuna.RestService.xml");
             c.IncludeXmlComments(filePath);
          });
 
+      }
+
+      private List<IStorage> GetRuntimeStorages()
+      {
+         // TODO (svnscha) Implement reflection to load all storages.
+         return new List<IStorage>();
       }
 
       /// <summary>
@@ -105,8 +101,7 @@ namespace Ajuna.RestService
          app.UseSwaggerUI(
              c =>
              {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "NodeTemplateCore.Infrastructure.RestService v1");
-                //c.InjectStylesheet("/swagger-ui/custom.css");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ajuna.RestService v1");
              }
          );
 
