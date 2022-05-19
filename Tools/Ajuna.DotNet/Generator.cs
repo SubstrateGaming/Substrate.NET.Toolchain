@@ -27,7 +27,7 @@ namespace Ajuna.DotNet
             ProjectName = "Ajuna.RestService",
             ProjectNamespace = "Ajuna.RestService",
             ProjectSolutionName = "Ajuna.RestService",
-            ProjectDirectory = @"D:\tmp"
+            ProjectDirectory = @"D:\tmp\code"
          };
       }
 

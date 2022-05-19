@@ -2,17 +2,17 @@ using Serilog;
 using System.Diagnostics;
 using System.IO;
 
-namespace Ajuna.DotNet.Generators
+namespace Ajuna.DotNet
 {
    /// <summary>
    /// Dotnet CLI Wrapper for creating VS Solutions and Projects
    /// </summary>
-   public class DotNetSolutionGenerator
+   public class DotNetCli
    {
       private readonly ILogger _logger;
       private readonly string _workingDirectory;
 
-      public DotNetSolutionGenerator(ILogger logger, string workingDirectory)
+      public DotNetCli(ILogger logger, string workingDirectory)
       {
          _workingDirectory = workingDirectory;
          _logger = logger;
@@ -77,18 +77,29 @@ namespace Ajuna.DotNet.Generators
          _logger.Debug("Executing command \"dotnet {arguments}\" in directory \"{directory}\".", arguments, workingDirectory);
 
          var process = new Process();
-
          var startInfo = new ProcessStartInfo
          {
             FileName = "dotnet",
             Arguments = arguments,
             WorkingDirectory = workingDirectory,
             CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden
+            WindowStyle = ProcessWindowStyle.Hidden,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
          };
 
          process.StartInfo = startInfo;
          process.Start();
+
+         string stdout = process.StandardOutput.ReadToEnd();
+         string stderr = process.StandardError.ReadToEnd();
+
+         if (!string.IsNullOrEmpty(stdout))
+            _logger.Debug($"stdout:\n{stdout}");
+
+         if (!string.IsNullOrEmpty(stderr))
+            _logger.Debug($"stderr:\n{stderr}");
+
          process.WaitForExit();
       }
    }

@@ -22,11 +22,11 @@ namespace Ajuna.DotNet.Generators
    /// </summary>
    public class NetApiSolutionGenerator : SolutionGeneratorBase
    {
-      private readonly DotNetSolutionGenerator _dotNetSolutionGenerator;
+      private readonly DotNetCli _dotNetSolutionGenerator;
 
       public NetApiSolutionGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings) : base(logger, nodeRuntime, projectSettings)
       {
-         _dotNetSolutionGenerator = new DotNetSolutionGenerator(logger, projectSettings.ProjectDirectory);
+         _dotNetSolutionGenerator = new DotNetCli(logger, projectSettings.ProjectDirectory);
       }
 
       protected override void GenerateClasses(MetaData metadata)
