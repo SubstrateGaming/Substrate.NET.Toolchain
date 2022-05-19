@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System;
 */
 using Newtonsoft.Json;
+using Serilog;
 using System.Collections.Generic;
 using System.IO;
 using Path = System.IO.Path;
@@ -23,15 +24,14 @@ namespace Ajuna.DotNet.Generators
    {
       private readonly DotNetSolutionGenerator _dotNetSolutionGenerator;
 
-      public NetApiSolutionGenerator(string nodeRuntime, string workingDirectory) : base(nodeRuntime,
-          workingDirectory)
+      public NetApiSolutionGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings) : base(logger, nodeRuntime, projectSettings)
       {
-         _dotNetSolutionGenerator = new DotNetSolutionGenerator(workingDirectory);
+         _dotNetSolutionGenerator = new DotNetSolutionGenerator(logger, projectSettings.ProjectDirectory);
       }
 
       protected override void GenerateClasses(MetaData metadata)
       {
-         var basePath = Path.Combine(WorkingDirectory, "Ajuna.NetApiExt");
+         var basePath = Path.Combine(ProjectSettings.ProjectDirectory, "Ajuna.NetApiExt");
 
          // dirty workaround for generics.
          GetGenericStructs(metadata.NodeMetadata.Types);

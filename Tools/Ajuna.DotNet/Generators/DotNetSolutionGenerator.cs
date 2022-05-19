@@ -1,3 +1,4 @@
+using Serilog;
 using System.Diagnostics;
 using System.IO;
 
@@ -8,11 +9,13 @@ namespace Ajuna.DotNet.Generators
    /// </summary>
    public class DotNetSolutionGenerator
    {
+      private readonly ILogger _logger;
       private readonly string _workingDirectory;
 
-      public DotNetSolutionGenerator(string workingDirectory)
+      public DotNetSolutionGenerator(ILogger logger, string workingDirectory)
       {
          _workingDirectory = workingDirectory;
+         _logger = logger;
       }
 
       public void CreateSolution(string solutionName)
@@ -71,6 +74,7 @@ namespace Ajuna.DotNet.Generators
 
       private void ExecuteCommand(string arguments, string workingDirectory)
       {
+         _logger.Debug("Executing command \"dotnet {arguments}\" in directory \"{directory}\".", arguments, workingDirectory);
 
          var process = new Process();
 

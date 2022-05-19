@@ -20,6 +20,15 @@ namespace Ajuna.DotNet
       {
          _logger = logger;
          _settings = settings;
+
+         // TODO (svnscha): Make this configurable.
+         _settings.RestService = new ProjectSettings()
+         {
+            ProjectName = "Ajuna.RestService",
+            ProjectNamespace = "Ajuna.RestService",
+            ProjectSolutionName = "Ajuna.RestService",
+            ProjectDirectory = @"D:\tmp"
+         };
       }
 
       internal async Task GenerateAsync(CancellationToken cancellationToken)
@@ -41,7 +50,7 @@ namespace Ajuna.DotNet
 
       private async Task GenerateServiceAsync(CancellationToken cancellationToken)
       {
-         if (!_settings.WantService)
+         if (_settings.RestService == null)
             return;
 
          MetaData? metadata = null;
@@ -71,10 +80,10 @@ namespace Ajuna.DotNet
          var w1 = @"D:\tmp\w1";
          var w2 = @"D:\tmp\w2";
 
-         GenerateRestServiceSolution(metadata, w1);
+         GenerateRestServiceSolution(metadata);
 
          // Generate Net Api Solution
-         GenerateNetApiSolution(metadata, w2);
+         // GenerateNetApiSolution(metadata, w2);
 
 
 
@@ -139,15 +148,15 @@ namespace Ajuna.DotNet
          return null;
       }
 
-      public void GenerateNetApiSolution(MetaData metadata, string workingDirectory)
+      public void GenerateNetApiSolution(MetaData metadata, ProjectSettings projectSettings)
       {
-         var netApiGenerator = new NetApiSolutionGenerator(_settings.NodeRuntime, workingDirectory);
+         var netApiGenerator = new NetApiSolutionGenerator(Log.Logger, _settings.NodeRuntime, projectSettings);
          netApiGenerator.Generate(metadata);
       }
 
-      public void GenerateRestServiceSolution(MetaData metadata, string workingDirectory)
+      public void GenerateRestServiceSolution(MetaData metadata)
       {
-         var restServiceGenerator = new RestServiceSolutionGenerator(_settings.NodeRuntime, workingDirectory);
+         var restServiceGenerator = new RestServiceSolutionGenerator(Log.Logger, _settings.NodeRuntime, _settings.RestService);
          restServiceGenerator.Generate(metadata);
       }
    }

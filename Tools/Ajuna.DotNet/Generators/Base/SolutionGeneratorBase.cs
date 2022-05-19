@@ -4,6 +4,7 @@ using Ajuna.DotNet.Node.Base;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types.Metadata.V14;
 using Ajuna.NetApi.Model.Types.Primitive;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +18,15 @@ namespace Ajuna.DotNet.Generators.Base
    /// </summary>
    public abstract class SolutionGeneratorBase
    {
-      private readonly string _nodeRuntime;
-      protected readonly string WorkingDirectory;
+      protected string NodeRuntime { get; private set; }
+      protected ProjectSettings ProjectSettings { get; private set; }
+      protected ILogger Logger { get; private set; }
 
-      protected SolutionGeneratorBase(string nodeRuntime, string workingDirectory)
+      protected SolutionGeneratorBase(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
       {
-         _nodeRuntime = nodeRuntime;
-         WorkingDirectory = workingDirectory;
+         NodeRuntime = nodeRuntime;
+         ProjectSettings = projectSettings;
+         Logger = logger;
       }
 
 
@@ -48,14 +51,12 @@ namespace Ajuna.DotNet.Generators.Base
       /// <param name="metadata"></param>
       protected abstract void GenerateClasses(MetaData metadata);
 
-      protected Dictionary<uint, (string, List<string>)> GenerateTypes(Dictionary<uint, NodeType> nodeTypes,
-          string basePath)
+      protected Dictionary<uint, (string, List<string>)> GenerateTypes(Dictionary<uint, NodeType> nodeTypes, string basePath)
       {
          var typeDict = new Dictionary<uint, (string, List<string>)>();
 
-         Dictionary<string, int> eventIndex = GetRuntimeIndex(nodeTypes, _nodeRuntime, "Event");
-
-         Dictionary<string, int> callIndex = GetRuntimeIndex(nodeTypes, _nodeRuntime, "Call");
+         Dictionary<string, int> eventIndex = GetRuntimeIndex(nodeTypes, NodeRuntime, "Event");
+         Dictionary<string, int> callIndex = GetRuntimeIndex(nodeTypes, NodeRuntime, "Call");
 
          var iterations = 10;
 

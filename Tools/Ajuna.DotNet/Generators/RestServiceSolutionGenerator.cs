@@ -10,6 +10,7 @@ using System;
 using System.IO;
 */
 using Ajuna.NetApi.Model.Meta;
+using Serilog;
 using System.IO;
 
 namespace Ajuna.DotNet.Generators
@@ -21,15 +22,15 @@ namespace Ajuna.DotNet.Generators
    {
       private readonly DotNetSolutionGenerator _dotNetSolutionGenerator;
 
-      public RestServiceSolutionGenerator(string nodeRuntime, string workingDirectory) : base(nodeRuntime,
-          workingDirectory)
+      public RestServiceSolutionGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
+         : base(logger, nodeRuntime, projectSettings)
       {
-         _dotNetSolutionGenerator = new DotNetSolutionGenerator(workingDirectory);
+         _dotNetSolutionGenerator = new DotNetSolutionGenerator(logger, projectSettings.ProjectDirectory);
       }
 
       protected override void GenerateClasses(MetaData metadata)
       {
-         string basePath = Path.Combine(WorkingDirectory, "Ajuna.RestService");
+         string basePath = Path.Combine(ProjectSettings.ProjectDirectory, "Ajuna.RestService");
 
          //String basePath = WorkingDirectory;            
          // dirty workaround for generics.
