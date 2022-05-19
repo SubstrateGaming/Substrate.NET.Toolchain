@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Ajuna.DotNet": {
+      "commandName": "Project",
+      "commandLineArgs": "new --service ws://ajuna.local:9944"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<AssemblyTitle>Ajuna.DotNet</AssemblyTitle>
+		<AssemblyName>Ajuna.DotNet</AssemblyName>
+		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Description>Ajuna .NET toolchain to generate code.</Description>
+      <PackAsTool>true</PackAsTool>
+      <ToolCommandName>ajuna</ToolCommandName>
+      <PackageOutputPath>./nupkg</PackageOutputPath>
+	</PropertyGroup>
+
+   <ItemGroup>
+      <PackageReference Include="Ajuna.NetApi" Version="0.1.7" />
+      <PackageReference Include="Serilog" Version="2.10.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+      <PackageReference Include="System.CodeDom" Version="6.0.0" />
+   </ItemGroup>
+</Project>

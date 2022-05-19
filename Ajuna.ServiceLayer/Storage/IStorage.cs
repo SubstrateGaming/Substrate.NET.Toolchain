@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace Ajuna.ServiceLayer.Storage
 {
-    public interface IStorage
-    {
-        Task InitializeAsync(SubstrateClient client);
-    }
+   public interface IStorage
+   {
+      Task InitializeAsync(SubstrateClient client);
+   }
 }

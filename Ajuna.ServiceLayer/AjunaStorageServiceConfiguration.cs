@@ -5,12 +5,12 @@ using System.Threading;
 
 namespace Ajuna.ServiceLayer
 {
-    public class AjunaStorageServiceConfiguration
-    {
-        public CancellationToken CancellationToken { get; set; }
+   public class AjunaStorageServiceConfiguration
+   {
+      public CancellationToken CancellationToken { get; set; }
 
-        public Uri Endpoint { get; set; }
+      public Uri Endpoint { get; set; }
 
-        public List<IStorage> Storages { get; set; }
-    }
+      public List<IStorage> Storages { get; set; }
+   }
 }
