@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using Ajuna;
 using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types.Metadata;

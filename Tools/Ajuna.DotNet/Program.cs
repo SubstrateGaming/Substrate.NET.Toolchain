@@ -50,7 +50,7 @@ namespace Ajuna.DotNet
                   // Handles dotnet ajuna upgrade
                   case "upgrade":
                      {
-                        if (! await UpgradeAjunaEnvironmentAsync(CancellationToken.None))
+                        if (!await UpgradeAjunaEnvironmentAsync(CancellationToken.None))
                         {
                            Log.Error("Upgrading project did not complete successfully.");
                            Environment.Exit(-1);
