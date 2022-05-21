@@ -1,7 +1,6 @@
 using Ajuna.AspNetCore;
 using Ajuna.AspNetCore.Extensions;
 using Ajuna.RestService.Formatters;
-using Ajuna.RestService.Generated.Storage;
 using Ajuna.ServiceLayer;
 using Ajuna.ServiceLayer.Storage;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +11,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Ajuna.RestService
@@ -55,7 +55,7 @@ namespace Ajuna.RestService
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
          {
             CancellationToken = CTS.Token,
-            Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944"),
+            Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://ajuna.local:9944"),
             Storages = GetRuntimeStorages()
          });
 
@@ -69,6 +69,7 @@ namespace Ajuna.RestService
 
          services.AddSwaggerGen(c =>
          {
+            c.CustomSchemaIds(type => type.ToString());
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ajuna.RestService", Version = "v1" });
          });
 
@@ -76,8 +77,11 @@ namespace Ajuna.RestService
 
       private List<IStorage> GetRuntimeStorages()
       {
-         // TODO (svnscha) Implement reflection to load all storages.
-         return new List<IStorage>();
+         return Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(anyType => anyType.IsClass && typeof(IStorage).IsAssignableFrom(anyType))
+            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageChangeDelegate }))
+            .ToList();
       }
 
       /// <summary>
