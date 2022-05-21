@@ -9,6 +9,9 @@ namespace Ajuna.DotNet
 
       [JsonProperty("metadata")]
       public AjunaConfigurationMetadata Metadata { get; set; }
+
+      [JsonProperty("rest_client_settings")]
+      public AjunaConfigurationRestClientSettings RestClientSettings { get; set; }
    }
 
    public class AjunaConfigurationProjects
@@ -18,6 +21,9 @@ namespace Ajuna.DotNet
 
       [JsonProperty("net_api")]
       public string NetApi { get; set; }
+
+      [JsonProperty("rest_client")]
+      public string RestClient { get; set; }
    }
 
    public class AjunaConfigurationMetadata
@@ -27,5 +33,11 @@ namespace Ajuna.DotNet
 
       [JsonProperty("runtime")]
       public string Runtime { get; set; }
+   }
+
+   public class AjunaConfigurationRestClientSettings
+   {
+      [JsonProperty("service_assembly")]
+      public string ServiceAssembly { get; set; }
    }
 }

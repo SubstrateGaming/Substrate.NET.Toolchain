@@ -1,10 +1,12 @@
-﻿using Ajuna.DotNet.Generators;
-using Ajuna.DotNet.Node;
+﻿using Ajuna.DotNet.Client;
+using Ajuna.DotNet.Service.Generators;
+using Ajuna.DotNet.Service.Node;
 using Ajuna.NetApi.Model.Meta;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Serilog;
 using System;
+using System.CodeDom.Compiler;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -115,8 +117,10 @@ namespace Ajuna.DotNet
             return false;
          }
 
-         Log.Information("Using RestService Project = {name}", configuration.Projects.RestService);
          Log.Information("Using NetApi Project = {name}", configuration.Projects.NetApi);
+         Log.Information("Using RestService Project = {name}", configuration.Projects.RestService);
+         Log.Information("Using RestClient Project = {name}", configuration.Projects.RestClient);
+         Log.Information("Using RestService assembly for RestClient = {assembly}", configuration.RestClientSettings.ServiceAssembly);
          Log.Information("Using Node Runtime = {runtime}", configuration.Metadata.Runtime);
 
          if (fetchMetadata)
@@ -137,8 +141,12 @@ namespace Ajuna.DotNet
          if (metadata == null)
             return false;
 
-         GenerateRestServiceClasses(metadata, configuration);
+         // Service
          GenerateNetApiClasses(metadata, configuration);
+         GenerateRestServiceClasses(metadata, configuration);
+
+         // Client
+         GenerateRestClientClasses(metadata, configuration);
 
          return true;
       }
@@ -179,6 +187,30 @@ namespace Ajuna.DotNet
       {
          var generator = new RestServiceGenerator(Log.Logger, configuration.Metadata.Runtime, configuration.Projects.NetApi, new ProjectSettings(configuration.Projects.RestService));
          generator.Generate(metadata);
+      }
+
+      private static void GenerateRestClientClasses(MetaData metadata, AjunaConfiguration configuration)
+      {
+         using (var loader = new AssemblyResolver(configuration.RestClientSettings.ServiceAssembly))
+         {
+            // Initialize configuration.
+            var clientConfiguration = new ClientGeneratorConfiguration()
+            {
+               Assembly = loader.Assembly,
+               ControllerBaseType = typeof(ControllerBase),
+               OutputDirectory = Path.Join(Environment.CurrentDirectory, configuration.Projects.RestClient),
+               GeneratorOptions = new CodeGeneratorOptions()
+               {
+                  BlankLinesBetweenMembers = false,
+                  BracingStyle = "C",
+                  IndentString = "   "
+               }
+            };
+
+            // Build and execute the client generator.
+            var client = new ClientGenerator(clientConfiguration);
+            client.Generate(Log.Logger);
+         }
       }
 
       /// <summary>
