@@ -10,8 +10,8 @@ namespace Ajuna.DotNet.Node
 {
    public class StructBuilder : TypeBuilderBase
    {
-      private StructBuilder(uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
-          : base(id, typeDef, typeDict)
+      private StructBuilder(string projectName, uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+          : base(projectName, id, typeDef, typeDict)
       {
       }
 
@@ -107,9 +107,9 @@ namespace Ajuna.DotNet.Node
          return encodeMethod;
       }
 
-      public static BuilderBase Init(uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static BuilderBase Init(string projectName, uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
       {
-         return new StructBuilder(id, typeDef, typeDict);
+         return new StructBuilder(projectName, id, typeDef, typeDict);
       }
 
       public override TypeBuilderBase Create()
@@ -120,9 +120,9 @@ namespace Ajuna.DotNet.Node
 
          ClassName = $"{typeDef.Path.Last()}";
 
-         ReferenzName = $"{NameSpace}.{typeDef.Path.Last()}";
+         ReferenzName = $"{NamespaceName}.{typeDef.Path.Last()}";
 
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          var targetClass = new CodeTypeDeclaration(ClassName)

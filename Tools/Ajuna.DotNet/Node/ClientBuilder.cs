@@ -11,14 +11,14 @@ namespace Ajuna.DotNet.Node
 {
    public class ClientBuilder : ClientBuilderBase
    {
-      private ClientBuilder(uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict) :
-          base(id, moduleNames, typeDict)
+      private ClientBuilder(string projectName, uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict) :
+          base(projectName, id, moduleNames, typeDict)
       {
       }
 
-      public static ClientBuilder Init(uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict)
+      public static ClientBuilder Init(string projectName, uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict)
       {
-         return new ClientBuilder(id, moduleNames, typeDict);
+         return new ClientBuilder(projectName, id, moduleNames, typeDict);
       }
 
       public override ClientBuilder Create()
@@ -26,9 +26,9 @@ namespace Ajuna.DotNet.Node
          #region CREATE
 
          ClassName = "SubstrateClientExt";
-         NameSpace = "Ajuna.NetApi";
+         NamespaceName = ProjectName;
 
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Meta"));

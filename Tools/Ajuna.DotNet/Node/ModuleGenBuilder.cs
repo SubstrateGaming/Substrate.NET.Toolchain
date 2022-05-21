@@ -13,14 +13,14 @@ namespace Ajuna.DotNet.Node
 {
    public class ModuleGenBuilder : ModuleBuilderBase
    {
-      private ModuleGenBuilder(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
-          base(id, module, typeDict, nodeTypes)
+      private ModuleGenBuilder(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+          base(projectName, id, module, typeDict, nodeTypes)
       {
       }
 
-      public static ModuleGenBuilder Init(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static ModuleGenBuilder Init(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
-         return new ModuleGenBuilder(id, module, typeDict, nodeTypes);
+         return new ModuleGenBuilder(projectName, id, module, typeDict, nodeTypes);
       }
 
       public override ModuleGenBuilder Create()
@@ -28,16 +28,16 @@ namespace Ajuna.DotNet.Node
          #region CREATE
 
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Meta"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi.Model.Meta"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Extrinsics"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi.Model.Types"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi.Model.Extrinsics"));
 
          FileName = "Main" + Module.Name;
+         ReferenzName = $"{ProjectName}.Model.{Module.Name}";
 
-         ReferenzName = "Ajuna.NetApi.Model." + Module.Name;
-
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          // add constructor
@@ -82,8 +82,7 @@ namespace Ajuna.DotNet.Node
             Name = "_client",
             Type = new CodeTypeReference("SubstrateClientExt")
          };
-         clientField.Comments.Add(new CodeCommentStatement(
-             "Substrate client for the storage calls."));
+         clientField.Comments.Add(new CodeCommentStatement("Substrate client for the storage calls."));
          targetClass.Members.Add(clientField);
 
          // Add parameters.
@@ -302,7 +301,7 @@ namespace Ajuna.DotNet.Node
                   eventClass.BaseTypes.Add(codeTypeRef);
 
                   // add event key mapping in constructor
-                  Console.WriteLine($"case \"{Module.Index}-{variant.Index}\": return typeof({NameSpace + "." + eventClass.Name});");
+                  Console.WriteLine($"case \"{Module.Index}-{variant.Index}\": return typeof({NamespaceName + "." + eventClass.Name});");
                   //constructor.Statements.Add(
                   //    AddPropertyValues(new CodeExpression[] {
                   //     new CodeObjectCreateExpression(

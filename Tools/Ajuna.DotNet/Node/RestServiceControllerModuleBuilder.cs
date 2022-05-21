@@ -10,14 +10,14 @@ namespace Ajuna.DotNet.Node
 {
    public class RestServiceControllerModuleBuilder : ModuleBuilderBase
    {
-      private RestServiceControllerModuleBuilder(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
-          base(id, module, typeDict, nodeTypes)
+      private RestServiceControllerModuleBuilder(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+          base(projectName, id, module, typeDict, nodeTypes)
       {
       }
 
-      public static RestServiceControllerModuleBuilder Init(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static RestServiceControllerModuleBuilder Init(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
-         return new RestServiceControllerModuleBuilder(id, module, typeDict, nodeTypes);
+         return new RestServiceControllerModuleBuilder(projectName, id, module, typeDict, nodeTypes);
       }
 
       public override RestServiceControllerModuleBuilder Create()
@@ -30,17 +30,14 @@ namespace Ajuna.DotNet.Node
          }
 
          #region CREATE
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.RestService.Generated.Storage"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Storage"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Microsoft.AspNetCore.Mvc"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
-
          FileName = Module.Storage.Prefix + "Controller";
+         ReferenzName = $"{ProjectName}.Generated.Controller.{FileName}";
+         NamespaceName = $"{ProjectName}.Generated.Controller";
 
-         ReferenzName = "Ajuna.RestService.Generated.Controller." + FileName;
-
-         NameSpace = "Ajuna.RestService.Generated.Controller";
-
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          CreateController(typeNamespace);

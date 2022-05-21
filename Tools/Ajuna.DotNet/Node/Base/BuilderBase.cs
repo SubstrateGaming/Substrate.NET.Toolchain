@@ -11,8 +11,6 @@ namespace Ajuna.DotNet.Node.Base
 
    public abstract class BuilderBase
    {
-      public const string BASE_NAMESPACE = "Ajuna.NetApi";
-
       public static List<string> Files = new();
 
       public uint Id { get; }
@@ -21,14 +19,15 @@ namespace Ajuna.DotNet.Node.Base
 
       public bool Success { get; set; }
 
-      public string NameSpace { get; set; }
+      public string NamespaceName { get; protected set; }
 
       internal string FileName { get; set; }
-
 
       public string ClassName { get; set; }
 
       public string ReferenzName { get; set; }
+
+      public string ProjectName { get; private set; }
 
       public CodeNamespace ImportsNamespace { get; set; }
 
@@ -36,18 +35,17 @@ namespace Ajuna.DotNet.Node.Base
 
       public abstract BuilderBase Create();
 
-      public BuilderBase(uint id, Dictionary<uint, (string, List<string>)> typeDict)
+      public BuilderBase(string projectName, uint id, Dictionary<uint, (string, List<string>)> typeDict)
       {
+         ProjectName = projectName;
          Id = id;
          TypeDict = typeDict;
          ImportsNamespace = new()
          {
-            Imports =
-                {
-                    new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Base"),
-                    new CodeNamespaceImport("System.Collections.Generic"),
-                    new CodeNamespaceImport("System")
-                }
+            Imports = {
+               new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Base"),
+               new CodeNamespaceImport("System.Collections.Generic")
+            }
          };
 
          TargetUnit = new CodeCompileUnit();
@@ -153,13 +151,13 @@ namespace Ajuna.DotNet.Node.Base
             }
          }
 
-         return (ReferenzName, new List<string>() { NameSpace });
+         return (ReferenzName, new List<string>() { NamespaceName });
       }
 
 
       private string GetPath(string basePath)
       {
-         var space = NameSpace.Split('.').ToList();
+         var space = NamespaceName.Split('.').ToList();
 
          space.Add((FileName is null ? ClassName : FileName) + ".cs");
 

@@ -21,6 +21,8 @@ namespace Ajuna.DotNet.Generators.Base
       protected string NodeRuntime { get; private set; }
       protected ProjectSettings ProjectSettings { get; private set; }
       protected ILogger Logger { get; private set; }
+      
+      protected string ProjectName { get => ProjectSettings.ProjectName; }
 
       protected SolutionGeneratorBase(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
       {
@@ -28,7 +30,6 @@ namespace Ajuna.DotNet.Generators.Base
          ProjectSettings = projectSettings;
          Logger = logger;
       }
-
 
       /// <summary>
       /// Generates the classes as well as the solution structure and files
@@ -68,7 +69,7 @@ namespace Ajuna.DotNet.Generators.Base
                   case TypeDefEnum.Composite:
                      {
                         var type = nodeType as NodeTypeComposite;
-                        var fullItem = StructBuilder.Init(type.Id, type, typeDict)
+                        var fullItem = StructBuilder.Init(ProjectName, type.Id, type, typeDict)
                             .Create()
                             .Build(write: write, out bool success, basePath);
                         if (success)
@@ -99,7 +100,7 @@ namespace Ajuna.DotNet.Generators.Base
                   case TypeDefEnum.Array:
                      {
                         var type = nodeType as NodeTypeArray;
-                        var fullItem = ArrayBuilder.Create(type.Id, type, typeDict)
+                        var fullItem = ArrayBuilder.Create(ProjectName, type.Id, type, typeDict)
                             .Create()
                             .Build(write: write, out bool success, basePath);
                         if (success)
@@ -134,8 +135,7 @@ namespace Ajuna.DotNet.Generators.Base
                      }
                   case TypeDefEnum.BitSequence:
                   default:
-                     throw new NotImplementedException(
-                         $"Unimplemented enumeration of node type {nodeType.TypeDef}");
+                     throw new NotImplementedException($"Unimplemented enumeration of node type {nodeType.TypeDef}");
                }
             }
          }
@@ -197,41 +197,37 @@ namespace Ajuna.DotNet.Generators.Base
 
             case "Result":
                {
-                  var spaces = new List<string>() { $"{BuilderBase.BASE_NAMESPACE}.Model.Types.Base" };
+                  var spaces = new List<string>() { $"Ajuna.NetApi.Model.Types.Base" };
                   typeDict.Add(nodeType.Id,
-                      ($"BaseTuple<BaseTuple, {BuilderBase.BASE_NAMESPACE}.Model.SpRuntime.EnumDispatchError>",
+                      ($"BaseTuple<BaseTuple, {ProjectName}.Model.SpRuntime.EnumDispatchError>",
                           spaces));
                   break;
                }
 
             case "Call":
                {
-                  var fullItem = (BuilderBase.BASE_NAMESPACE + $".{nodeType.Path[0].MakeMethod()}Call",
-                      new List<string>() { BuilderBase.BASE_NAMESPACE });
+                  var fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Call", new List<string>() { ProjectName });
                   typeDict.Add(nodeType.Id, fullItem);
                   break;
                }
 
             case "Event":
                {
-                  var fullItem = (BuilderBase.BASE_NAMESPACE + $".{nodeType.Path[0].MakeMethod()}Event",
-                      new List<string>() { BuilderBase.BASE_NAMESPACE });
+                  var fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Event", new List<string>() { ProjectName });
                   typeDict.Add(nodeType.Id, fullItem);
                   break;
                }
 
             case "Error":
                {
-                  var fullItem = (BuilderBase.BASE_NAMESPACE + $".{nodeType.Path[0].MakeMethod()}Error",
-                      new List<string>() { BuilderBase.BASE_NAMESPACE });
+                  var fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Error", new List<string>() { ProjectName });
                   typeDict.Add(nodeType.Id, fullItem);
                   break;
                }
 
             case "Runtime":
                {
-                  var fullItem = RunetimeBuilder.Init(nodeType.Id, nodeType, typeDict)
-                      .Create().Build(write: write, out bool success, basePath);
+                  var fullItem = RunetimeBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (success)
                   {
                      typeDict.Add(nodeType.Id, fullItem);
@@ -242,15 +238,14 @@ namespace Ajuna.DotNet.Generators.Base
 
             case "Void":
                {
-                  var spaces = new List<string>() { $"{BuilderBase.BASE_NAMESPACE}.Model.Types.Base" };
-                  typeDict.Add(nodeType.Id, ($"{BuilderBase.BASE_NAMESPACE}.Model.Types.Base.BaseVoid", spaces));
+                  var spaces = new List<string>() { $"Ajuna.NetApi.Model.Types.Base" };
+                  typeDict.Add(nodeType.Id, ($"Ajuna.NetApi.Model.Types.Base.BaseVoid", spaces));
                   break;
                }
 
             case "Enum":
                {
-                  var fullItem = EnumBuilder.Init(nodeType.Id, nodeType, typeDict)
-                      .Create().Build(write: write, out bool success, basePath);
+                  var fullItem = EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (success)
                   {
                      typeDict.Add(nodeType.Id, fullItem);
@@ -266,8 +261,8 @@ namespace Ajuna.DotNet.Generators.Base
 
       private void CallPrimitive(NodeTypePrimitive nodeType, ref Dictionary<uint, (string, List<string>)> typeDict)
       {
-         List<string> spaces = new() { $"{BuilderBase.BASE_NAMESPACE}.Model.Types.Primitive" };
-         var path = $"{BuilderBase.BASE_NAMESPACE}.Model.Types.Primitive.";
+         List<string> spaces = new() { $"Ajuna.NetApi.Model.Types.Primitive" };
+         var path = $"Ajuna.NetApi.Model.Types.Primitive.";
          switch (nodeType.Primitive)
          {
             case TypeDefPrimitive.Bool:
@@ -345,8 +340,7 @@ namespace Ajuna.DotNet.Generators.Base
          }
       }
 
-      private Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime,
-          string runtimeType)
+      private Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
       {
          foreach (var test in nodeTypes)
          {

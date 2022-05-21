@@ -6,20 +6,20 @@ namespace Ajuna.DotNet.Node.Base
 {
    public abstract class ModuleBuilderBase : BuilderBase
    {
-      public Dictionary<uint, NodeType> NodeTypes { get; }
+      public Dictionary<uint, NodeType> NodeTypes { get; private set; }
 
-      public PalletModule Module { get; }
+      public PalletModule Module { get; private set; }
 
-      public string PrefixName { get; }
+      public string PrefixName { get; private set; }
 
-      public ModuleBuilderBase(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict,
+      public ModuleBuilderBase(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict,
           Dictionary<uint, NodeType> nodeTypes)
-          : base(id, typeDict)
+          : base(projectName, id, typeDict)
       {
          NodeTypes = nodeTypes;
          Module = module;
          PrefixName = module.Name == "System" ? "Frame" : "Pallet";
-         NameSpace = $"{BASE_NAMESPACE}.Model.{PrefixName + module.Name.MakeMethod()}";
+         NamespaceName = $"{ProjectName}.Model.{PrefixName + module.Name.MakeMethod()}";
       }
    }
 }

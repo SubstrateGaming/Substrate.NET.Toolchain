@@ -2,6 +2,7 @@
 using Ajuna.DotNet.Node;
 using Ajuna.NetApi.Model.Meta;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Serilog;
 using System;
 using System.IO;
@@ -74,7 +75,7 @@ namespace Ajuna.DotNet
       }
 
       /// <summary>
-      /// Invoked with dotnet ajuna update.
+      /// Invoked with dotnet ajuna update
       /// This command parses the ajuna project configuration and generates code for all given projects.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
@@ -88,7 +89,7 @@ namespace Ajuna.DotNet
       private static async Task<bool> UpgradeAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(token, fetchMetadata: true);
 
       /// <summary>
-      /// Handles the implementation to update or upgrade an ajuna environment.
+      /// Handles the implementation to update or upgrade an ajuna environment
       /// Upgrading first fetches the metadata and stores it in .ajuna configuration directory.
       /// Then a normal update command is invoked to generate code for all given projects.
       /// </summary>
@@ -136,15 +137,16 @@ namespace Ajuna.DotNet
          if (metadata == null)
             return false;
 
-         GenerateServiceClasses(metadata, configuration);
+         GenerateRestServiceClasses(metadata, configuration);
+         GenerateNetApiClasses(metadata, configuration);
 
          return true;
       }
 
       /// <summary>
-      /// Fetches and generates .ajuna/metadata.txt.
+      /// Fetches and generates .ajuna/metadata.json
       /// </summary>
-      /// <param name="websocket">The websocket to connect for.</param>
+      /// <param name="websocket">The websocket to connect to</param>
       /// <param name="token">Cancellation token.</param>
       /// <returns>Returns true on success, otherwise false.</returns>
       /// <exception cref="InvalidOperationException"></exception>
@@ -154,51 +156,54 @@ namespace Ajuna.DotNet
          if (metadata == null)
             throw new InvalidOperationException($"Could not query metadata from node {websocket}!");
 
-         var targetDirectory = Path.Join(Directory.GetCurrentDirectory(), ".ajuna");
-         var fp = Path.Join(targetDirectory, "metadata.txt");
+         var metadataFilePath = ResolveMetadataFilePath();
 
          try
          {
-            if (!Directory.Exists(targetDirectory))
-            {
-               Directory.CreateDirectory(targetDirectory);
-            }
-
-            Log.Information("Saving metadata to {fp}...", fp);
-            File.WriteAllText(fp, metadata);
+            Log.Information("Saving metadata to {metadataFilePath}...", metadataFilePath);
+            File.WriteAllText(metadataFilePath, metadata);
             return true;
          }
          catch (Exception e)
          {
-            Log.Error(e, $"Could not save metadata to filepath: {fp}!");
+            Log.Error(e, $"Could not save metadata to filepath: {metadataFilePath}!");
          }
 
          return false;
       }
 
       /// <summary>
-      /// Generates all classes for the RestService project.
+      /// Generates all classes for the RestService project
       /// </summary>
-      private static void GenerateServiceClasses(MetaData metadata, AjunaConfiguration configuration)
+      private static void GenerateRestServiceClasses(MetaData metadata, AjunaConfiguration configuration)
       {
          var generator = new RestServiceGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.RestService));
          generator.Generate(metadata);
       }
 
       /// <summary>
-      /// Returns the directory path to .ajuna directory.
+      /// Generates all classes for the NetApi project
+      /// </summary>
+      private static void GenerateNetApiClasses(MetaData metadata, AjunaConfiguration configuration)
+      {
+         var generator = new NetApiGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.NetApi));
+         generator.Generate(metadata);
+      }
+
+      /// <summary>
+      /// Returns the directory path to .ajuna directory
       /// </summary>
       private static string ResolveConfigurationDirectory() => Path.Join(Environment.CurrentDirectory, ".ajuna");
 
       /// <summary>
-      /// Returns the file path to .ajuna/ajuna-config.json.
+      /// Returns the file path to .ajuna/ajuna-config.json
       /// </summary>
       private static string ResolveConfigurationFilePath() => Path.Join(ResolveConfigurationDirectory(), "ajuna-config.json");
 
       /// <summary>
-      /// Returns the file path to .ajuna/metadata.txt
+      /// Returns the file path to .ajuna/metadata.json
       /// </summary>
-      private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.txt");
+      private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.json");
 
    }
 }

@@ -12,14 +12,14 @@ namespace Ajuna.DotNet.Node
 {
    public class EventModuleBuilder : ModulesBuilderBase
    {
-      private EventModuleBuilder(uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
-          base(id, modules, typeDict, nodeTypes)
+      private EventModuleBuilder(string projectName, uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+          base(projectName, id, modules, typeDict, nodeTypes)
       {
       }
 
-      public static EventModuleBuilder Init(uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static EventModuleBuilder Init(string projectName, uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
-         return new EventModuleBuilder(id, modules, typeDict, nodeTypes);
+         return new EventModuleBuilder(projectName, id, modules, typeDict, nodeTypes);
       }
 
       public override EventModuleBuilder Create()
@@ -33,10 +33,10 @@ namespace Ajuna.DotNet.Node
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Extrinsics"));
 
          FileName = "NodeEvents";
-         NameSpace = "Ajuna.NetApi.Model.Event";
+         NamespaceName = "Ajuna.NetApi.Model.Event";
          ReferenzName = "Ajuna.NetApi.Model.Event";
 
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          // add constructor

@@ -11,8 +11,8 @@ namespace Ajuna.DotNet.Node
    public class ArrayBuilder : TypeBuilderBase
    {
       public static int Counter = 0;
-      private ArrayBuilder(uint id, NodeTypeArray typeDef, Dictionary<uint, (string, List<string>)> typeDict)
-          : base(id, typeDef, typeDict)
+      private ArrayBuilder(string projectName, uint id, NodeTypeArray typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+          : base(projectName, id, typeDef, typeDict)
       {
       }
 
@@ -42,7 +42,7 @@ namespace Ajuna.DotNet.Node
              "}"));
          decodeMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
          decodeMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
+         decodeMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
          decodeMethod.Statements.Add(new CodeSnippetExpression("Value = array"));
          return decodeMethod;
       }
@@ -64,9 +64,9 @@ namespace Ajuna.DotNet.Node
          return encodeMethod;
       }
 
-      public static ArrayBuilder Create(uint id, NodeTypeArray nodeType, Dictionary<uint, (string, List<string>)> typeDict)
+      public static ArrayBuilder Create(string projectName, uint id, NodeTypeArray nodeType, Dictionary<uint, (string, List<string>)> typeDict)
       {
-         return new ArrayBuilder(id, nodeType, typeDict);
+         return new ArrayBuilder(projectName, id, nodeType, typeDict);
       }
 
       public override TypeBuilderBase Create()
@@ -78,7 +78,7 @@ namespace Ajuna.DotNet.Node
          var fullItem = GetFullItemPath(typeDef.TypeId);
 
          ClassName = $"Arr{typeDef.Length}{fullItem.Item1.Split('.').Last()}";
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          if (ClassName.Any(ch => !char.IsLetterOrDigit(ch)))
@@ -87,7 +87,7 @@ namespace Ajuna.DotNet.Node
             ClassName = $"Arr{typeDef.Length}Special" + Counter++;
          }
 
-         ReferenzName = $"{NameSpace}.{ClassName}";
+         ReferenzName = $"{NamespaceName}.{ClassName}";
 
          var targetClass = new CodeTypeDeclaration(ClassName)
          {

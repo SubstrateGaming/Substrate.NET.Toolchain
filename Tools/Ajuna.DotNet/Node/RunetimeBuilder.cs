@@ -9,14 +9,14 @@ namespace Ajuna.DotNet.Node
 {
    public class RunetimeBuilder : TypeBuilderBase
    {
-      private RunetimeBuilder(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
-          : base(id, typeDef, typeDict)
+      private RunetimeBuilder(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+          : base(projectName, id, typeDef, typeDict)
       {
       }
 
-      public static RunetimeBuilder Init(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static RunetimeBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
       {
-         return new RunetimeBuilder(id, typeDef, typeDict);
+         return new RunetimeBuilder(projectName, id, typeDef, typeDict);
       }
 
       public override TypeBuilderBase Create()
@@ -29,8 +29,8 @@ namespace Ajuna.DotNet.Node
          var enumName = $"Node{runtimeType}";
 
          ClassName = $"Enum{enumName}";
-         ReferenzName = $"{NameSpace}.{ClassName}";
-         CodeNamespace typeNamespace = new(NameSpace);
+         ReferenzName = $"{NamespaceName}.{ClassName}";
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          CodeTypeDeclaration TargetType = new(enumName)

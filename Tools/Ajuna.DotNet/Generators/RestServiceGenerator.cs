@@ -10,12 +10,9 @@ namespace Ajuna.DotNet.Generators
    /// </summary>
    public class RestServiceGenerator : SolutionGeneratorBase
    {
-      // private readonly DotNetCli _dotNetSolutionGenerator;
-
       public RestServiceGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
          : base(logger, nodeRuntime, projectSettings)
       {
-         // _dotNetSolutionGenerator = new DotNetCli(logger, projectSettings.ProjectDirectory);
       }
 
       protected override void GenerateClasses(MetaData metadata)
@@ -29,12 +26,12 @@ namespace Ajuna.DotNet.Generators
          foreach (var module in metadata.NodeMetadata.Modules.Values)
          {
             RestServiceStorageModuleBuilder
-                .Init(module.Index, module, typeDict, metadata.NodeMetadata.Types)
+                .Init(ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: ProjectSettings.ProjectDirectory);
 
             RestServiceControllerModuleBuilder
-                .Init(module.Index, module, typeDict, metadata.NodeMetadata.Types)
+                .Init(ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: ProjectSettings.ProjectDirectory);
          }

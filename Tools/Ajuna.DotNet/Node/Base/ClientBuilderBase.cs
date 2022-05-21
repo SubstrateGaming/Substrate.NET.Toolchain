@@ -6,12 +6,11 @@ namespace Ajuna.DotNet.Node.Base
    {
       public List<(string, List<string>)> ModuleNames { get; }
 
-      public ClientBuilderBase(uint id, List<(string, List<string>)> moduleNames,
-          Dictionary<uint, (string, List<string>)> typeDict)
-          : base(id, typeDict)
+      public ClientBuilderBase(string projectName, uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict)
+          : base(projectName, id, typeDict)
       {
          ModuleNames = moduleNames;
-         NameSpace = BASE_NAMESPACE;
+         NamespaceName = ProjectName;
       }
    }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Ajuna.DotNet
+namespace Ajuna.DotNet.Generators
 {
    public class ProjectSettings
    {

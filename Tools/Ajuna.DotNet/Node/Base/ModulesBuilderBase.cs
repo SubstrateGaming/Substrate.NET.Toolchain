@@ -5,15 +5,13 @@ namespace Ajuna.DotNet.Node.Base
 {
    public abstract class ModulesBuilderBase : BuilderBase
    {
-      public Dictionary<uint, NodeType> NodeTypes { get; }
+      public Dictionary<uint, NodeType> NodeTypes { get; private set; }
 
-      public PalletModule[] Modules { get; }
+      public PalletModule[] Modules { get; private set; }
 
-      public string PrefixName { get; }
-
-      public ModulesBuilderBase(uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict,
+      public ModulesBuilderBase(string projectName, uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict,
           Dictionary<uint, NodeType> nodeTypes)
-          : base(id, typeDict)
+          : base(projectName, id, typeDict)
       {
          NodeTypes = nodeTypes;
          Modules = modules;

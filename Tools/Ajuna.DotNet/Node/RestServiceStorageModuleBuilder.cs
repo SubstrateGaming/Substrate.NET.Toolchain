@@ -11,14 +11,14 @@ namespace Ajuna.DotNet.Node
 {
    public class RestServiceStorageModuleBuilder : ModuleBuilderBase
    {
-      private RestServiceStorageModuleBuilder(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
-          base(id, module, typeDict, nodeTypes)
+      private RestServiceStorageModuleBuilder(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+          base(projectName, id, module, typeDict, nodeTypes)
       {
       }
 
-      public static RestServiceStorageModuleBuilder Init(uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static RestServiceStorageModuleBuilder Init(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
-         return new RestServiceStorageModuleBuilder(id, module, typeDict, nodeTypes);
+         return new RestServiceStorageModuleBuilder(projectName, id, module, typeDict, nodeTypes);
       }
 
       public override RestServiceStorageModuleBuilder Create()
@@ -37,11 +37,10 @@ namespace Ajuna.DotNet.Node
 
          FileName = Module.Storage.Prefix + "Storage";
 
-         ReferenzName = "Ajuna.RestService.Generated.Storage." + FileName;
+         ReferenzName = $"{ProjectName}.Generated.Storage.{FileName}";
+         NamespaceName = $"{ProjectName}.Generated.Storage";
 
-         NameSpace = "Ajuna.RestService.Generated.Storage";
-
-         CodeNamespace typeNamespace = new(NameSpace);
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          CreateStorage(typeNamespace);

@@ -8,13 +8,13 @@ namespace Ajuna.DotNet.Node.Base
    {
       public NodeType TypeDef { get; }
 
-      public TypeBuilderBase(uint id, NodeType typeDef, Dictionary<uint, (string, List<string>)> typeDict)
-          : base(id, typeDict)
+      public TypeBuilderBase(string projectName, uint id, NodeType typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+          : base(projectName, id, typeDict)
       {
          TypeDef = typeDef;
-         NameSpace = typeDef.Path != null && typeDef.Path[0].Contains("_")
-             ? $"{BASE_NAMESPACE}.Model.{typeDef.Path[0].MakeMethod()}"
-             : $"{BASE_NAMESPACE}.Model.Base";
+         NamespaceName = typeDef.Path != null && typeDef.Path[0].Contains("_")
+             ? $"{ProjectName}.Model.{typeDef.Path[0].MakeMethod()}"
+             : $"{ProjectName}.Model.Base";
       }
    }
 }

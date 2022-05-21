@@ -11,14 +11,14 @@ namespace Ajuna.DotNet.Node
 {
    public class EnumBuilder : TypeBuilderBase
    {
-      private EnumBuilder(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
-          : base(id, typeDef, typeDict)
+      private EnumBuilder(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+          : base(projectName, id, typeDef, typeDict)
       {
       }
 
-      public static EnumBuilder Init(uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static EnumBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
       {
-         return new EnumBuilder(id, typeDef, typeDict);
+         return new EnumBuilder(projectName, id, typeDef, typeDict);
       }
 
       public override TypeBuilderBase Create()
@@ -30,8 +30,8 @@ namespace Ajuna.DotNet.Node
          var enumName = $"{typeDef.Path.Last()}";
 
          ClassName = $"Enum{enumName}";
-         ReferenzName = $"{NameSpace}.{ClassName}";
-         CodeNamespace typeNamespace = new(NameSpace);
+         ReferenzName = $"{NamespaceName}.{ClassName}";
+         CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          CodeTypeDeclaration TargetType = new(enumName)
@@ -132,7 +132,7 @@ namespace Ajuna.DotNet.Node
       private CodeTypeMemberCollection GetEnumEra()
       {
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Base"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Primitive"));
 
@@ -189,7 +189,7 @@ namespace Ajuna.DotNet.Node
 
       private CodeTypeMemberCollection GetEnumData()
       {
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Base"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
 
          var result = new CodeTypeMemberCollection();
