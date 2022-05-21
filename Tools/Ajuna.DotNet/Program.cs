@@ -1,5 +1,10 @@
-﻿using Serilog;
+﻿using Ajuna.DotNet.Generators;
+using Ajuna.DotNet.Node;
+using Ajuna.NetApi.Model.Meta;
+using Newtonsoft.Json;
+using Serilog;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,20 +14,11 @@ namespace Ajuna.DotNet
    {
       /// <summary>
       /// Command line utility to easily maintain and scaffold Ajuna SDK related projects.
-      /// This tool should be installed as dotnet tool so it can be easily invoked on a developer machine
-      /// to get started with Ajuna SDK.
       /// 
       /// Usage
-      /// dotnet ajuna new TYPE
-      /// 
-      ///   TYPE
-      ///      --service WEBSOCKET_CONNECTION_STRING | METADATA_FILE_PATH
-      ///      --client  ??
-      ///      
       /// dotnet ajuna update
       /// 
       /// </summary>
-      /// <returns></returns>
       static async Task Main(string[] args)
       {
          // Initialize logging.
@@ -33,16 +29,32 @@ namespace Ajuna.DotNet
 
          try
          {
-            if (args.Length >= 1)
+            for (int i = 0; i < args.Length; i++)
             {
-               switch (args[0])
+               switch (args[i])
                {
-                  case "new":
-                     await NewCommandAsync(args);
-                     break;
+                  // Handles dotnet ajuna update
                   case "update":
-                     await UpdateCommandAsync(args);
+                     {
+                        if (!await UpdateAjunaEnvironmentAsync(CancellationToken.None))
+                        {
+                           Log.Error("Updating project did not complete successfully.");
+                           Environment.Exit(-1);
+                        }
+                     }
                      break;
+
+                  // Handles dotnet ajuna upgrade
+                  case "upgrade":
+                     {
+                        if (! await UpgradeAjunaEnvironmentAsync(CancellationToken.None))
+                        {
+                           Log.Error("Upgrading project did not complete successfully.");
+                           Environment.Exit(-1);
+                        }
+                     }
+                     break;
+
                   default:
                      break;
                }
@@ -51,75 +63,142 @@ namespace Ajuna.DotNet
          catch (InvalidOperationException ex)
          {
             Log.Error(ex, "Could not complete operation!");
+            Environment.Exit(-1);
          }
          catch (Exception ex)
          {
             Log.Error(ex, "Unhandled exception!");
+            Environment.Exit(-1);
          }
 
       }
 
       /// <summary>
-      /// Invokable with dotnet ajuna update
+      /// Invoked with dotnet ajuna update.
+      /// This command parses the ajuna project configuration and generates code for all given projects.
       /// </summary>
-      private static async Task UpdateCommandAsync(string[] args)
-      {
-         await Task.Delay(0);
-         throw new NotImplementedException();
-      }
+      /// <returns>Returns true on success, otherwise false.</returns>
+      private static async Task<bool> UpdateAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(token, fetchMetadata: false);
 
       /// <summary>
-      /// Implements any dotnet ajuna new command handling and extracts the parameters and forwards them to the actual command handlers.
+      /// Invoked with dotnet ajuna upgrade.
+      /// This command first updates the metadata file and then generates all classes again.
       /// </summary>
-      private static async Task NewCommandAsync(string[] args)
+      /// <returns>Returns true on success, otherwise false.</returns>
+      private static async Task<bool> UpgradeAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(token, fetchMetadata: true);
+
+      /// <summary>
+      /// Handles the implementation to update or upgrade an ajuna environment.
+      /// Upgrading first fetches the metadata and stores it in .ajuna configuration directory.
+      /// Then a normal update command is invoked to generate code for all given projects.
+      /// </summary>
+      /// <param name="token">Cancellation</param>
+      /// <param name="fetchMetadata">Controls whether to fetch the metadata (upgrade) or not (update).</param>
+      /// <returns>Returns true on success, otherwise false.</returns>
+      private static async Task<bool> UpgradeOrUpdateAjunaEnvironmentAsync(CancellationToken token, bool fetchMetadata)
       {
-         bool wantService = false;
-         string serviceArgument = null;
-
-         bool wantClient = false;
-         string clientArgument = null;
-
-         for (int i = 0; i < args.Length; i++)
+         // Update an existing Ajuna project tree by reading the required configuration file
+         // in the current directory in subdirectory .ajuna.
+         var configurationFile = ResolveConfigurationFilePath();
+         if (!File.Exists(configurationFile))
          {
-            switch (args[i])
+            Log.Error("The configuration file {file} does not exist! Please create a configuration file so this toolchain can produce correct outputs. You can scaffold the configuration file by creating a new service project with `dotnet new ajuna-service`.");
+            return false;
+         }
+
+         // Read ajuna-config.json
+         var configuration = JsonConvert.DeserializeObject<AjunaConfiguration>(File.ReadAllText(configurationFile));
+         if (configuration == null)
+         {
+            Log.Error("Could not parse the configuration file {file}! Please ensure that the configuration file format is correct.", configurationFile);
+            return false;
+         }
+
+         Log.Information("Using RestService Project = {name}", configuration.Projects.RestService);
+         Log.Information("Using NetApi Project = {name}", configuration.Projects.NetApi);
+         Log.Information("Using Node Runtime = {runtime}", configuration.Metadata.Runtime);
+
+         if (fetchMetadata)
+         {
+            Log.Information("Using Websocket = {websocket} to fetch metadata", configuration.Metadata.Websocket);
+
+            if (!await GenerateMetadataAsync(configuration.Metadata.Websocket, token))
             {
-               case "--service":
-                  {
-                     if (i + 1 < args.Length)
-                     {
-                        wantService = true;
-                        serviceArgument = args[i + 1];
-                        i += 1;
-                     }
-                  }
-                  break;
-
-               case "--client":
-                  {
-                     if (i + 1 < args.Length)
-                     {
-                        wantClient = true;
-                        clientArgument = args[i + 1];
-                        i += 1;
-                     }
-                  }
-                  break;
-
-               default:
-                  break;
+               Log.Error("Unable to fetch metadata from websocket {websocket}. Aborting.", configuration.Metadata.Websocket);
+               return false;
             }
          }
 
-         var gen = new Generator(Log.Logger, new GeneratorSettings()
-         {
-            WantService = wantService,
-            ServiceArgument = serviceArgument,
+         var metadataFilePath = ResolveMetadataFilePath();
+         Log.Information("Using Metadata = {metadataFilePath}", metadataFilePath);
 
-            WantClient = wantClient,
-            ClientArgument = clientArgument
-         });
+         var metadata = GetMetadata.GetMetadataFromFile(Log.Logger, metadataFilePath);
+         if (metadata == null)
+            return false;
 
-         await gen.GenerateAsync(CancellationToken.None);
+         GenerateServiceClasses(metadata, configuration);
+
+         return true;
       }
+
+      /// <summary>
+      /// Fetches and generates .ajuna/metadata.txt.
+      /// </summary>
+      /// <param name="websocket">The websocket to connect for.</param>
+      /// <param name="token">Cancellation token.</param>
+      /// <returns>Returns true on success, otherwise false.</returns>
+      /// <exception cref="InvalidOperationException"></exception>
+      private static async Task<bool> GenerateMetadataAsync(string websocket, CancellationToken token)
+      {
+         var metadata = await GetMetadata.GetMetadataFromNodeAsync(Log.Logger, websocket, token);
+         if (metadata == null)
+            throw new InvalidOperationException($"Could not query metadata from node {websocket}!");
+
+         var targetDirectory = Path.Join(Directory.GetCurrentDirectory(), ".ajuna");
+         var fp = Path.Join(targetDirectory, "metadata.txt");
+
+         try
+         {
+            if (!Directory.Exists(targetDirectory))
+            {
+               Directory.CreateDirectory(targetDirectory);
+            }
+
+            Log.Information("Saving metadata to {fp}...", fp);
+            File.WriteAllText(fp, metadata);
+            return true;
+         }
+         catch (Exception e)
+         {
+            Log.Error(e, $"Could not save metadata to filepath: {fp}!");
+         }
+
+         return false;
+      }
+
+      /// <summary>
+      /// Generates all classes for the RestService project.
+      /// </summary>
+      private static void GenerateServiceClasses(MetaData metadata, AjunaConfiguration configuration)
+      {
+         var generator = new RestServiceGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.RestService));
+         generator.Generate(metadata);
+      }
+
+      /// <summary>
+      /// Returns the directory path to .ajuna directory.
+      /// </summary>
+      private static string ResolveConfigurationDirectory() => Path.Join(Environment.CurrentDirectory, ".ajuna");
+
+      /// <summary>
+      /// Returns the file path to .ajuna/ajuna-config.json.
+      /// </summary>
+      private static string ResolveConfigurationFilePath() => Path.Join(ResolveConfigurationDirectory(), "ajuna-config.json");
+
+      /// <summary>
+      /// Returns the file path to .ajuna/metadata.txt
+      /// </summary>
+      private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.txt");
+
    }
 }

@@ -1,16 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<AssemblyTitle>Ajuna.DotNet</AssemblyTitle>
-		<AssemblyName>Ajuna.DotNet</AssemblyName>
-		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-		<Description>Ajuna .NET toolchain to generate code.</Description>
+   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <AssemblyTitle>Ajuna.DotNet</AssemblyTitle>
+      <AssemblyName>Ajuna.DotNet</AssemblyName>
+      <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+      
+      <!-- HINT: Use dotnet pack instead. -->
+      <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+      
+      <Description>Ajuna .NET toolchain to generate code.</Description>
       <PackAsTool>true</PackAsTool>
       <ToolCommandName>ajuna</ToolCommandName>
       <PackageOutputPath>./nupkg</PackageOutputPath>
-	</PropertyGroup>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <None Include="..\..\LICENSE">
+         <Pack>True</Pack>
+         <PackagePath></PackagePath>
+      </None>
+   </ItemGroup>
 
    <ItemGroup>
       <PackageReference Include="Ajuna.NetApi" Version="0.1.7" />

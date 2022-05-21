@@ -7,7 +7,7 @@
       <AssemblyName>Ajuna.DotNet.Template</AssemblyName>
       <Title>Ajuna.DotNet.Template</Title>
       <Description>Ajuna .NET template toolchain to generate projects.</Description>
-      <PackageTags>dotnet-new;templates;ajuna-restservice;ajuna-restclient</PackageTags>
+      <PackageTags>dotnet-new;templates;ajuna-ervice;ajuna-client</PackageTags>
       <TargetFramework>netstandard2.0</TargetFramework>
       <IncludeContentInPack>true</IncludeContentInPack>
       <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -30,12 +30,12 @@
    </ItemGroup>
 
    <ItemGroup>
-     <Content Update="templates\Ajuna.RestService\appsettings.Development.json">
+     <Content Update="templates\Ajuna.RestService\Ajuna.Service\appsettings.Development.json">
        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
      </Content>
-     <Content Update="templates\Ajuna.RestService\appsettings.json">
+     <Content Update="templates\Ajuna.RestService\Ajuna.Service\appsettings.json">
        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

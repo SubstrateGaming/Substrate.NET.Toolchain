@@ -2,7 +2,8 @@
   "profiles": {
     "Ajuna.DotNet": {
       "commandName": "Project",
-      "commandLineArgs": "new --service ws://ajuna.local:9944"
+      "commandLineArgs": "upgrade",
+      "workingDirectory": "D:\\tmp\\code\\test"
     }
   }
 }

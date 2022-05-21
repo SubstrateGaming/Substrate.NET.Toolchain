@@ -70,10 +70,6 @@ namespace Ajuna.RestService
          services.AddSwaggerGen(c =>
          {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ajuna.RestService", Version = "v1" });
-
-            // Set the comments path for the Swagger JSON and UI.
-            var filePath = Path.Combine(AppContext.BaseDirectory, "Ajuna.RestService.xml");
-            c.IncludeXmlComments(filePath);
          });
 
       }

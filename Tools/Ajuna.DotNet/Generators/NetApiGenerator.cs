@@ -28,7 +28,7 @@ namespace Ajuna.DotNet.Generators
          GetGenericStructs(metadata.NodeMetadata.Types);
 
          // generate types
-         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, basePath);
+         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, basePath, write: true);
 
          // generate modules
          GenerateModules(metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types, basePath);
@@ -40,31 +40,6 @@ namespace Ajuna.DotNet.Generators
          //Directory.CreateDirectory(path);
 
          WriteJsonFile("metadata.json", metadata, basePath);
-      }
-
-      protected override void GenerateDotNetSolution()
-      {
-         var solutionName = "Ajuna.NetApiExt";
-         var classProjectName = "Ajuna.NetApiExt";
-         var testProjectName = "Ajuna.NetApiExt.Test";
-
-
-         // Create Solution 
-         _dotNetSolutionGenerator.CreateSolution(solutionName);
-
-         // Create Lib Project
-         _dotNetSolutionGenerator.CreateNetstandard2Project(classProjectName, ProjectType.ClassLib);
-         _dotNetSolutionGenerator.AddProjectToSolution(classProjectName);
-
-         // Create Test Project 
-         _dotNetSolutionGenerator.CreateNet5Project(testProjectName, ProjectType.MsTest);
-         _dotNetSolutionGenerator.AddProjectToSolution(testProjectName);
-         _dotNetSolutionGenerator.AddReferenceToProject(testProjectName, classProjectName);
-
-         // Add Nuget Packages 
-         _dotNetSolutionGenerator.AddNugetToProject("Ajuna.NetApi", classProjectName);
-
-         _dotNetSolutionGenerator.RestorePackages();
       }
 
       private void WriteJsonFile(string fileName, MetaData runtimeMetadata, string basePath = null)

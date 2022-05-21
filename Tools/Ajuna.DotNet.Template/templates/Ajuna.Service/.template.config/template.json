@@ -1,0 +1,71 @@
+{
+   "$schema": "http://json.schemastore.org/template",
+   "author": "Sven Scharmentke",
+   "classifications": [ "Common", "Console" ],
+   "identity": "Ajuna.RestService",
+   "name": "Ajuna: Rest Service middleware projects",
+   "shortName": "ajuna-service",
+   "tags": {
+      "language": "C#",
+      "type": "project"
+   },
+   "symbols": {
+      "rest_service": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Renames project name and namespace containing Ajuna.RestService (default).",
+         "defaultValue": "Ajuna.RestService",
+         "replaces": "Ajuna.RestService",
+         "fileRename": "Ajuna.RestService"
+      },
+      "net_api": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Renames project name and namespace containing Ajuna.NetApiExt (default).",
+         "defaultValue": "Ajuna.NetApiExt",
+         "replaces": "Ajuna.NetApiExt",
+         "fileRename": "Ajuna.NetApiExt"
+      },
+      "metadata_websocket": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Uses the given websocket URL to query metadata.",
+         "defaultValue": "ws://ajuna.local:9944",
+         "replaces": "ws://ajuna.local:9944"
+      },
+      "metadata_runtime": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Uses the given runtime for metadata type building.",
+         "defaultValue": "ajuna_solo_runtime",
+         "replaces": "ajuna_solo_runtime"
+      }
+   },
+   "postActions": [
+   {
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "args": {
+         "executable": "dotnet",
+         "args": "tool install --add-source \"D:\\tmp\\NuGet\" Ajuna.DotNet"
+      },
+      "manualInstructions": [{
+         "text": "Run 'dotnet tool install --add-source \"D:\\tmp\\NuGet\" Ajuna.DotNet'"
+      }],
+      "continueOnError": false,
+      "description": "Setup the project to use local dotnet tools."
+   },
+   {
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "args": {
+         "executable": "dotnet",
+         "args": "ajuna upgrade",
+         "redirectStandardOutput": true,
+         "redirectStandardError": true
+      },
+      "manualInstructions": [{
+         "text": "Run 'dotnet ajuna upgrade'"
+      }],
+      "continueOnError": false,
+      "description": "Scaffold services and clients."
+   }]
+}

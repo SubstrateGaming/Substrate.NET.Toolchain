@@ -37,13 +37,7 @@ namespace Ajuna.DotNet.Generators.Base
       public void Generate(MetaData metadata)
       {
          GenerateClasses(metadata);
-         GenerateDotNetSolution();
       }
-
-      /// <summary>
-      /// Generates the .NET Solution Structure
-      /// </summary>
-      protected abstract void GenerateDotNetSolution();
 
       /// <summary>
       /// Generates the respective classes 
@@ -51,7 +45,7 @@ namespace Ajuna.DotNet.Generators.Base
       /// <param name="metadata"></param>
       protected abstract void GenerateClasses(MetaData metadata);
 
-      protected Dictionary<uint, (string, List<string>)> GenerateTypes(Dictionary<uint, NodeType> nodeTypes, string basePath)
+      protected Dictionary<uint, (string, List<string>)> GenerateTypes(Dictionary<uint, NodeType> nodeTypes, string basePath, bool write)
       {
          var typeDict = new Dictionary<uint, (string, List<string>)>();
 
@@ -76,7 +70,7 @@ namespace Ajuna.DotNet.Generators.Base
                         var type = nodeType as NodeTypeComposite;
                         var fullItem = StructBuilder.Init(type.Id, type, typeDict)
                             .Create()
-                            .Build(write: true, out bool success, basePath);
+                            .Build(write: write, out bool success, basePath);
                         if (success)
                         {
                            typeDict.Add(type.Id, fullItem);
@@ -88,7 +82,7 @@ namespace Ajuna.DotNet.Generators.Base
                      {
                         var type = nodeType as NodeTypeVariant;
                         var variantType = GetVariantType(string.Join('.', nodeType.Path));
-                        CallVariant(variantType, type, ref typeDict, basePath);
+                        CallVariant(variantType, type, ref typeDict, write, basePath);
                         break;
                      }
                   case TypeDefEnum.Sequence:
@@ -107,7 +101,7 @@ namespace Ajuna.DotNet.Generators.Base
                         var type = nodeType as NodeTypeArray;
                         var fullItem = ArrayBuilder.Create(type.Id, type, typeDict)
                             .Create()
-                            .Build(write: true, out bool success, basePath);
+                            .Build(write: write, out bool success, basePath);
                         if (success)
                         {
                            typeDict.Add(type.Id, fullItem);
@@ -186,9 +180,7 @@ namespace Ajuna.DotNet.Generators.Base
          }
       }
 
-
-      private void CallVariant(string variantType, NodeTypeVariant nodeType,
-          ref Dictionary<uint, (string, List<string>)> typeDict, string basePath = null)
+      private void CallVariant(string variantType, NodeTypeVariant nodeType, ref Dictionary<uint, (string, List<string>)> typeDict, bool write, string basePath = null)
       {
          switch (variantType)
          {
@@ -239,7 +231,7 @@ namespace Ajuna.DotNet.Generators.Base
             case "Runtime":
                {
                   var fullItem = RunetimeBuilder.Init(nodeType.Id, nodeType, typeDict)
-                      .Create().Build(write: true, out bool success, basePath);
+                      .Create().Build(write: write, out bool success, basePath);
                   if (success)
                   {
                      typeDict.Add(nodeType.Id, fullItem);
@@ -258,7 +250,7 @@ namespace Ajuna.DotNet.Generators.Base
             case "Enum":
                {
                   var fullItem = EnumBuilder.Init(nodeType.Id, nodeType, typeDict)
-                      .Create().Build(write: true, out bool success, basePath);
+                      .Create().Build(write: write, out bool success, basePath);
                   if (success)
                   {
                      typeDict.Add(nodeType.Id, fullItem);
@@ -327,7 +319,6 @@ namespace Ajuna.DotNet.Generators.Base
                throw new NotImplementedException($"Please implement {nodeType.Primitive}, in Ajuna.NetApi.");
          }
       }
-
 
       private void CallTuple(NodeTypeTuple nodeType, ref Dictionary<uint, (string, List<string>)> typeDict)
       {

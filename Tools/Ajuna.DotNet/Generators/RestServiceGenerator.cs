@@ -2,7 +2,6 @@ using Ajuna.DotNet.Generators.Base;
 using Ajuna.DotNet.Node;
 using Ajuna.NetApi.Model.Meta;
 using Serilog;
-using System.IO;
 
 namespace Ajuna.DotNet.Generators
 {
@@ -11,61 +10,34 @@ namespace Ajuna.DotNet.Generators
    /// </summary>
    public class RestServiceGenerator : SolutionGeneratorBase
    {
-      private readonly DotNetCli _dotNetSolutionGenerator;
+      // private readonly DotNetCli _dotNetSolutionGenerator;
 
       public RestServiceGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
          : base(logger, nodeRuntime, projectSettings)
       {
-         _dotNetSolutionGenerator = new DotNetCli(logger, projectSettings.ProjectDirectory);
+         // _dotNetSolutionGenerator = new DotNetCli(logger, projectSettings.ProjectDirectory);
       }
 
       protected override void GenerateClasses(MetaData metadata)
-      {
-         string basePath = Path.Combine(ProjectSettings.ProjectDirectory, ProjectSettings.ProjectName);
-
-         // TODO (svnscha): Double-check why this was dirty and make it not dirty.
-         //String basePath = WorkingDirectory;            
-         // dirty workaround for generics.
+      {        
          GetGenericStructs(metadata.NodeMetadata.Types);
-         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, basePath);
+
+         // Generate types as if we were generating them for Types project but just keep them in memory
+         // so we can reference these types and we don't output all the types while generating the rest service.
+         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, ProjectSettings.ProjectDirectory, write: false);
 
          foreach (var module in metadata.NodeMetadata.Modules.Values)
          {
             RestServiceStorageModuleBuilder
                 .Init(module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
-                .Build(write: true, out bool _, basePath: basePath);
+                .Build(write: true, out bool _, basePath: ProjectSettings.ProjectDirectory);
 
             RestServiceControllerModuleBuilder
                 .Init(module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
-                .Build(write: true, out bool _, basePath: basePath);
+                .Build(write: true, out bool _, basePath: ProjectSettings.ProjectDirectory);
          }
-      }
-
-      protected override void GenerateDotNetSolution()
-      {
-         // Create Solution 
-         _dotNetSolutionGenerator.CreateSolution(ProjectSettings.ProjectSolutionName);
-
-         // Create Lib Project
-         _dotNetSolutionGenerator.CreateNetstandard2Project(ProjectSettings.ProjectName, ProjectType.ClassLib);
-         _dotNetSolutionGenerator.AddProjectToSolution(ProjectSettings.ProjectName);
-
-         // Add Nuget Packages 
-         _dotNetSolutionGenerator.AddNugetToProject(Constants.AjunaNetApiNugetPackage, ProjectSettings.ProjectName);
-         _dotNetSolutionGenerator.AddNugetToProject(Constants.AjunaServiceLayerNugetPackage, ProjectSettings.ProjectName);
-         _dotNetSolutionGenerator.AddNugetToProject(Constants.MicrosoftAspNetCoreMvcCoreNugetPackage, ProjectSettings.ProjectName);
-
-         _dotNetSolutionGenerator.AddNugetToProject(Constants.SerilogAspNetCoreNugetPackage, ProjectSettings.ProjectName);
-         _dotNetSolutionGenerator.AddNugetToProject(Constants.SerilogEnrichersThreadNugetPackage, ProjectSettings.ProjectName);
-         _dotNetSolutionGenerator.AddNugetToProject(Constants.SwashbuckeAspNetCoreNugetPackage, ProjectSettings.ProjectName);
-
-         // This service needs to be build so that we can generate RESTful clients.
-         // TODO (svnscha): Do we really need this here? We should probably just do this whenever we are building RESTful clients.
-         _dotNetSolutionGenerator.RestorePackages();
-         _dotNetSolutionGenerator.CleanSolution();
-         _dotNetSolutionGenerator.BuildSolution();
       }
 
    }

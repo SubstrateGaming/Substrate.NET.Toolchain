@@ -1,0 +1,10 @@
+{
+   "projects": {
+      "rest_service": "Ajuna.RestService",
+      "net_api": "Ajuna.NetApiExt"
+   },
+   "metadata": {
+      "websocket": "ws://ajuna.local:9944",
+      "runtime": "ajuna_solo_runtime"
+   }
+}
