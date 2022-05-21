@@ -2,9 +2,9 @@
    "$schema": "http://json.schemastore.org/template",
    "author": "Sven Scharmentke",
    "classifications": [ "Common", "Console" ],
-   "identity": "Ajuna.RestService",
-   "name": "Ajuna: Rest Service middleware projects",
-   "shortName": "ajuna-service",
+   "identity": "Ajuna",
+   "name": "Ajuna: Service and Client projects",
+   "shortName": "ajuna",
    "tags": {
       "language": "C#",
       "type": "project"
