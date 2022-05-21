@@ -12,8 +12,11 @@ namespace Ajuna.DotNet.Generators
    /// </summary>
    public class NetApiGenerator : SolutionGeneratorBase
    {
-      public NetApiGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings) : base(logger, nodeRuntime, projectSettings)
+      private readonly ProjectSettings _projectSettings;
+
+      public NetApiGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings) : base(logger, nodeRuntime, projectSettings.ProjectName)
       {
+         _projectSettings = projectSettings;
       }
 
       protected override void GenerateClasses(MetaData metadata)
@@ -23,10 +26,10 @@ namespace Ajuna.DotNet.Generators
          GetGenericStructs(metadata.NodeMetadata.Types);
 
          // generate types
-         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, ProjectSettings.ProjectDirectory, write: true);
+         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);
 
          // generate modules
-         GenerateModules(ProjectName, metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types, ProjectSettings.ProjectDirectory);
+         GenerateModules(ProjectName, metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory);
 
          // generate base event handler
          // TODO (svnscha) Why disabled?

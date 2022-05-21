@@ -177,7 +177,7 @@ namespace Ajuna.DotNet
       /// </summary>
       private static void GenerateRestServiceClasses(MetaData metadata, AjunaConfiguration configuration)
       {
-         var generator = new RestServiceGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.RestService));
+         var generator = new RestServiceGenerator(Log.Logger, configuration.Metadata.Runtime, configuration.Projects.NetApi, new ProjectSettings(configuration.Projects.RestService));
          generator.Generate(metadata);
       }
 

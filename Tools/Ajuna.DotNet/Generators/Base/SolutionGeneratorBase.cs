@@ -19,15 +19,14 @@ namespace Ajuna.DotNet.Generators.Base
    public abstract class SolutionGeneratorBase
    {
       protected string NodeRuntime { get; private set; }
-      protected ProjectSettings ProjectSettings { get; private set; }
       protected ILogger Logger { get; private set; }
       
-      protected string ProjectName { get => ProjectSettings.ProjectName; }
+      protected string ProjectName { get; private set; }
 
-      protected SolutionGeneratorBase(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
+      protected SolutionGeneratorBase(ILogger logger, string nodeRuntime, string projectName)
       {
          NodeRuntime = nodeRuntime;
-         ProjectSettings = projectSettings;
+         ProjectName = projectName;
          Logger = logger;
       }
 
@@ -350,9 +349,7 @@ namespace Ajuna.DotNet.Generators.Base
             }
          }
 
-         var nodeType = nodeTypes.Select(p => p.Value).Where(p =>
-                 p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType)
-             .FirstOrDefault();
+         var nodeType = nodeTypes.Select(p => p.Value).Where(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType).FirstOrDefault();
          if (nodeType is null or not NodeTypeVariant)
          {
             throw new Exception($"Node Index changed for {runtime}.{runtimeType} and {nodeType.GetType().Name}");

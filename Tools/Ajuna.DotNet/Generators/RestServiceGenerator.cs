@@ -10,9 +10,13 @@ namespace Ajuna.DotNet.Generators
    /// </summary>
    public class RestServiceGenerator : SolutionGeneratorBase
    {
-      public RestServiceGenerator(ILogger logger, string nodeRuntime, ProjectSettings projectSettings)
-         : base(logger, nodeRuntime, projectSettings)
+      private readonly ProjectSettings _projectSettings;
+
+      public RestServiceGenerator(ILogger logger, string nodeRuntime, string netApiProjectName, ProjectSettings projectSettings)
+         : base(logger, nodeRuntime, netApiProjectName)
       {
+         // Rest Service project configuration.
+         _projectSettings = projectSettings;
       }
 
       protected override void GenerateClasses(MetaData metadata)
@@ -21,19 +25,19 @@ namespace Ajuna.DotNet.Generators
 
          // Generate types as if we were generating them for Types project but just keep them in memory
          // so we can reference these types and we don't output all the types while generating the rest service.
-         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, ProjectSettings.ProjectDirectory, write: false);
+         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, string.Empty, write: false);
 
          foreach (var module in metadata.NodeMetadata.Modules.Values)
          {
             RestServiceStorageModuleBuilder
-                .Init(ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
+                .Init(_projectSettings.ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
-                .Build(write: true, out bool _, basePath: ProjectSettings.ProjectDirectory);
+                .Build(write: true, out bool _, basePath: _projectSettings.ProjectDirectory);
 
             RestServiceControllerModuleBuilder
-                .Init(ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
+                .Init(_projectSettings.ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
-                .Build(write: true, out bool _, basePath: ProjectSettings.ProjectDirectory);
+                .Build(write: true, out bool _, basePath: _projectSettings.ProjectDirectory);
          }
       }
 
