@@ -16,11 +16,11 @@ namespace Ajuna.DotNet
 
    public class AjunaConfigurationProjects
    {
-      [JsonProperty("rest_service")]
-      public string RestService { get; set; }
-
       [JsonProperty("net_api")]
       public string NetApi { get; set; }
+
+      [JsonProperty("rest_service")]
+      public string RestService { get; set; }
 
       [JsonProperty("rest_client")]
       public string RestClient { get; set; }

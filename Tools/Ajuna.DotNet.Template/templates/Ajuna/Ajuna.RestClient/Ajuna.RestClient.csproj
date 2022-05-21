@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+      <TargetFramework>netstandard2.0</TargetFramework>
+   </PropertyGroup>
+   <ItemGroup>
+      <PackageReference Include="Ajuna.ServiceLayer.Model" Version="0.1.6" />
+   </ItemGroup>
+   <ItemGroup>
+      <ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
+   </ItemGroup>
+</Project>

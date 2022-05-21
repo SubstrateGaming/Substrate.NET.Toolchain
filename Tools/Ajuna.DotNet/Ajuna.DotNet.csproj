@@ -8,12 +8,23 @@
       
       <!-- HINT: Use dotnet pack instead. -->
       <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-      
+
+      <!-- 
+         .NET 6 removed runtime configuration. 
+         This is required for resolving assemblies (having local NuGet feeds) when reflection hits this service. 
+      -->
+      <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+
       <Description>Ajuna .NET toolchain to generate code.</Description>
       <PackAsTool>true</PackAsTool>
       <ToolCommandName>ajuna</ToolCommandName>
       <PackageOutputPath>./nupkg</PackageOutputPath>
    </PropertyGroup>
+
+   <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App"></FrameworkReference>
+   </ItemGroup>
+   
    <ItemGroup>
      <Compile Remove="nupkg\**" />
      <EmbeddedResource Remove="nupkg\**" />

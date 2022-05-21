@@ -10,14 +10,6 @@
       "type": "project"
    },
    "symbols": {
-      "rest_service": {
-         "type": "parameter",
-         "datatype": "string",
-         "description": "Renames project name and namespace containing Ajuna.RestService (default).",
-         "defaultValue": "Ajuna.RestService",
-         "replaces": "Ajuna.RestService",
-         "fileRename": "Ajuna.RestService"
-      },
       "net_api": {
          "type": "parameter",
          "datatype": "string",
@@ -26,6 +18,22 @@
          "replaces": "Ajuna.NetApiExt",
          "fileRename": "Ajuna.NetApiExt"
       },
+      "rest_service": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Renames project name and namespace containing Ajuna.RestService (default).",
+         "defaultValue": "Ajuna.RestService",
+         "replaces": "Ajuna.RestService",
+         "fileRename": "Ajuna.RestService"
+      }, 
+      "rest_client": {
+         "type": "parameter",
+         "datatype": "string",
+         "description": "Renames project name and namespace containing Ajuna.RestClient (default).",
+         "defaultValue": "Ajuna.RestClient",
+         "replaces": "Ajuna.RestClient",
+         "fileRename": "Ajuna.RestClient"
+      }, 
       "metadata_websocket": {
          "type": "parameter",
          "datatype": "string",

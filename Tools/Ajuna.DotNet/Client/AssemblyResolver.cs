@@ -35,7 +35,7 @@ namespace Ajuna.DotNet.Client
             new ReferenceAssemblyPathResolver(),
 
             // Probe NuGet package cache
-            new PackageCompilationAssemblyResolver()
+            new PackageCompilationAssemblyResolver(),
          });
 
          _loadContext.Resolving += OnResolving;
@@ -61,7 +61,7 @@ namespace Ajuna.DotNet.Client
          var compileLibrary = _dependencyContext.CompileLibraries
              .FirstOrDefault(x => x.Name.Equals(name.Name, StringComparison.OrdinalIgnoreCase));
 
-         if (compileLibrary == null)
+         if (compileLibrary == null || compileLibrary.Assemblies.Count == 0)
          {
             // If the application has PreserveCompilationContext set to 'false' we also need to check runtime libraries.
             // This shouldn't be the case with projects using Microsoft.NET.Sdk.Web, which defaults to 'true'.
@@ -92,6 +92,9 @@ namespace Ajuna.DotNet.Client
          {
             try
             {
+               if (assemblyPaths.Count == 0)
+                  return null;
+
                return _loadContext.LoadFromAssemblyPath(assemblyPaths.First());
             }
             catch

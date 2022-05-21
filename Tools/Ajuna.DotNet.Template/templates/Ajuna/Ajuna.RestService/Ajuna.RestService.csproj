@@ -3,6 +3,13 @@
       <OutputType>Exe</OutputType>
       <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
       <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+
+      <!-- 
+         .NET 6 removed runtime configuration. 
+         This is required for resolving assemblies (having local NuGet feeds) when reflection hits this service. 
+      -->
+      <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+
    </PropertyGroup>
 
    <ItemGroup>
@@ -14,7 +21,7 @@
    </ItemGroup>
 
    <ItemGroup>
-		<ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
+      <ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />
    </ItemGroup>
 
 </Project>

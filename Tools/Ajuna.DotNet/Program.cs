@@ -191,7 +191,16 @@ namespace Ajuna.DotNet
 
       private static void GenerateRestClientClasses(MetaData metadata, AjunaConfiguration configuration)
       {
-         using (var loader = new AssemblyResolver(configuration.RestClientSettings.ServiceAssembly))
+         var filePath = ResolveRestServiceAssembly(configuration);
+         if (string.IsNullOrEmpty(filePath))
+         {
+            Log.Error("Could not resolve RestService assembly file path. Please build the RestService before generating RestClient project classes.");
+            return;
+         }
+
+         Log.Information("Using resolved RestService assembly for RestClient = {assembly}", filePath);
+
+         using (var loader = new AssemblyResolver(filePath))
          {
             // Initialize configuration.
             var clientConfiguration = new ClientGeneratorConfiguration()
@@ -204,7 +213,8 @@ namespace Ajuna.DotNet
                   BlankLinesBetweenMembers = false,
                   BracingStyle = "C",
                   IndentString = "   "
-               }
+               },
+               BaseNamespace = configuration.Projects.RestClient
             };
 
             // Build and execute the client generator.
@@ -237,5 +247,36 @@ namespace Ajuna.DotNet
       /// </summary>
       private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.json");
 
+      private static string ResolveRestServiceAssembly(AjunaConfiguration configuration)
+      {
+         if (File.Exists(configuration.RestClientSettings.ServiceAssembly))
+            return configuration.RestClientSettings.ServiceAssembly;
+
+         var framework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+
+#if DEBUG
+         var fp = ResolveServicePath(framework, "Debug", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
+         if (File.Exists(fp))
+            return fp;
+#else
+         var fp = ResolveServicePath(framework, "Release", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
+         if (File.Exists(fp))
+            return fp;
+#endif
+
+         return string.Empty;
+      }
+
+      private static string ResolveServicePath(string framework, string configuration, string restServiceProject, string assembly)
+      {
+         return Path.Combine(
+            ResolveConfigurationDirectory(),
+            "..",
+            restServiceProject,
+            "bin",
+            configuration,
+            framework,
+            assembly);
+      }
    }
 }
