@@ -38,7 +38,6 @@ namespace Ajuna.DotNet.Extensions
          };
 
          // Client class inheritance (IClient)
-         // TODO: Do we really want to have this hard-coded?
          target.BaseTypes.Add(new CodeTypeReference("BaseClient"));
          target.BaseTypes.Add(controller.GetInterfaceName());
 
@@ -51,7 +50,6 @@ namespace Ajuna.DotNet.Extensions
             Attributes = MemberAttributes.Public | MemberAttributes.Final
          };
 
-         // TODO: Do we really want to have this hard-coded?
          ctor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(HttpClient), "httpClient"));
          ctor.Statements.Add(new CodeAssignStatement(
             new CodeVariableReferenceExpression("_httpClient"),

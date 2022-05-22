@@ -43,7 +43,7 @@ namespace Ajuna.DotNet.Extensions
          }
 
          // The key parameter is an encoded parameter depending on the controller storage access implementation.
-         // TODO: Try to get the underlying storage access and build a user friendly type.
+         // TODO (svnscha): Try to get the underlying storage access and build a user friendly type.
 
          result.Add(new CodeParameterDeclarationExpression(parameter.Type, parameter.Name));
          return result;

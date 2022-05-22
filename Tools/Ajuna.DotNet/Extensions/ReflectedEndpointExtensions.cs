@@ -38,7 +38,7 @@ namespace Ajuna.DotNet.Extensions
          var method = new CodeMemberMethod()
          {
             Name = endpoint.GetClientMethodName(),
-            // TODO: Find out how to use 'async' modifier. Internet says it doesn't work yet? Is this true?
+            // TODO (svnscha): Should use async modifier directly to avoid patching the code.
             ReturnType = endpoint.GetResponse().ToInterfaceMethodReturnType(clientNamespace),
             Attributes = MemberAttributes.Public,
          };
