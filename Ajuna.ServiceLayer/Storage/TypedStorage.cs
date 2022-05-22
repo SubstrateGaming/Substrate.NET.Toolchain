@@ -10,22 +10,25 @@ namespace Ajuna.ServiceLayer.Storage
    {
       internal string Identifier { get; private set; }
       public T Store { get; private set; }
+      public IStorageDataProvider DataProvider { get; private set; }
       public IStorageChangeDelegate ChangeDelegate { get; private set; }
 
-      public TypedStorage(string identifier)
+      public TypedStorage(string identifier, IStorageDataProvider dataProvider)
       {
          Identifier = identifier;
+         DataProvider = dataProvider;
       }
 
-      public TypedStorage(string identifier, IStorageChangeDelegate changeDelegate)
+      public TypedStorage(string identifier, IStorageDataProvider dataProvider, IStorageChangeDelegate changeDelegate)
       {
          Identifier = identifier;
+         DataProvider = dataProvider;
          ChangeDelegate = changeDelegate;
       }
 
-      public async Task InitializeAsync(SubstrateClient client, string module, string moduleItem)
+      public async Task InitializeAsync(string module, string moduleItem)
       {
-         Store = await client.GetStorageAsync<T>(module, moduleItem);
+         Store = await DataProvider.GetStorageAsync<T>(module, moduleItem);
          Log.Information("loaded storage with {name}", moduleItem, Store.ToString());
       }
 

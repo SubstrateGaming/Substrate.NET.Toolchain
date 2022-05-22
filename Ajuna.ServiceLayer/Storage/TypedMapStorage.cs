@@ -11,22 +11,25 @@ namespace Ajuna.ServiceLayer.Storage
    {
       internal string Identifier { get; private set; }
       public Dictionary<string, T> Dictionary { get; private set; }
+      public IStorageDataProvider DataProvider { get; private set; }
       public IStorageChangeDelegate ChangeDelegate { get; private set; }
 
-      public TypedMapStorage(string identifier)
+      public TypedMapStorage(string identifier, IStorageDataProvider dataProvider)
       {
          Identifier = identifier;
+         DataProvider = dataProvider;
       }
 
-      public TypedMapStorage(string identifier, IStorageChangeDelegate changeDelegate)
+      public TypedMapStorage(string identifier, IStorageDataProvider dataProvider, IStorageChangeDelegate changeDelegate)
       {
          Identifier = identifier;
+         DataProvider = dataProvider;
          ChangeDelegate = changeDelegate;
       }
 
-      public async Task InitializeAsync(SubstrateClient client, string module, string moduleItem)
+      public async Task InitializeAsync(string module, string moduleItem)
       {
-         Dictionary = await client.GetStorageDictAsync<T>(module, moduleItem);
+         Dictionary = await DataProvider.GetStorageDictAsync<T>(module, moduleItem);
          Log.Information("loaded storage map {storage} with {count} entries", moduleItem, Dictionary.Count);
       }
 
