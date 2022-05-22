@@ -16,9 +16,9 @@ namespace Ajuna.DotNet.Service.Node
       {
       }
 
-      private CodeMemberMethod GetDecode(string baseType)
+      private static CodeMemberMethod GetDecode(string baseType)
       {
-         var decodeMethod = SimpleMethod("Decode");
+         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
          CodeParameterDeclarationExpression param1 = new()
          {
             Type = new CodeTypeReference("System.Byte[]"),
@@ -47,7 +47,7 @@ namespace Ajuna.DotNet.Service.Node
          return decodeMethod;
       }
 
-      private CodeMemberMethod GetEncode()
+      private static CodeMemberMethod GetEncode()
       {
          CodeMemberMethod encodeMethod = new()
          {
@@ -73,9 +73,7 @@ namespace Ajuna.DotNet.Service.Node
       {
          var typeDef = TypeDef as NodeTypeArray;
 
-         #region CREATE
-
-         var fullItem = GetFullItemPath(typeDef.TypeId);
+         (string, List<string>) fullItem = GetFullItemPath(typeDef.TypeId);
 
          ClassName = $"Arr{typeDef.Length}{fullItem.Item1.Split('.').Last()}";
          CodeNamespace typeNamespace = new(NamespaceName);
@@ -134,10 +132,10 @@ namespace Ajuna.DotNet.Service.Node
          targetClass.Members.Add(sizeProperty);
 
 
-         CodeMemberMethod encodeMethod = GetEncode();
+         CodeMemberMethod encodeMethod = ArrayBuilder.GetEncode();
          targetClass.Members.Add(encodeMethod);
 
-         CodeMemberMethod decodeMethod = GetDecode(fullItem.Item1);
+         CodeMemberMethod decodeMethod = ArrayBuilder.GetDecode(fullItem.Item1);
          targetClass.Members.Add(decodeMethod);
 
 
@@ -180,8 +178,6 @@ namespace Ajuna.DotNet.Service.Node
          targetClass.Members.Add(createMethod);
 
          targetClass.Members.Add(valueProperty);
-         #endregion
-
          return this;
       }
    }

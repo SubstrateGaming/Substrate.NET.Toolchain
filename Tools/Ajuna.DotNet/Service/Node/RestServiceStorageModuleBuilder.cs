@@ -30,7 +30,6 @@ namespace Ajuna.DotNet.Service.Node
             return this;
          }
 
-         #region CREATE
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.ServiceLayer.Attributes"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.ServiceLayer.Storage"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
@@ -44,9 +43,6 @@ namespace Ajuna.DotNet.Service.Node
          TargetUnit.Namespaces.Add(typeNamespace);
 
          CreateStorage(typeNamespace);
-
-         #endregion
-
          return this;
       }
 
@@ -102,14 +98,14 @@ namespace Ajuna.DotNet.Service.Node
             var keyParamter = new CodeParameterDeclarationExpression(typeof(string), "key");
             var dataParamter = new CodeParameterDeclarationExpression(typeof(string), "data");
 
-            foreach (var entry in Module.Storage.Entries)
+            foreach (Entry entry in Module.Storage.Entries)
             {
                CodeTypeReference baseReturnType;
                CodeTypeReference returnType;
                CodeExpression[] updateExpression, tryGetExpression;
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  var fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  (string, List<string>) fullItem = GetFullItemPath(entry.TypeMap.Item1);
                   baseReturnType = new CodeTypeReference(fullItem.Item1);
                   returnType = new CodeTypeReference($"TypedStorage<{fullItem.Item1}>");
 
@@ -119,10 +115,10 @@ namespace Ajuna.DotNet.Service.Node
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
-                  var typeMap = entry.TypeMap.Item2;
-                  var hashers = typeMap.Hashers;
-                  var key = GetFullItemPath(typeMap.Key);
-                  var value = GetFullItemPath(typeMap.Value);
+                  TypeMap typeMap = entry.TypeMap.Item2;
+                  Storage.Hasher[] hashers = typeMap.Hashers;
+                  (string, List<string>) key = GetFullItemPath(typeMap.Key);
+                  (string, List<string>) value = GetFullItemPath(typeMap.Value);
                   baseReturnType = new CodeTypeReference(value.Item1);
                   returnType = new CodeTypeReference($"TypedMapStorage<{value.Item1}>");
 

@@ -1,4 +1,5 @@
 ﻿using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Rpc;
 using Ajuna.ServiceLayer.Attributes;
 using Ajuna.ServiceLayer.Storage;
@@ -32,7 +33,7 @@ namespace Ajuna.ServiceLayer
 
       internal IStorage GetStorage<T>()
       {
-         foreach (var storage in Storages)
+         foreach (IStorage storage in Storages)
          {
             if (storage.GetType().GetInterfaces().Contains(typeof(T)))
             {
@@ -50,7 +51,7 @@ namespace Ajuna.ServiceLayer
          InitializeMetadataDisplayNames(client);
          InitializeStorageChangeListener();
 
-         foreach (var storage in Storages)
+         foreach (IStorage storage in Storages)
          {
             await storage.InitializeAsync(client);
          }
@@ -58,12 +59,12 @@ namespace Ajuna.ServiceLayer
 
       private void InitializeStorageChangeListener()
       {
-         foreach (var storage in Storages)
+         foreach (IStorage storage in Storages)
          {
-            foreach (var method in storage.GetType().GetMethods())
+            foreach (MethodInfo method in storage.GetType().GetMethods())
             {
-               var attributes = method.GetCustomAttributes(typeof(StorageChangeAttribute), true);
-               foreach (var attribute in attributes)
+               object[] attributes = method.GetCustomAttributes(typeof(StorageChangeAttribute), true);
+               foreach (object attribute in attributes)
                {
                   var listenerMethod = attribute as StorageChangeAttribute;
                   StorageChangeListener.Add(listenerMethod.Key, new Tuple<object, MethodInfo>(storage, method));
@@ -74,9 +75,9 @@ namespace Ajuna.ServiceLayer
 
       private void InitializeMetadataDisplayNames(SubstrateClient client)
       {
-         foreach (var palletModule in client.MetaData.NodeMetadata.Modules.Values)
+         foreach (PalletModule palletModule in client.MetaData.NodeMetadata.Modules.Values)
          {
-            var moduleName = palletModule.Name;
+            string moduleName = palletModule.Name;
 
             // skip pallets with out storage
             if (palletModule.Storage == null || palletModule.Storage.Entries == null)
@@ -84,9 +85,9 @@ namespace Ajuna.ServiceLayer
                continue;
             }
 
-            foreach (var storage in palletModule.Storage.Entries)
+            foreach (Entry storage in palletModule.Storage.Entries)
             {
-               ItemInfo itemInfo = new ItemInfo
+               var itemInfo = new ItemInfo
                {
                   ModuleName = moduleName,
                   StorageName = storage.Name
@@ -94,14 +95,13 @@ namespace Ajuna.ServiceLayer
 
                //Log.Debug("ItemInfo[{module}, {name}]: {state}", itemInfo.ModuleName, itemInfo.StorageName, "Ok");
 
-               var key = Utils.Bytes2HexString(
+               string key = Utils.Bytes2HexString(
                    RequestGenerator.GetStorageKeyBytesHash(itemInfo.ModuleName, itemInfo.StorageName),
                    Utils.HexStringFormat.Prefixed)
                    .ToLower();
 
-               var moduleNameHash = $"0x{key.Substring(2, 32)}";
-
-               var storageItemNameHash = $"0x{key.Substring(34, 32)}";
+               string moduleNameHash = $"0x{key.Substring(2, 32)}";
+               string storageItemNameHash = $"0x{key.Substring(34, 32)}";
 
                if (!StorageModuleNames.ContainsKey(moduleNameHash))
                {
@@ -120,6 +120,7 @@ namespace Ajuna.ServiceLayer
          Log.Information("loaded storage metadata module item names {count}", StorageModuleItemInfos.Count);
       }
 
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "May be used later.")]
       internal void OnStorageUpdate(string id, StorageChangeSet changes)
       {
          lock (Lock)
@@ -129,10 +130,10 @@ namespace Ajuna.ServiceLayer
             StorageStartProcessingEvent.WaitOne();
 
             // Process the changes.
-            foreach (var change in changes.Changes)
+            foreach (string[] change in changes.Changes)
             {
                // The key starts with 0x prefix.
-               var key = change[0].ToLower();
+               string key = change[0].ToLower();
 
                if (key.Length < 66)
                {
@@ -141,11 +142,10 @@ namespace Ajuna.ServiceLayer
                }
 
                // [0x][Hash128(ModuleName)][Hash128(StorageName)]
-               var moduleNameHash = $"0x{key.Substring(2, 32)}";
+               string moduleNameHash = $"0x{key.Substring(2, 32)}";
 
-               var storageItemNameHash = $"0x{key.Substring(34, 32)}";
-
-               if (!StorageModuleNames.TryGetValue(moduleNameHash, out string moduleName))
+               string storageItemNameHash = $"0x{key.Substring(34, 32)}";
+               if (!StorageModuleNames.TryGetValue(moduleNameHash, out _))
                {
                   Log.Debug($"Unable to find a module with moduleNameHash {moduleNameHash}!");
                   continue;
@@ -161,7 +161,7 @@ namespace Ajuna.ServiceLayer
 
                if (key.Length == 66)
                {
-                  ProcessStorageChange(itemInfo, new string[] { }, change[1]);
+                  ProcessStorageChange(itemInfo, Array.Empty<string>(), change[1]);
                }
                else
                {
@@ -178,11 +178,11 @@ namespace Ajuna.ServiceLayer
 
       private void ProcessStorageChange(ItemInfo itemInfo, string[] storageItemKeys, string data)
       {
-         var key = $"{itemInfo.ModuleName}.{itemInfo.StorageName}";
+         string key = $"{itemInfo.ModuleName}.{itemInfo.StorageName}";
 
          if (StorageChangeListener.ContainsKey(key))
          {
-            var listener = StorageChangeListener[key];
+            Tuple<object, MethodInfo> listener = StorageChangeListener[key];
 
             string[] parameters = new string[storageItemKeys.Length + 1];
             parameters[parameters.Length - 1] = data;

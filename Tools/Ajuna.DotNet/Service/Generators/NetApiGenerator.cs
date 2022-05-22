@@ -22,7 +22,7 @@ namespace Ajuna.DotNet.Service.Generators
       {
          // dirty workaround for generics.
          // TODO (svnscha) Why dirty workaround?
-         GetGenericStructs(metadata.NodeMetadata.Types);
+         SolutionGeneratorBase.GetGenericStructs(metadata.NodeMetadata.Types);
 
          // generate types
          var typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);

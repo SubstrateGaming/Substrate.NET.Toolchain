@@ -21,7 +21,7 @@ namespace Ajuna.DotNet.Service.Generators
 
       protected override void GenerateClasses(MetaData metadata)
       {
-         GetGenericStructs(metadata.NodeMetadata.Types);
+         SolutionGeneratorBase.GetGenericStructs(metadata.NodeMetadata.Types);
 
          // Generate types as if we were generating them for Types project but just keep them in memory
          // so we can reference these types and we don't output all the types while generating the rest service.

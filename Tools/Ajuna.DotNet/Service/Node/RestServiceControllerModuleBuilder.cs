@@ -29,7 +29,6 @@ namespace Ajuna.DotNet.Service.Node
             return this;
          }
 
-         #region CREATE
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Storage"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Microsoft.AspNetCore.Mvc"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
@@ -41,8 +40,6 @@ namespace Ajuna.DotNet.Service.Node
          TargetUnit.Namespaces.Add(typeNamespace);
 
          CreateController(typeNamespace);
-
-         #endregion
 
          return this;
       }
@@ -70,7 +67,7 @@ namespace Ajuna.DotNet.Service.Node
                         new CodeAttributeArgument(new CodePrimitiveExpression("[controller]"))
              }));
 
-         var fieldName = $"{Module.Storage.Prefix}Storage";
+         string fieldName = $"{Module.Storage.Prefix}Storage";
          CodeMemberField field = new()
          {
             Attributes = MemberAttributes.Private,
@@ -97,24 +94,24 @@ namespace Ajuna.DotNet.Service.Node
 
          if (Module.Storage.Entries != null)
          {
-            foreach (var entry in Module.Storage.Entries)
+            foreach (Entry entry in Module.Storage.Entries)
             {
                CodeParameterDeclarationExpression parameterDeclaration;
                CodeTypeReference baseReturnType;
                CodeExpression[] codeExpressions;
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  var fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  (string, List<string>) fullItem = GetFullItemPath(entry.TypeMap.Item1);
                   baseReturnType = new CodeTypeReference(fullItem.Item1);
                   parameterDeclaration = null;
                   codeExpressions = Array.Empty<CodeExpression>();
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
-                  var typeMap = entry.TypeMap.Item2;
-                  var hashers = typeMap.Hashers;
-                  var key = GetFullItemPath(typeMap.Key);
-                  var value = GetFullItemPath(typeMap.Value);
+                  TypeMap typeMap = entry.TypeMap.Item2;
+                  Storage.Hasher[] hashers = typeMap.Hashers;
+                  (string, List<string>) key = GetFullItemPath(typeMap.Key);
+                  (string, List<string>) value = GetFullItemPath(typeMap.Value);
                   baseReturnType = new CodeTypeReference(value.Item1);
                   parameterDeclaration = new CodeParameterDeclarationExpression(typeof(string), "key");
                   codeExpressions = new CodeExpression[] {

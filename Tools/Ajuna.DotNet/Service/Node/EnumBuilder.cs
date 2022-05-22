@@ -25,9 +25,7 @@ namespace Ajuna.DotNet.Service.Node
       {
          var typeDef = TypeDef as NodeTypeVariant;
 
-         #region CREATE
-
-         var enumName = $"{typeDef.Path.Last()}";
+         string enumName = $"{typeDef.Path.Last()}";
 
          ClassName = $"Enum{enumName}";
          ReferenzName = $"{NamespaceName}.{ClassName}";
@@ -41,7 +39,7 @@ namespace Ajuna.DotNet.Service.Node
 
          if (typeDef.Variants != null)
          {
-            foreach (var enumFieldName in typeDef.Variants.Select(p => p.Name))
+            foreach (string enumFieldName in typeDef.Variants.Select(p => p.Name))
             {
                TargetType.Members.Add(new CodeMemberField(ClassName, enumFieldName));
             }
@@ -80,16 +78,16 @@ namespace Ajuna.DotNet.Service.Node
                      {
                         if (variant.TypeFields.Length == 1)
                         {
-                           var fullItem = GetFullItemPath(variant.TypeFields[0].TypeId);
+                           (string, List<string>) fullItem = GetFullItemPath(variant.TypeFields[0].TypeId);
                            codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
                         }
                         else
                         {
                            var baseTuple = new CodeTypeReference("BaseTuple");
 
-                           foreach (var field in variant.TypeFields)
+                           foreach (NodeTypeField field in variant.TypeFields)
                            {
-                              var fullItem = GetFullItemPath(field.TypeId);
+                              (string, List<string>) fullItem = GetFullItemPath(field.TypeId);
                               baseTuple.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
                            }
                            codeTypeRef.TypeArguments.Add(baseTuple);
@@ -124,8 +122,6 @@ namespace Ajuna.DotNet.Service.Node
                typeNamespace.Types.Add(targetClass);
             }
          }
-         #endregion
-
          return this;
       }
 
@@ -138,7 +134,7 @@ namespace Ajuna.DotNet.Service.Node
 
          var result = new CodeTypeMemberCollection();
 
-         var decodeMethod = SimpleMethod("Decode");
+         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
          decodeMethod.Parameters.Add(new()
          {
             Type = new CodeTypeReference("System.Byte[]"),
@@ -158,7 +154,7 @@ namespace Ajuna.DotNet.Service.Node
          decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = p - start"));
          result.Add(decodeMethod);
 
-         var decodeOneOfMethod = SimpleMethod("DecodeOneOf");
+         CodeMemberMethod decodeOneOfMethod = SimpleMethod("DecodeOneOf");
          decodeOneOfMethod.Attributes = MemberAttributes.Private;
          decodeOneOfMethod.ReturnType = new CodeTypeReference(typeof(IType));
          decodeOneOfMethod.Parameters.Add(new()
@@ -194,7 +190,7 @@ namespace Ajuna.DotNet.Service.Node
 
          var result = new CodeTypeMemberCollection();
 
-         var decodeMethod = SimpleMethod("Decode");
+         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
          decodeMethod.Parameters.Add(new()
          {
             Type = new CodeTypeReference("System.Byte[]"),
@@ -214,7 +210,7 @@ namespace Ajuna.DotNet.Service.Node
          decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = p - start"));
          result.Add(decodeMethod);
 
-         var decodeOneOfMethod = SimpleMethod("DecodeOneOf");
+         CodeMemberMethod decodeOneOfMethod = SimpleMethod("DecodeOneOf");
          decodeOneOfMethod.Attributes = MemberAttributes.Private;
          decodeOneOfMethod.ReturnType = new CodeTypeReference(typeof(IType));
          decodeOneOfMethod.Parameters.Add(new()

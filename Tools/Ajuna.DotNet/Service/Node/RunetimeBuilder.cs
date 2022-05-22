@@ -23,10 +23,8 @@ namespace Ajuna.DotNet.Service.Node
       {
          var typeDef = TypeDef as NodeTypeVariant;
 
-         #region CREATE
-
-         var runtimeType = $"{typeDef.Path.Last()}";
-         var enumName = $"Node{runtimeType}";
+         string runtimeType = $"{typeDef.Path.Last()}";
+         string enumName = $"Node{runtimeType}";
 
          ClassName = $"Enum{enumName}";
          ReferenzName = $"{NamespaceName}.{ClassName}";
@@ -40,7 +38,7 @@ namespace Ajuna.DotNet.Service.Node
 
          if (typeDef.Variants != null)
          {
-            foreach (var enumFieldName in typeDef.Variants.Select(p => p.Name))
+            foreach (string enumFieldName in typeDef.Variants.Select(p => p.Name))
             {
                TargetType.Members.Add(new CodeMemberField(ClassName, enumFieldName));
             }
@@ -58,8 +56,6 @@ namespace Ajuna.DotNet.Service.Node
          targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
 
          typeNamespace.Types.Add(targetClass);
-
-         #endregion
 
          return this;
       }

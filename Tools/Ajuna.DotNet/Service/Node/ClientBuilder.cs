@@ -23,8 +23,6 @@ namespace Ajuna.DotNet.Service.Node
 
       public override ClientBuilder Create()
       {
-         #region CREATE
-
          ClassName = "SubstrateClientExt";
          NamespaceName = $"{ProjectName}.Generated";
 
@@ -64,7 +62,7 @@ namespace Ajuna.DotNet.Service.Node
          constructor.Statements.Add(
              new CodeAssignStatement(
                  new CodeVariableReferenceExpression(storageKeyField.Name),
-                 new CodeObjectCreateExpression(storageKeyField.Type, new CodeExpression[] { })));
+                 new CodeObjectCreateExpression(storageKeyField.Type, Array.Empty<CodeExpression>())));
 
          //CodeMemberField eventKeyField = new()
          //{
@@ -80,14 +78,14 @@ namespace Ajuna.DotNet.Service.Node
          //        new CodeVariableReferenceExpression(eventKeyField.Name),
          //        new CodeObjectCreateExpression(eventKeyField.Type, new CodeExpression[] { })));
 
-         foreach (var tuple in ModuleNames)
+         foreach ((string, List<string>) tuple in ModuleNames)
          {
-            var pallets = new string[] { "Storage" }; // , "Call"};
+            string[] pallets = new string[] { "Storage" }; // , "Call"};
 
-            foreach (var pallet in pallets)
+            foreach (string pallet in pallets)
             {
-               var name = tuple.Item1.Split('.').Last() + pallet;
-               var referenceName = tuple.Item2[0] + "." + name;
+               string name = tuple.Item1.Split('.').Last() + pallet;
+               string referenceName = tuple.Item2[0] + "." + name;
 
                CodeMemberField clientField = new()
                {
@@ -106,10 +104,6 @@ namespace Ajuna.DotNet.Service.Node
                constructor.Statements.Add(new CodeAssignStatement(fieldReference, createPallet));
             }
          }
-
-
-
-         #endregion
 
          return this;
       }

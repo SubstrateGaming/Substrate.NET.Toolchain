@@ -48,10 +48,8 @@ namespace Ajuna.DotNet.Service.Generators.Base
       {
          var typeDict = new Dictionary<uint, (string, List<string>)>();
 
-         Dictionary<string, int> eventIndex = GetRuntimeIndex(nodeTypes, NodeRuntime, "Event");
-         Dictionary<string, int> callIndex = GetRuntimeIndex(nodeTypes, NodeRuntime, "Call");
-
-         var iterations = 10;
+         // TODO (svnscha): Why 10 iterations?
+         int iterations = 10;
 
          for (int i = 0; i < iterations; i++)
          {
@@ -67,7 +65,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                   case TypeDefEnum.Composite:
                      {
                         var type = nodeType as NodeTypeComposite;
-                        var fullItem = StructBuilder.Init(ProjectName, type.Id, type, typeDict)
+                        (string, List<string>) fullItem = StructBuilder.Init(ProjectName, type.Id, type, typeDict)
                             .Create()
                             .Build(write: write, out bool success, basePath);
                         if (success)
@@ -80,7 +78,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                   case TypeDefEnum.Variant:
                      {
                         var type = nodeType as NodeTypeVariant;
-                        var variantType = GetVariantType(string.Join('.', nodeType.Path));
+                        string variantType = SolutionGeneratorBase.GetVariantType(string.Join('.', nodeType.Path));
                         CallVariant(variantType, type, ref typeDict, write, basePath);
                         break;
                      }
@@ -89,7 +87,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                         var type = nodeType as NodeTypeSequence;
                         if (typeDict.TryGetValue(type.TypeId, out (string, List<string>) fullItem))
                         {
-                           var typeName = $"BaseVec<{fullItem.Item1}>";
+                           string typeName = $"BaseVec<{fullItem.Item1}>";
                            typeDict.Add(type.Id, (typeName, fullItem.Item2));
                         }
 
@@ -98,7 +96,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                   case TypeDefEnum.Array:
                      {
                         var type = nodeType as NodeTypeArray;
-                        var fullItem = ArrayBuilder.Create(ProjectName, type.Id, type, typeDict)
+                        (string, List<string>) fullItem = ArrayBuilder.Create(ProjectName, type.Id, type, typeDict)
                             .Create()
                             .Build(write: write, out bool success, basePath);
                         if (success)
@@ -111,7 +109,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                   case TypeDefEnum.Tuple:
                      {
                         var type = nodeType as NodeTypeTuple;
-                        CallTuple(type, ref typeDict);
+                        SolutionGeneratorBase.CallTuple(type, ref typeDict);
                         break;
                      }
                   case TypeDefEnum.Primitive:
@@ -125,7 +123,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                         var type = nodeType as NodeTypeCompact;
                         if (typeDict.TryGetValue(type.TypeId, out (string, List<string>) fullItem))
                         {
-                           var typeName = $"BaseCom<{fullItem.Item1}>";
+                           string typeName = $"BaseCom<{fullItem.Item1}>";
                            typeDict.Add(type.Id, (typeName, fullItem.Item2));
                         }
 
@@ -141,7 +139,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
          return typeDict;
       }
 
-      private string GetVariantType(string path)
+      private static string GetVariantType(string path)
       {
          if (path == "Option")
          {
@@ -184,8 +182,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
          {
             case "Option":
                {
-                  if (typeDict.TryGetValue(nodeType.Variants[1].TypeFields[0].TypeId,
-                          out (string, List<string>) fullItem))
+                  if (typeDict.TryGetValue(nodeType.Variants[1].TypeFields[0].TypeId, out (string, List<string>) fullItem))
                   {
                      typeDict.Add(nodeType.Id, ($"BaseOpt<{fullItem.Item1}>", fullItem.Item2));
                   }
@@ -204,28 +201,28 @@ namespace Ajuna.DotNet.Service.Generators.Base
 
             case "Call":
                {
-                  var fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Call", new List<string>() { ProjectName });
+                  (string, List<string>) fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Call", new List<string>() { ProjectName });
                   typeDict.Add(nodeType.Id, fullItem);
                   break;
                }
 
             case "Event":
                {
-                  var fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Event", new List<string>() { ProjectName });
+                  (string, List<string>) fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Event", new List<string>() { ProjectName });
                   typeDict.Add(nodeType.Id, fullItem);
                   break;
                }
 
             case "Error":
                {
-                  var fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Error", new List<string>() { ProjectName });
+                  (string, List<string>) fullItem = (ProjectName + $".{nodeType.Path[0].MakeMethod()}Error", new List<string>() { ProjectName });
                   typeDict.Add(nodeType.Id, fullItem);
                   break;
                }
 
             case "Runtime":
                {
-                  var fullItem = RunetimeBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  (string, List<string>) fullItem = RunetimeBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (success)
                   {
                      typeDict.Add(nodeType.Id, fullItem);
@@ -243,7 +240,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
 
             case "Enum":
                {
-                  var fullItem = EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  (string, List<string>) fullItem = EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (success)
                   {
                      typeDict.Add(nodeType.Id, fullItem);
@@ -260,7 +257,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
       private void CallPrimitive(NodeTypePrimitive nodeType, ref Dictionary<uint, (string, List<string>)> typeDict)
       {
          List<string> spaces = new() { $"Ajuna.NetApi.Model.Types.Primitive" };
-         var path = $"Ajuna.NetApi.Model.Types.Primitive.";
+         string path = $"Ajuna.NetApi.Model.Types.Primitive.";
          switch (nodeType.Primitive)
          {
             case TypeDefPrimitive.Bool:
@@ -313,13 +310,13 @@ namespace Ajuna.DotNet.Service.Generators.Base
          }
       }
 
-      private void CallTuple(NodeTypeTuple nodeType, ref Dictionary<uint, (string, List<string>)> typeDict)
+      private static void CallTuple(NodeTypeTuple nodeType, ref Dictionary<uint, (string, List<string>)> typeDict)
       {
          var typeIds = new List<string>();
          var imports = new List<string>();
          for (int j = 0; j < nodeType.TypeIds.Length; j++)
          {
-            var typeId = nodeType.TypeIds[j];
+            uint typeId = nodeType.TypeIds[j];
             if (!typeDict.TryGetValue(typeId, out (string, List<string>) fullItem))
             {
                typeIds = null;
@@ -333,21 +330,21 @@ namespace Ajuna.DotNet.Service.Generators.Base
          // all types found
          if (typeIds != null)
          {
-            var typeName = $"BaseTuple{(typeIds.Count > 0 ? "<" + string.Join(',', typeIds.ToArray()) + ">" : "")}";
+            string typeName = $"BaseTuple{(typeIds.Count > 0 ? "<" + string.Join(',', typeIds.ToArray()) + ">" : "")}";
             typeDict.Add(nodeType.Id, (typeName, imports.Distinct().ToList()));
          }
       }
 
-      private Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
+      private static Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
       {
-         var nodeType = nodeTypes.Select(p => p.Value).Where(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType).FirstOrDefault();
+         NodeType nodeType = nodeTypes.Select(p => p.Value).Where(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType).FirstOrDefault();
          if (nodeType is null or not NodeTypeVariant)
          {
             throw new Exception($"Node Index changed for {runtime}.{runtimeType} and {nodeType.GetType().Name}");
          }
 
          Dictionary<string, int> result = new();
-         foreach (var variant in (nodeType as NodeTypeVariant).Variants)
+         foreach (TypeVariant variant in (nodeType as NodeTypeVariant).Variants)
          {
             result.Add(variant.Name, variant.Index);
          }
@@ -355,7 +352,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
          return result;
       }
 
-      protected void GetGenericStructs(Dictionary<uint, NodeType> nodeTypes)
+      protected static void GetGenericStructs(Dictionary<uint, NodeType> nodeTypes)
       {
          Dictionary<string, int> _countPaths = new();
          for (uint id = 0; id < nodeTypes.Keys.Max(); id++)
@@ -368,7 +365,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
             if (nodeType.TypeDef == TypeDefEnum.Composite)
             {
                var type = nodeType as NodeTypeComposite;
-               var key = string.Join('.', type.Path);
+               string key = string.Join('.', type.Path);
                if (_countPaths.ContainsKey(key))
                {
                   _countPaths[key]++;
@@ -396,7 +393,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
             if (nodeType.TypeDef == TypeDefEnum.Composite)
             {
                var type = nodeType as NodeTypeComposite;
-               var key = string.Join('.', type.Path);
+               string key = string.Join('.', type.Path);
                if (_countPaths.ContainsKey(key))
                {
                   _countPaths[key]++;

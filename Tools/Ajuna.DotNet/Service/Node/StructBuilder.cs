@@ -15,7 +15,7 @@ namespace Ajuna.DotNet.Service.Node
       {
       }
 
-      private CodeMemberField GetPropertyField(string name, string baseType)
+      private static CodeMemberField GetPropertyField(string name, string baseType)
       {
          CodeMemberField field = new()
          {
@@ -26,7 +26,7 @@ namespace Ajuna.DotNet.Service.Node
          return field;
       }
 
-      private CodeMemberProperty GetProperty(string name, CodeMemberField propertyField)
+      private static CodeMemberProperty GetProperty(string name, CodeMemberField propertyField)
       {
          CodeMemberProperty prop = new()
          {
@@ -48,7 +48,7 @@ namespace Ajuna.DotNet.Service.Node
 
       private CodeMemberMethod GetDecode(NodeTypeField[] typeFields)
       {
-         var decodeMethod = SimpleMethod("Decode");
+         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
          CodeParameterDeclarationExpression param1 = new()
          {
             Type = new CodeTypeReference("System.Byte[]"),
@@ -70,8 +70,8 @@ namespace Ajuna.DotNet.Service.Node
             {
                NodeTypeField typeField = typeFields[i];
 
-               string fieldName = GetFieldName(typeField, "value", typeFields.Length, i);
-               var fullItem = GetFullItemPath(typeField.TypeId);
+               string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
+               (string, List<string>) fullItem = GetFullItemPath(typeField.TypeId);
 
                decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()} = new {fullItem.Item1}()"));
                decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()}.Decode(byteArray, ref p)"));
@@ -82,7 +82,7 @@ namespace Ajuna.DotNet.Service.Node
          return decodeMethod;
       }
 
-      private CodeMemberMethod GetEncode(NodeTypeField[] typeFields)
+      private static CodeMemberMethod GetEncode(NodeTypeField[] typeFields)
       {
          CodeMemberMethod encodeMethod = new()
          {
@@ -97,7 +97,7 @@ namespace Ajuna.DotNet.Service.Node
             for (int i = 0; i < typeFields.Length; i++)
             {
                NodeTypeField typeField = typeFields[i];
-               string fieldName = GetFieldName(typeField, "value", typeFields.Length, i);
+               string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
 
                encodeMethod.Statements.Add(new CodeSnippetExpression($"result.AddRange({fieldName.MakeMethod()}.Encode())"));
             }
@@ -115,8 +115,6 @@ namespace Ajuna.DotNet.Service.Node
       public override TypeBuilderBase Create()
       {
          var typeDef = TypeDef as NodeTypeComposite;
-
-         #region CREATE
 
          ClassName = $"{typeDef.Path.Last()}";
 
@@ -137,7 +135,7 @@ namespace Ajuna.DotNet.Service.Node
 
          typeNamespace.Types.Add(targetClass);
 
-         var nameMethod = SimpleMethod("TypeName", "System.String", ClassName);
+         CodeMemberMethod nameMethod = SimpleMethod("TypeName", "System.String", ClassName);
          targetClass.Members.Add(nameMethod);
 
          if (typeDef.TypeFields != null)
@@ -146,32 +144,30 @@ namespace Ajuna.DotNet.Service.Node
             {
 
                NodeTypeField typeField = typeDef.TypeFields[i];
-               string fieldName = GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
+               string fieldName = StructBuilder.GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
 
-               var fullItem = GetFullItemPath(typeField.TypeId);
+               (string, List<string>) fullItem = GetFullItemPath(typeField.TypeId);
 
-               var field = GetPropertyField(fieldName, fullItem.Item1);
+               CodeMemberField field = StructBuilder.GetPropertyField(fieldName, fullItem.Item1);
 
                // add comment to field if exists
                field.Comments.AddRange(GetComments(typeField.Docs, null, fieldName));
 
                targetClass.Members.Add(field);
-               targetClass.Members.Add(GetProperty(fieldName, field));
+               targetClass.Members.Add(StructBuilder.GetProperty(fieldName, field));
             }
          }
 
-         CodeMemberMethod encodeMethod = GetEncode(typeDef.TypeFields);
+         CodeMemberMethod encodeMethod = StructBuilder.GetEncode(typeDef.TypeFields);
          targetClass.Members.Add(encodeMethod);
 
          CodeMemberMethod decodeMethod = GetDecode(typeDef.TypeFields);
          targetClass.Members.Add(decodeMethod);
 
-         #endregion
-
          return this;
       }
 
-      private string GetFieldName(NodeTypeField typeField, string alterName, int length, int index)
+      private static string GetFieldName(NodeTypeField typeField, string alterName, int length, int index)
       {
          if (typeField.Name == null)
          {

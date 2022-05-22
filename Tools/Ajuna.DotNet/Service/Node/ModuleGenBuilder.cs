@@ -25,8 +25,6 @@ namespace Ajuna.DotNet.Service.Node
 
       public override ModuleGenBuilder Create()
       {
-         #region CREATE
-
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi.Model.Meta"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading"));
@@ -43,22 +41,16 @@ namespace Ajuna.DotNet.Service.Node
          // add constructor
          CodeConstructor constructor = new()
          {
-            Attributes =
-             MemberAttributes.Public | MemberAttributes.Final
+            Attributes = MemberAttributes.Public | MemberAttributes.Final
          };
 
          CreateStorage(typeNamespace, constructor);
-
-         CreateCalls(typeNamespace, constructor);
+         CreateCalls(typeNamespace);
 
          // CreateEvents(typeNamespace, constructor);
+         // CreateConstants(typeNamespace, constructor);
 
-         CreateConstants(typeNamespace, constructor);
-
-         CreateErrors(typeNamespace, constructor);
-
-         #endregion
-
+         CreateErrors(typeNamespace);
          return this;
       }
 
@@ -66,7 +58,7 @@ namespace Ajuna.DotNet.Service.Node
       {
          ClassName = Module.Name + "Storage";
 
-         var storage = Module.Storage;
+         PalletStorage storage = Module.Storage;
 
          var targetClass = new CodeTypeDeclaration(ClassName)
          {
@@ -76,7 +68,7 @@ namespace Ajuna.DotNet.Service.Node
          typeNamespace.Types.Add(targetClass);
 
          // Declare the client field.
-         CodeMemberField clientField = new CodeMemberField
+         var clientField = new CodeMemberField
          {
             Attributes = MemberAttributes.Private,
             Name = "_client",
@@ -97,9 +89,9 @@ namespace Ajuna.DotNet.Service.Node
 
          if (storage?.Entries != null)
          {
-            foreach (var entry in storage.Entries)
+            foreach (Entry entry in storage.Entries)
             {
-               var storageParams = entry.Name + "Params";
+               string storageParams = entry.Name + "Params";
                CodeMemberMethod parameterMethod = new()
                {
                   Attributes = MemberAttributes.Static | MemberAttributes.Public | MemberAttributes.Final,
@@ -124,10 +116,10 @@ namespace Ajuna.DotNet.Service.Node
 
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  var fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  (string, List<string>) fullItem = GetFullItemPath(entry.TypeMap.Item1);
 
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
-                      GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
+                      ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
 
                   storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem.Item1}>");
 
@@ -141,23 +133,23 @@ namespace Ajuna.DotNet.Service.Node
 
                   storageMethod.Statements.Add(variableDeclaration);
 
-                  storageMethod.Statements.Add(new CodeMethodReturnStatement(new CodeArgumentReferenceExpression(GetInvoceString(fullItem.Item1))));
+                  storageMethod.Statements.Add(new CodeMethodReturnStatement(new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.Item1))));
 
                   // add storage key mapping in constructor
                   constructor.Statements.Add(
-                      AddPropertyValues(GetStorageMapString("", fullItem.Item1, storage.Prefix, entry.Name, entry.StorageType), "_client.StorageKeyDict"));
+                      ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString("", fullItem.Item1, storage.Prefix, entry.Name), "_client.StorageKeyDict"));
 
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
-                  var typeMap = entry.TypeMap.Item2;
-                  var hashers = typeMap.Hashers;
-                  var key = GetFullItemPath(typeMap.Key);
-                  var value = GetFullItemPath(typeMap.Value);
+                  TypeMap typeMap = entry.TypeMap.Item2;
+                  Storage.Hasher[] hashers = typeMap.Hashers;
+                  (string, List<string>) key = GetFullItemPath(typeMap.Key);
+                  (string, List<string>) value = GetFullItemPath(typeMap.Value);
 
                   parameterMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.Item1, "key"));
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
-                      GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
+                      ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
 
                   storageMethod.ReturnType = new CodeTypeReference($"async Task<{value.Item1}>");
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.Item1, "key"));
@@ -170,11 +162,10 @@ namespace Ajuna.DotNet.Service.Node
 
                   storageMethod.Statements.Add(
                       new CodeMethodReturnStatement(
-                          new CodeArgumentReferenceExpression(GetInvoceString(value.Item1))));
+                          new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.Item1))));
 
                   // add storage key mapping in constructor
-                  constructor.Statements.Add(
-                      AddPropertyValues(GetStorageMapString(key.Item1, value.Item1, storage.Prefix, entry.Name, entry.StorageType, hashers), "_client.StorageKeyDict"));
+                  constructor.Statements.Add(ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString(key.Item1, value.Item1, storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
                }
                else
                {
@@ -184,11 +175,11 @@ namespace Ajuna.DotNet.Service.Node
          }
       }
 
-      private void CreateCalls(CodeNamespace typeNamespace, CodeConstructor constructor)
+      private void CreateCalls(CodeNamespace typeNamespace)
       {
          ClassName = Module.Name + "Calls";
 
-         var calls = Module.Calls;
+         PalletCalls calls = Module.Calls;
 
          var targetClass = new CodeTypeDeclaration(ClassName)
          {
@@ -205,7 +196,7 @@ namespace Ajuna.DotNet.Service.Node
 
                if (typeDef.Variants != null)
                {
-                  foreach (var variant in typeDef.Variants)
+                  foreach (TypeVariant variant in typeDef.Variants)
                   {
                      CodeMemberMethod callMethod = new()
                      {
@@ -217,17 +208,16 @@ namespace Ajuna.DotNet.Service.Node
                      // add comment to class if exists
                      callMethod.Comments.AddRange(GetComments(typeDef.Docs, null, variant.Name));
 
-                     var byteArrayName = "byteArray";
+                     string byteArrayName = "byteArray";
 
                      callMethod.Statements.Add(new CodeVariableDeclarationStatement(
                          typeof(List<byte>), byteArrayName, new CodeObjectCreateExpression("List<byte>", Array.Empty<CodeExpression>())));
 
                      if (variant.TypeFields != null)
                      {
-
-                        foreach (var field in variant.TypeFields)
+                        foreach (NodeTypeField field in variant.TypeFields)
                         {
-                           var fullItem = GetFullItemPath(field.TypeId);
+                           (string, List<string>) fullItem = GetFullItemPath(field.TypeId);
 
                            CodeParameterDeclarationExpression param = new()
                            {
@@ -322,16 +312,16 @@ namespace Ajuna.DotNet.Service.Node
       //   }
       //}
 
-      private void CreateConstants(CodeNamespace typeNamespace, CodeConstructor constructor)
-      {
-         // TODO
-      }
+      //private void CreateConstants(CodeNamespace typeNamespace, CodeConstructor constructor)
+      //{
+      //   // TODO
+      //}
 
-      private void CreateErrors(CodeNamespace typeNamespace, CodeConstructor constructor)
+      private void CreateErrors(CodeNamespace typeNamespace)
       {
          ClassName = Module.Name + "Errors";
 
-         var errors = Module.Errors;
+         PalletErrors errors = Module.Errors;
 
          if (errors != null)
          {
@@ -346,7 +336,7 @@ namespace Ajuna.DotNet.Service.Node
                };
 
 
-               foreach (var variant in typeDef.Variants)
+               foreach (TypeVariant variant in typeDef.Variants)
                {
                   var enumField = new CodeMemberField(ClassName, variant.Name);
 
@@ -361,15 +351,15 @@ namespace Ajuna.DotNet.Service.Node
          }
       }
 
-      private string GetInvoceString(string returnType)
+      private static string GetInvoceString(string returnType)
       {
          return "await _client.GetStorageAsync<" + returnType + ">(parameters, token)";
       }
 
-      private CodeMethodInvokeExpression GetStorageString(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
+      private static CodeMethodInvokeExpression GetStorageString(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
       {
 
-         CodeExpression[] codeExpressions =
+         var codeExpressions =
              new CodeExpression[] {
                         new CodePrimitiveExpression(module),
                         new CodePrimitiveExpression(item),
@@ -399,11 +389,11 @@ namespace Ajuna.DotNet.Service.Node
          return new CodeMethodInvokeExpression(new CodeTypeReferenceExpression("RequestGenerator"), "GetStorage", codeExpressions);
       }
 
-      private CodeExpression[] GetStorageMapString(string keyType, string returnType, string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
+      private static CodeExpression[] GetStorageMapString(string keyType, string returnType, string module, string item, Storage.Hasher[] hashers = null)
       {
          var typeofReturn = new CodeTypeOfExpression(returnType);
 
-         CodeExpression[] result = new CodeExpression[] {
+         var result = new CodeExpression[] {
                     new CodeObjectCreateExpression(
                             new CodeTypeReference(typeof(Tuple<string,string>)),
                             new CodeExpression[] {
@@ -448,7 +438,7 @@ namespace Ajuna.DotNet.Service.Node
          return result;
       }
 
-      private CodeStatement AddPropertyValues(CodeExpression[] exprs, string variableReference)
+      private static CodeStatement AddPropertyValues(CodeExpression[] exprs, string variableReference)
       {
          return new CodeExpressionStatement(
              new CodeMethodInvokeExpression(
