@@ -40,12 +40,14 @@ namespace Ajuna.DotNet.Client.Services
       /// <exception cref="NotImplementedException">Throws an exception if a parameter has Attributes attached.</exception>
       public IEnumerable<IReflectedEndpointNamedType> GetParameters()
       {
-         var parameters = _endpointMethod.GetParameters();
+         ParameterInfo[] parameters = _endpointMethod.GetParameters();
 
          // The current generated controllers do not support custom attributes in parameters.
          // But if it does we better bail here to make sure that'll get properly implemented once needed.
          if (parameters.Any(x => x.CustomAttributes.Any()))
+         {
             throw new NotImplementedException();
+         }
 
          return parameters.Select(parameter => new ReflectedEndpointNamedType(parameter.ParameterType, parameter.Name)).ToList();
       }

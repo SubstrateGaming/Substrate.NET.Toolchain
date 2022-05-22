@@ -35,7 +35,7 @@ namespace Ajuna.DotNet.Client.Services
       /// <returns>Returns an enumerable set of reflected endpoints.</returns>
       public IEnumerable<IReflectedEndpoint> GetEndpoints()
       {
-         var methods = _controllerType
+         IQueryable<System.Reflection.MethodInfo> methods = _controllerType
             .GetMethods()
             .Where(method => method.IsPublic && method.HasActionResultReturnType())
             .AsQueryable();
@@ -46,8 +46,10 @@ namespace Ajuna.DotNet.Client.Services
             .ToList();
 
          // Yield the results for enumerable.
-         foreach (var method in httpGetMethods)
+         foreach (ReflectedEndpoint method in httpGetMethods)
+         {
             yield return method;
+         }
 
          // Clear the actual list.
          httpGetMethods.Clear();

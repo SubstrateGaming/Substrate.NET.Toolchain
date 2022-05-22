@@ -54,10 +54,12 @@ namespace Ajuna.DotNet.Extensions
       internal static Dictionary<int, IReflectedEndpointType> GetProducedReturnType(this MethodInfo method)
       {
          if (!method.HasProducesResponseTypeAttribute())
+         {
             return new Dictionary<int, IReflectedEndpointType>();
+         }
 
          var result = new Dictionary<int, IReflectedEndpointType>();
-         foreach (var attribute in method.GetCustomAttributes<ProducesResponseTypeAttribute>(false))
+         foreach (ProducesResponseTypeAttribute attribute in method.GetCustomAttributes<ProducesResponseTypeAttribute>(false))
          {
             result.Add(attribute.StatusCode, new ReflectedEndpointType(attribute.Type));
          }

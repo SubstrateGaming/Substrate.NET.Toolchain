@@ -81,14 +81,14 @@ namespace Ajuna.DotNet
       /// This command parses the ajuna project configuration and generates code for all given projects.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
-      private static async Task<bool> UpdateAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(token, fetchMetadata: false);
+      private static async Task<bool> UpdateAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(fetchMetadata: false, token);
 
       /// <summary>
       /// Invoked with dotnet ajuna upgrade.
       /// This command first updates the metadata file and then generates all classes again.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
-      private static async Task<bool> UpgradeAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(token, fetchMetadata: true);
+      private static async Task<bool> UpgradeAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(fetchMetadata: true, token);
 
       /// <summary>
       /// Handles the implementation to update or upgrade an ajuna environment
@@ -98,11 +98,11 @@ namespace Ajuna.DotNet
       /// <param name="token">Cancellation</param>
       /// <param name="fetchMetadata">Controls whether to fetch the metadata (upgrade) or not (update).</param>
       /// <returns>Returns true on success, otherwise false.</returns>
-      private static async Task<bool> UpgradeOrUpdateAjunaEnvironmentAsync(CancellationToken token, bool fetchMetadata)
+      private static async Task<bool> UpgradeOrUpdateAjunaEnvironmentAsync(bool fetchMetadata, CancellationToken token)
       {
          // Update an existing Ajuna project tree by reading the required configuration file
          // in the current directory in subdirectory .ajuna.
-         var configurationFile = ResolveConfigurationFilePath();
+         string configurationFile = ResolveConfigurationFilePath();
          if (!File.Exists(configurationFile))
          {
             Log.Error("The configuration file {file} does not exist! Please create a configuration file so this toolchain can produce correct outputs. You can scaffold the configuration file by creating a new service project with `dotnet new ajuna-service`.");
@@ -110,7 +110,7 @@ namespace Ajuna.DotNet
          }
 
          // Read ajuna-config.json
-         var configuration = JsonConvert.DeserializeObject<AjunaConfiguration>(File.ReadAllText(configurationFile));
+         AjunaConfiguration configuration = JsonConvert.DeserializeObject<AjunaConfiguration>(File.ReadAllText(configurationFile));
          if (configuration == null)
          {
             Log.Error("Could not parse the configuration file {file}! Please ensure that the configuration file format is correct.", configurationFile);
@@ -134,19 +134,21 @@ namespace Ajuna.DotNet
             }
          }
 
-         var metadataFilePath = ResolveMetadataFilePath();
+         string metadataFilePath = ResolveMetadataFilePath();
          Log.Information("Using Metadata = {metadataFilePath}", metadataFilePath);
 
-         var metadata = GetMetadata.GetMetadataFromFile(Log.Logger, metadataFilePath);
+         MetaData metadata = GetMetadata.GetMetadataFromFile(Log.Logger, metadataFilePath);
          if (metadata == null)
+         {
             return false;
+         }
 
          // Service
          GenerateNetApiClasses(metadata, configuration);
          GenerateRestServiceClasses(metadata, configuration);
 
          // Client
-         GenerateRestClientClasses(metadata, configuration);
+         GenerateRestClientClasses(configuration);
 
          return true;
       }
@@ -160,11 +162,13 @@ namespace Ajuna.DotNet
       /// <exception cref="InvalidOperationException"></exception>
       private static async Task<bool> GenerateMetadataAsync(string websocket, CancellationToken token)
       {
-         var metadata = await GetMetadata.GetMetadataFromNodeAsync(Log.Logger, websocket, token);
+         string metadata = await GetMetadata.GetMetadataFromNodeAsync(Log.Logger, websocket, token);
          if (metadata == null)
+         {
             throw new InvalidOperationException($"Could not query metadata from node {websocket}!");
+         }
 
-         var metadataFilePath = ResolveMetadataFilePath();
+         string metadataFilePath = ResolveMetadataFilePath();
 
          try
          {
@@ -189,9 +193,9 @@ namespace Ajuna.DotNet
          generator.Generate(metadata);
       }
 
-      private static void GenerateRestClientClasses(MetaData metadata, AjunaConfiguration configuration)
+      private static void GenerateRestClientClasses(AjunaConfiguration configuration)
       {
-         var filePath = ResolveRestServiceAssembly(configuration);
+         string filePath = ResolveRestServiceAssembly(configuration);
          if (string.IsNullOrEmpty(filePath))
          {
             Log.Information("Could not resolve RestService assembly file path. Please build the RestService before generating RestClient project classes.");
@@ -200,27 +204,26 @@ namespace Ajuna.DotNet
 
          Log.Information("Using resolved RestService assembly for RestClient = {assembly}", filePath);
 
-         using (var loader = new AssemblyResolver(filePath))
-         {
-            // Initialize configuration.
-            var clientConfiguration = new ClientGeneratorConfiguration()
-            {
-               Assembly = loader.Assembly,
-               ControllerBaseType = typeof(ControllerBase),
-               OutputDirectory = Path.Join(Environment.CurrentDirectory, configuration.Projects.RestClient),
-               GeneratorOptions = new CodeGeneratorOptions()
-               {
-                  BlankLinesBetweenMembers = false,
-                  BracingStyle = "C",
-                  IndentString = "   "
-               },
-               BaseNamespace = configuration.Projects.RestClient
-            };
+         using var loader = new AssemblyResolver(filePath);
 
-            // Build and execute the client generator.
-            var client = new ClientGenerator(clientConfiguration);
-            client.Generate(Log.Logger);
-         }
+         // Initialize configuration.
+         var clientConfiguration = new ClientGeneratorConfiguration()
+         {
+            Assembly = loader.Assembly,
+            ControllerBaseType = typeof(ControllerBase),
+            OutputDirectory = Path.Join(Environment.CurrentDirectory, configuration.Projects.RestClient),
+            GeneratorOptions = new CodeGeneratorOptions()
+            {
+               BlankLinesBetweenMembers = false,
+               BracingStyle = "C",
+               IndentString = "   "
+            },
+            BaseNamespace = configuration.Projects.RestClient
+         };
+
+         // Build and execute the client generator.
+         var client = new ClientGenerator(clientConfiguration);
+         client.Generate(Log.Logger);
       }
 
       /// <summary>
@@ -250,13 +253,17 @@ namespace Ajuna.DotNet
       private static string ResolveRestServiceAssembly(AjunaConfiguration configuration)
       {
          if (File.Exists(configuration.RestClientSettings.ServiceAssembly))
+         {
             return configuration.RestClientSettings.ServiceAssembly;
+         }
 
-         var framework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+         string framework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+         string fp = ResolveServicePath(framework, "Release", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
 
-         var fp = ResolveServicePath(framework, "Release", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
          if (File.Exists(fp))
+         {
             return fp;
+         }
          else
          {
             Log.Information("The file path {path} does not exist.", fp);
@@ -265,7 +272,9 @@ namespace Ajuna.DotNet
          // Check if Debug version exist (if Release isn't available)
          fp = ResolveServicePath(framework, "Debug", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
          if (File.Exists(fp))
+         {
             return fp;
+         }
          else
          {
             Log.Information("The file path {path} does not exist.", fp);

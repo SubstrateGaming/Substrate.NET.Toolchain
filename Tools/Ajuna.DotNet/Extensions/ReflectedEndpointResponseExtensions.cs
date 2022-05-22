@@ -1,5 +1,6 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
 using System.CodeDom;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -18,10 +19,12 @@ namespace Ajuna.DotNet.Extensions
       /// <returns></returns>
       internal static CodeTypeReference ToInterfaceMethodReturnType(this IReflectedEndpointResponse response, CodeNamespace currentNamespace)
       {
-         var defaultReturnType = response.GetSuccessReturnType();
+         IReflectedEndpointType defaultReturnType = response.GetSuccessReturnType();
 
          if (defaultReturnType == null)
+         {
             return new CodeTypeReference(typeof(void));
+         }
 
          // Ensure we are importing all model items.
          // Not actually required since we use fully qualified items but we want to get rid of that later.
@@ -36,7 +39,7 @@ namespace Ajuna.DotNet.Extensions
       /// <param name="response">The response object to get the return type for.</param>
       internal static IReflectedEndpointType GetSuccessReturnType(this IReflectedEndpointResponse response)
       {
-         var possibleReturnTypes = response.GetReturnTypesByStatusCode();
+         Dictionary<int, IReflectedEndpointType> possibleReturnTypes = response.GetReturnTypesByStatusCode();
          if (possibleReturnTypes.ContainsKey((int)HttpStatusCode.OK))
          {
             // We assume that the default http status code 200 is the default wanted return type.

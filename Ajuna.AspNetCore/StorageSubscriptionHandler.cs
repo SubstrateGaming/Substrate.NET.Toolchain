@@ -13,8 +13,8 @@ namespace Ajuna.AspNetCore
 {
    public class StorageSubscriptionHandler : SubscriptionHandlerBase
    {
-      private static object _subscriptionsLock = new object();
-      private Dictionary<string, List<string>> _subscriptions = new Dictionary<string, List<string>>();
+      private static readonly object _subscriptionsLock = new object();
+      private readonly Dictionary<string, List<string>> _subscriptions = new Dictionary<string, List<string>>();
 
       public StorageSubscriptionHandler(SubscriptionManager subscriptionManager) : base(subscriptionManager)
       {
@@ -29,7 +29,7 @@ namespace Ajuna.AspNetCore
 
          try
          {
-            var command = JsonConvert.DeserializeObject<StorageSubscribeMessage>(Encoding.UTF8.GetString(buffer));
+            StorageSubscribeMessage command = JsonConvert.DeserializeObject<StorageSubscribeMessage>(Encoding.UTF8.GetString(buffer));
             if (command == null)
             {
                // Close the socket because the message is not interpreted.
@@ -72,14 +72,18 @@ namespace Ajuna.AspNetCore
       internal void BroadcastChange(string identifier, string key, string data, StorageSubscriptionChangeType changeType)
       {
          // Get all subscriptions
-         var clients = GetSubscribedSockets(identifier, key);
+         string[] clients = GetSubscribedSockets(identifier, key);
          if (clients.Length == 0)
+         {
             return;
+         }
 
          // Format the change notification that is send to all subscribed clients
-         var message = FormatMessage(identifier, key, data, changeType);
+         string message = FormatMessage(identifier, key, data, changeType);
          if (string.IsNullOrEmpty(message))
+         {
             return;
+         }
 
          // Retreive all subscribed clients
          var sockets = Manager
@@ -89,7 +93,9 @@ namespace Ajuna.AspNetCore
              .ToList();
 
          if (sockets.Count == 0)
+         {
             return;
+         }
 
          // Publish the message to all connected clients
          sockets.ForEachAsync(Environment.ProcessorCount, async (WebSocket socket) => { await SendMessageAsync(socket, message); });
@@ -121,12 +127,12 @@ namespace Ajuna.AspNetCore
       private string[] GetSubscribedSockets(string identifier, string key)
       {
          var result = new List<string>();
-         var subscriptionKeyExact = GetSubscriptionKey(identifier, key);
-         var subscriptionKeyAny = GetSubscriptionKey(identifier, string.Empty);
+         string subscriptionKeyExact = GetSubscriptionKey(identifier, key);
+         string subscriptionKeyAny = GetSubscriptionKey(identifier, string.Empty);
 
          lock (_subscriptionsLock)
          {
-            foreach (var kvp in _subscriptions)
+            foreach (KeyValuePair<string, List<string>> kvp in _subscriptions)
             {
                if (kvp.Value.Any(x => x == subscriptionKeyExact || x == subscriptionKeyAny))
                {
@@ -141,18 +147,22 @@ namespace Ajuna.AspNetCore
       private bool RegisterSubscription(string clientId, StorageSubscribeMessage command)
       {
          if (string.IsNullOrEmpty(clientId))
+         {
             return false;
+         }
 
          if (string.IsNullOrEmpty(command.Identifier))
+         {
             return false;
+         }
 
-         var subscriptionKey = GetSubscriptionKey(command);
+         string subscriptionKey = GetSubscriptionKey(command);
 
          lock (_subscriptionsLock)
          {
             if (_subscriptions.ContainsKey(clientId))
             {
-               var subscriptionsForClient = _subscriptions[clientId];
+               List<string> subscriptionsForClient = _subscriptions[clientId];
                if (subscriptionsForClient.Contains(subscriptionKey))
                {
                   // Client is already registered
@@ -177,7 +187,9 @@ namespace Ajuna.AspNetCore
          lock (_subscriptionsLock)
          {
             if (_subscriptions.ContainsKey(clientId))
+            {
                _subscriptions.Remove(clientId);
+            }
          }
       }
    }

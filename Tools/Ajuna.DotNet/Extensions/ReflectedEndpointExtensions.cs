@@ -23,7 +23,7 @@ namespace Ajuna.DotNet.Extensions
             ReturnType = endpoint.GetResponse().ToInterfaceMethodReturnType(currentNamespace),
          };
 
-         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters(currentNamespace));
+         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters());
          return method;
       }
 
@@ -43,10 +43,10 @@ namespace Ajuna.DotNet.Extensions
             Attributes = MemberAttributes.Public,
          };
 
-         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters(clientNamespace));
+         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters());
 
          var invokeArgumentType = new CodeTypeReference(endpoint.GetResponse().GetSuccessReturnType().Type);
-         var endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
+         string endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
 
          if (method.Parameters.Count == 0)
          {

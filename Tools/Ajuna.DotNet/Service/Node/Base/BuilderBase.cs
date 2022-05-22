@@ -1,5 +1,4 @@
 ﻿using Ajuna.NetApi.Model.Meta;
-using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ namespace Ajuna.DotNet.Service.Node.Base
 
    public abstract class BuilderBase
    {
-      public static List<string> Files = new();
+      public static readonly List<string> Files = new();
 
       public uint Id { get; }
 
@@ -77,7 +76,7 @@ namespace Ajuna.DotNet.Service.Node.Base
 
          if (typeDef != null)
          {
-            var path = typeDef.Path != null ? "[" + string.Join('.', typeDef.Path) + "]" : "";
+            string path = typeDef.Path != null ? "[" + string.Join('.', typeDef.Path) + "]" : "";
             comments.Add(new CodeCommentStatement($">> {typeDef.Id} - {typeDef.TypeDef}{path}", true));
          }
 
@@ -88,7 +87,7 @@ namespace Ajuna.DotNet.Service.Node.Base
 
          if (docs != null)
          {
-            foreach (var doc in docs)
+            foreach (string doc in docs)
             {
                comments.Add(new CodeCommentStatement(doc, true));
             }
@@ -98,7 +97,7 @@ namespace Ajuna.DotNet.Service.Node.Base
          return comments;
       }
 
-      public CodeMemberMethod SimpleMethod(string name, string returnType = null, object returnExpression = null)
+      public static CodeMemberMethod SimpleMethod(string name, string returnType = null, object returnExpression = null)
       {
          CodeMemberMethod nameMethod = new()
          {
@@ -124,7 +123,7 @@ namespace Ajuna.DotNet.Service.Node.Base
          success = Success;
          if (write && Success)
          {
-            CodeDomProvider provider = CodeDomProvider.CreateProvider("CSharp");
+            var provider = CodeDomProvider.CreateProvider("CSharp");
             CodeGeneratorOptions options = new()
             {
                BracingStyle = "C"
@@ -145,11 +144,9 @@ namespace Ajuna.DotNet.Service.Node.Base
                Files.Add(path);
             }
 
-            using (StreamWriter sourceWriter = new(path))
-            {
-               provider.GenerateCodeFromCompileUnit(
-                   TargetUnit, sourceWriter, options);
-            }
+            using StreamWriter sourceWriter = new(path);
+            provider.GenerateCodeFromCompileUnit(
+                TargetUnit, sourceWriter, options);
          }
 
          return (ReferenzName, new List<string>() { NamespaceName });

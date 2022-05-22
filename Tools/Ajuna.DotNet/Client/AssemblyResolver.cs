@@ -58,14 +58,14 @@ namespace Ajuna.DotNet.Client
       private Assembly OnResolving(AssemblyLoadContext context, AssemblyName name)
       {
          // Try to resolve the dependent assembly by looking in the dependency ({assembly}.deps.json) file.
-         var compileLibrary = _dependencyContext.CompileLibraries
+         CompilationLibrary compileLibrary = _dependencyContext.CompileLibraries
              .FirstOrDefault(x => x.Name.Equals(name.Name, StringComparison.OrdinalIgnoreCase));
 
          if (compileLibrary == null || compileLibrary.Assemblies.Count == 0)
          {
             // If the application has PreserveCompilationContext set to 'false' we also need to check runtime libraries.
             // This shouldn't be the case with projects using Microsoft.NET.Sdk.Web, which defaults to 'true'.
-            var runtimeLibrary = _dependencyContext.RuntimeLibraries
+            RuntimeLibrary runtimeLibrary = _dependencyContext.RuntimeLibraries
                 .FirstOrDefault(x => x.Name.Equals(name.Name, StringComparison.OrdinalIgnoreCase));
 
             if (runtimeLibrary != null)
@@ -93,7 +93,9 @@ namespace Ajuna.DotNet.Client
             try
             {
                if (assemblyPaths.Count == 0)
+               {
                   return null;
+               }
 
                return _loadContext.LoadFromAssemblyPath(assemblyPaths.First());
             }

@@ -18,10 +18,12 @@ namespace Ajuna.ServiceLayer.Extensions
                 using (partition)
                 {
                    while (partition.MoveNext())
+                   {
                       await body(partition.Current).ContinueWith(t =>
                          {
                             //observe exceptions
                          });
+                   }
                 }
              }));
       }

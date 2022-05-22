@@ -52,11 +52,9 @@ namespace Ajuna.DotNet.Service.Node
 
          try
          {
-            using (var client = new SubstrateClient(new Uri(serviceArgument)))
-            {
-               await client.ConnectAsync(true, cancellationToken);
-               return await client.State.GetMetaDataAsync(cancellationToken);
-            }
+            using var client = new SubstrateClient(new Uri(serviceArgument));
+            await client.ConnectAsync(true, cancellationToken);
+            return await client.State.GetMetaDataAsync(cancellationToken);
          }
          catch (Exception ex)
          {

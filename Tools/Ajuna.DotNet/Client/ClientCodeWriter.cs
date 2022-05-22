@@ -19,22 +19,20 @@ namespace Ajuna.DotNet.Client
          string unit)
       {
          var provider = new CSharpCodeProvider();
-         var path = Path.Combine(configuration.OutputDirectory, Path.Combine(ns.Name.Replace(configuration.BaseNamespace, string.Empty).Split('.').ToArray()));
+         string path = Path.Combine(configuration.OutputDirectory, Path.Combine(ns.Name.Replace(configuration.BaseNamespace, string.Empty).Split('.').ToArray()));
          Directory.CreateDirectory(path);
 
-         var filePath = Path.Combine(path, $"{unit}.cs");
-         using (var memoryStream = new MemoryStream())
-         using (var writer = new StreamWriter(memoryStream))
-         {
-            provider.GenerateCodeFromCompileUnit(dom, writer, configuration.GeneratorOptions);
-            writer.Flush();
-            var code = Encoding.UTF8.GetString(memoryStream.ToArray());
-            code = PatchSystemThreadingTasksUsage(code);
-            code = PatchNamespaceUsage(code, ns.Imports);
-            code = PatchPublicVirtualWithAsyncPublic(code);
-            code = PatchSendRequestFunctionCall(code);
-            File.WriteAllText(filePath, code);
-         }
+         string filePath = Path.Combine(path, $"{unit}.cs");
+         using var memoryStream = new MemoryStream();
+         using var writer = new StreamWriter(memoryStream);
+         provider.GenerateCodeFromCompileUnit(dom, writer, configuration.GeneratorOptions);
+         writer.Flush();
+         string code = Encoding.UTF8.GetString(memoryStream.ToArray());
+         code = PatchSystemThreadingTasksUsage(code);
+         code = PatchNamespaceUsage(code, ns.Imports);
+         code = PatchPublicVirtualWithAsyncPublic(code);
+         code = PatchSendRequestFunctionCall(code);
+         File.WriteAllText(filePath, code);
       }
       /// <summary>
       /// This will simplify namespace usage of fully qualified types to imported types.
@@ -48,19 +46,25 @@ namespace Ajuna.DotNet.Client
             ns.Add(import.Namespace);
          }
 
-         var index = code.IndexOf("public sealed class");
+         int index = code.IndexOf("public sealed class");
          if (index == -1)
+         {
             index = code.IndexOf("public interface");
+         }
 
          if (index == -1)
+         {
             return code;
+         }
 
-         var lhs = code.Substring(0, index);
-         var rhs = code.Remove(0, index);
+         string lhs = code[..index];
+         string rhs = code.Remove(0, index);
 
          ns = ns.OrderByDescending(x => x.Length).ToList();
-         foreach (var name in ns)
+         foreach (string name in ns)
+         {
             rhs = rhs.Replace($"{name}.", string.Empty);
+         }
 
          return lhs + rhs;
       }

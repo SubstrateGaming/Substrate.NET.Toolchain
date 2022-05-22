@@ -1,33 +1,36 @@
 <Project>
-	<PropertyGroup>
-		
-		<!-- Configuration -->
-		<VersionMajor>0</VersionMajor>
-		<VersionMinor>1</VersionMinor>
-		<VersionPatch>6</VersionPatch>
-		<AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
+   <PropertyGroup>
 
-		<!-- Variables -->
-		<AjunaVersion>$(AssemblyVersion)</AjunaVersion>
-		<AjunaCompany>BloGa Tech AG</AjunaCompany>
-		<AjunaAuthors>Cedric Decoster</AjunaAuthors>
-		<AjunaRepository>https://github.com/ajuna-network/Ajuna.SDK</AjunaRepository>
-		<AjunaWebsite>https://ajuna.io</AjunaWebsite>
-		<AjunaLicenseFile>LICENSE</AjunaLicenseFile>
-		<AjunaCopyright>Copyright © BloGa Tech AG, Switzerland. All rights reserved.</AjunaCopyright>
-		
-		<!-- Default supported frameworks -->
-		<AjunaDefaultFrameworks>netstandard2.0;net5.0;net6.0</AjunaDefaultFrameworks>
+      <!-- Configuration -->
+      <VersionMajor>0</VersionMajor>
+      <VersionMinor>1</VersionMinor>
+      <VersionPatch>6</VersionPatch>
+      <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-		<!-- Generic Project configuration -->
-		<Version>$(AjunaVersion)</Version>
-		<Company>$(AjunaCompany)</Company>
-		<Authors>$(AjunaAuthors)</Authors>
-		<Copyright>$(AjunaCopyright)</Copyright>
-		<RepositoryUrl>$(AjunaRepository)</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>$(AjunaWebsite)</PackageProjectUrl>
-		<PackageLicenseFile>$(AjunaLicenseFile)</PackageLicenseFile>
-		
-	</PropertyGroup>
+      <!-- Variables -->
+      <AjunaVersion>$(AssemblyVersion)</AjunaVersion>
+      <AjunaCompany>BloGa Tech AG</AjunaCompany>
+      <AjunaAuthors>Cedric Decoster</AjunaAuthors>
+      <AjunaRepository>https://github.com/ajuna-network/Ajuna.SDK</AjunaRepository>
+      <AjunaWebsite>https://ajuna.io</AjunaWebsite>
+      <AjunaLicenseFile>LICENSE</AjunaLicenseFile>
+      <AjunaCopyright>Copyright © BloGa Tech AG, Switzerland. All rights reserved.</AjunaCopyright>
+
+      <!-- Default supported frameworks -->
+      <AjunaDefaultFrameworks>netstandard2.0;net5.0;net6.0</AjunaDefaultFrameworks>
+
+      <!-- Code Style -->
+      <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+      <!-- Generic Project configuration -->
+      <Version>$(AjunaVersion)</Version>
+      <Company>$(AjunaCompany)</Company>
+      <Authors>$(AjunaAuthors)</Authors>
+      <Copyright>$(AjunaCopyright)</Copyright>
+      <RepositoryUrl>$(AjunaRepository)</RepositoryUrl>
+      <RepositoryType>git</RepositoryType>
+      <PackageProjectUrl>$(AjunaWebsite)</PackageProjectUrl>
+      <PackageLicenseFile>$(AjunaLicenseFile)</PackageLicenseFile>
+
+   </PropertyGroup>
 </Project>

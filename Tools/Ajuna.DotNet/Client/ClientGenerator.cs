@@ -34,23 +34,21 @@ namespace Ajuna.DotNet.Client
       /// </summary>
       public void Generate(ILogger logger)
       {
-         using (var reflector = new ReflectorService())
+         using var reflector = new ReflectorService();
+         Assembly assembly = _configuration.Assembly;
+         System.Type type = _configuration.ControllerBaseType;
+         IEnumerable<IReflectedController> controllers = reflector.GetControllers(assembly, type);
+
+         // Build controller clients.
+         foreach (IReflectedController controller in controllers)
          {
-            var assembly = _configuration.Assembly;
-            var type = _configuration.ControllerBaseType;
-            var controllers = reflector.GetControllers(assembly, type);
-
-            // Build controller clients.
-            foreach (var controller in controllers)
-            {
-               logger.Information("Generate controller {controller} client.", controller);
-               BuildControllerClientInterface(controller);
-               BuildControllerClientImplementation(controller);
-            }
-
-            // Build general purpose client.
-            BuildClient(controllers);
+            logger.Information("Generate controller {controller} client.", controller);
+            BuildControllerClientInterface(controller);
+            BuildControllerClientImplementation(controller);
          }
+
+         // Build general purpose client.
+         BuildClient(controllers);
       }
 
       /// <summary>
@@ -59,7 +57,7 @@ namespace Ajuna.DotNet.Client
       /// <param name="controllers"></param>
       private void BuildClient(IEnumerable<IReflectedController> controllers)
       {
-         var className = _configuration.ClientClassname;
+         string className = _configuration.ClientClassname;
          var targetNamespace = new CodeNamespace(_configuration.BaseNamespace);
          AddDefaultControllerImports(targetNamespace);
 
@@ -84,9 +82,9 @@ namespace Ajuna.DotNet.Client
          target.Members.AddHttpClientPrivateMember(targetNamespace);
 
          // Generate constructor assignments for all controller clients.
-         foreach (var controller in controllers)
+         foreach (IReflectedController controller in controllers)
          {
-            var controllerMemberName = controller.GetClientClassName();
+            string controllerMemberName = controller.GetClientClassName();
 
             target.Members.Add(new CodeMemberField()
             {
@@ -123,11 +121,11 @@ namespace Ajuna.DotNet.Client
          var dom = new CodeCompileUnit();
          dom.Namespaces.Add(clientNamespace);
 
-         var controllerClient = controller.ToClient(clientNamespace);
+         CodeTypeDeclaration controllerClient = controller.ToClient(clientNamespace);
          clientNamespace.Types.Add(controllerClient);
 
          // Generate methods.
-         foreach (var endpoint in controller.GetEndpoints())
+         foreach (IReflectedEndpoint endpoint in controller.GetEndpoints())
          {
             controllerClient.Members.Add(endpoint.ToClientMethod(controller, clientNamespace));
          }
@@ -149,9 +147,9 @@ namespace Ajuna.DotNet.Client
          var dom = new CodeCompileUnit();
          dom.Namespaces.Add(interfaceNamespace);
 
-         var controllerInterface = controller.ToInterface();
+         CodeTypeDeclaration controllerInterface = controller.ToInterface();
          interfaceNamespace.Types.Add(controllerInterface);
-         foreach (var endpoint in controller.GetEndpoints())
+         foreach (IReflectedEndpoint endpoint in controller.GetEndpoints())
          {
             controllerInterface.Members.Add(endpoint.ToInterfaceMethod(interfaceNamespace));
          }

@@ -381,7 +381,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
          }
 
          var generics = _countPaths.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
-         
+
          // TODO (svnscha) Should really fix that instead of logging?
          // generics.ForEach(p => Console.WriteLine($"Fixing generic: {p} - please do it properly, once you've more time!!!"));
 

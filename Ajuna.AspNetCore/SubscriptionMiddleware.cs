@@ -8,44 +8,44 @@ namespace Ajuna.AspNetCore
 {
    public class SubscriptionMiddleware
    {
-      private readonly RequestDelegate _next;
-      private SubscriptionHandlerBase _webSocketHandler { get; set; }
+      private SubscriptionHandlerBase WebSocketHandler { get; set; }
 
-      public SubscriptionMiddleware(RequestDelegate next, SubscriptionHandlerBase webSocketHandler)
+      public SubscriptionMiddleware(SubscriptionHandlerBase webSocketHandler)
       {
-         _next = next;
-         _webSocketHandler = webSocketHandler;
+         WebSocketHandler = webSocketHandler;
       }
 
       public async Task InvokeAsync(HttpContext context)
       {
          if (!context.WebSockets.IsWebSocketRequest)
+         {
             return;
+         }
 
-         var socket = await context.WebSockets.AcceptWebSocketAsync();
-         await _webSocketHandler.OnConnectedAsync(socket);
+         WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
+         await WebSocketHandler.OnConnectedAsync(socket);
 
          await ReceiveAsync(socket, async (result, buffer) =>
          {
             if (result.MessageType == WebSocketMessageType.Text)
             {
-               await _webSocketHandler.OnReceivedAsync(socket, result, buffer);
+               await WebSocketHandler.OnReceivedAsync(socket, result, buffer);
             }
 
             else if (result.MessageType == WebSocketMessageType.Close)
             {
-               await _webSocketHandler.OnDisconnectedAsync(socket);
+               await WebSocketHandler.OnDisconnectedAsync(socket);
             }
          });
       }
 
       private async Task ReceiveAsync(WebSocket socket, Func<WebSocketReceiveResult, byte[], Task> handleMessage)
       {
-         var buffer = new byte[1024 * 4];
+         byte[] buffer = new byte[1024 * 4];
 
          while (socket.State == WebSocketState.Open)
          {
-            var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
+            WebSocketReceiveResult result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
             await handleMessage(result, buffer);
          }
       }
