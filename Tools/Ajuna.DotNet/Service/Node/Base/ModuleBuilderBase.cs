@@ -19,7 +19,7 @@ namespace Ajuna.DotNet.Service.Node.Base
          NodeTypes = nodeTypes;
          Module = module;
          PrefixName = module.Name == "System" ? "Frame" : "Pallet";
-         NamespaceName = $"{ProjectName}.Model.{PrefixName + module.Name.MakeMethod()}";
+         NamespaceName = $"{ProjectName}.Generated.Model.{PrefixName + module.Name.MakeMethod()}";
       }
    }
 }

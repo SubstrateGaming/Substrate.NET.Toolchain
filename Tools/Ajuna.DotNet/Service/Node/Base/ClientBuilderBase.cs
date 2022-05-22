@@ -10,7 +10,7 @@ namespace Ajuna.DotNet.Service.Node.Base
           : base(projectName, id, typeDict)
       {
          ModuleNames = moduleNames;
-         NamespaceName = ProjectName;
+         NamespaceName = $"{ProjectName}.Generated";
       }
    }
 }

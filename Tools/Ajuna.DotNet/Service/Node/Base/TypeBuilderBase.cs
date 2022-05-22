@@ -13,8 +13,8 @@ namespace Ajuna.DotNet.Service.Node.Base
       {
          TypeDef = typeDef;
          NamespaceName = typeDef.Path != null && typeDef.Path[0].Contains("_")
-             ? $"{ProjectName}.Model.{typeDef.Path[0].MakeMethod()}"
-             : $"{ProjectName}.Model.Base";
+             ? $"{ProjectName}.Generated.Model.{typeDef.Path[0].MakeMethod()}"
+             : $"{ProjectName}.Generated.Model.Base";
       }
    }
 }

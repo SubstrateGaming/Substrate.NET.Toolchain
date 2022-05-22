@@ -26,7 +26,7 @@ namespace Ajuna.DotNet.Service.Node
          #region CREATE
 
          ClassName = "SubstrateClientExt";
-         NamespaceName = ProjectName;
+         NamespaceName = $"{ProjectName}.Generated";
 
          CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);

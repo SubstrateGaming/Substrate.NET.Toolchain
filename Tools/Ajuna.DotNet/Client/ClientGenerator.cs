@@ -16,7 +16,7 @@ namespace Ajuna.DotNet.Client
    public class ClientGenerator
    {
       private readonly ClientGeneratorConfiguration _configuration;
-      private string GetNamespace(string ns) => $"{_configuration.BaseNamespace}.{ns}";
+      private string GetNamespace(string ns) => $"{_configuration.BaseNamespace}.Generated.{ns}";
       private string InterfaceNamespace => GetNamespace("Interfaces");
       private string ClientsNamespace => GetNamespace("Clients");
 

@@ -132,7 +132,7 @@ namespace Ajuna.DotNet.Service.Node
       private CodeTypeMemberCollection GetEnumEra()
       {
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Model.Base"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Primitive"));
 
