@@ -5,7 +5,7 @@
       "rest_client": "Ajuna.RestClient"
    },
    "metadata": {
-      "websocket": "ws://ajuna.local:9944",
+      "websocket": "ws://127.0.0.1:9944",
       "runtime": "ajuna_solo_runtime"
    },
    "rest_client_settings": {

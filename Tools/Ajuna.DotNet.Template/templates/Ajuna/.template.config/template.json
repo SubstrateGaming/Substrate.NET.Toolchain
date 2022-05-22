@@ -38,8 +38,8 @@
          "type": "parameter",
          "datatype": "string",
          "description": "Uses the given websocket URL to query metadata.",
-         "defaultValue": "ws://ajuna.local:9944",
-         "replaces": "ws://ajuna.local:9944"
+         "defaultValue": "ws://127.0.0.1:9944",
+         "replaces": "ws://127.0.0.1:9944"
       },
       "metadata_runtime": {
          "type": "parameter",

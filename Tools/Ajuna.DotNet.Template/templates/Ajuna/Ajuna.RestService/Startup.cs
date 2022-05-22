@@ -55,7 +55,7 @@ namespace Ajuna.RestService
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
          {
             CancellationToken = CTS.Token,
-            Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://ajuna.local:9944"),
+            Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944"),
             Storages = GetRuntimeStorages()
          });
 
