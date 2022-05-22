@@ -10,14 +10,17 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class RestServiceControllerModuleBuilder : ModuleBuilderBase
    {
-      private RestServiceControllerModuleBuilder(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+      private string NetApiProjectName { get; }
+      
+      private RestServiceControllerModuleBuilder(string projectName, string netApiProjectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(projectName, id, module, typeDict, nodeTypes)
       {
+         NetApiProjectName = netApiProjectName;
       }
 
-      public static RestServiceControllerModuleBuilder Init(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static RestServiceControllerModuleBuilder Init(string projectName, string netApiProjectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
-         return new RestServiceControllerModuleBuilder(projectName, id, module, typeDict, nodeTypes);
+         return new RestServiceControllerModuleBuilder(projectName, netApiProjectName, id, module, typeDict, nodeTypes);
       }
 
       public override RestServiceControllerModuleBuilder Create()
@@ -145,12 +148,34 @@ namespace Ajuna.DotNet.Service.Node
                                 new CodeAttributeArgument(new CodePrimitiveExpression(200))
                    }));
 
-               getStorageMethod.CustomAttributes.Add(
-                   new CodeAttributeDeclaration("StorageKeyBuilder",
-                   new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodePrimitiveExpression($"{Module.Name}Storage")),
+               if (entry.StorageType == Storage.Type.Plain)
+               {
+                  string prefixName = Module.Name == "System" ? "Frame" : "Pallet";
+
+                  getStorageMethod.CustomAttributes.Add(
+                      new CodeAttributeDeclaration("StorageKeyBuilder",
+                      new CodeAttributeArgument[] {
+                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Model.{prefixName}{Module.Name}.{Module.Name}Storage")),
                                 new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params"))
-                   }));
+                      }));
+               }
+               else if (entry.StorageType == Storage.Type.Map)
+               {
+                  string prefixName = Module.Name == "System" ? "Frame" : "Pallet";
+
+                  getStorageMethod.CustomAttributes.Add(
+                      new CodeAttributeDeclaration("StorageKeyBuilder",
+                      new CodeAttributeArgument[] {
+                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Model.{prefixName}{Module.Name}.{Module.Name}Storage")),
+                                new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params")),
+                                new CodeAttributeArgument(new CodeTypeOfExpression(GetFullItemPath(entry.TypeMap.Item2.Key).Item1))
+                      }));
+               }
+               else
+               {
+                  throw new NotImplementedException();
+               }
+
 
                if (parameterDeclaration != null)
                {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Ajuna.ServiceLayer.Attributes;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Ajuna.DotNet.Client.Interfaces
@@ -14,13 +15,19 @@ namespace Ajuna.DotNet.Client.Interfaces
       HttpMethod HttpMethod { get; }
 
       /// <summary>
-      /// The route endpoint URL.
+      /// The Endpoint URL.
       /// </summary>
       string Endpoint { get; }
 
       /// <summary>
+      /// The KeyBuilder attribute that gives a hint how to build the encoded Key parameter.
+      /// </summary>
+      StorageKeyBuilderAttribute KeyBuilderAttribute { get; }
+      
+      /// <summary>
       /// Enumerable set of request parameters such as query parameters.
       /// </summary>
       IEnumerable<IReflectedEndpointNamedType> GetParameters();
+
    }
 }

@@ -1,4 +1,5 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
+using Ajuna.ServiceLayer.Attributes;
 using System;
 using System.CodeDom;
 using System.Linq;
@@ -43,9 +44,15 @@ namespace Ajuna.DotNet.Extensions
          }
 
          // The key parameter is an encoded parameter depending on the controller storage access implementation.
-         // TODO (svnscha): Try to get the underlying storage access and build a user friendly type.
-
-         result.Add(new CodeParameterDeclarationExpression(parameter.Type, parameter.Name));
+         StorageKeyBuilderAttribute att = request.KeyBuilderAttribute;
+         if (att.ParameterType != typeof(void))
+         {
+            result.Add(new CodeParameterDeclarationExpression(att.ParameterType, parameter.Name));
+         }
+         else
+         {
+            result.Add(new CodeParameterDeclarationExpression(parameter.Type, parameter.Name));
+         }
          return result;
       }
    }

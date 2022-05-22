@@ -1,6 +1,8 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
 using Ajuna.DotNet.Client.Services;
+using Ajuna.ServiceLayer.Attributes;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -36,6 +38,11 @@ namespace Ajuna.DotNet.Extensions
       internal static string HttpGetEndpoint(this MethodInfo method)
       {
          return method.GetCustomAttribute<HttpGetAttribute>().Template;
+      }
+
+      internal static StorageKeyBuilderAttribute ExtractKeyBuilderAttribute(this MethodInfo method)
+      {
+         return method.GetCustomAttribute<StorageKeyBuilderAttribute>();
       }
 
       /// <summary>

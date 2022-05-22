@@ -43,7 +43,9 @@ namespace Ajuna.DotNet.Extensions
             Attributes = MemberAttributes.Public,
          };
 
-         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters());
+         IReflectedEndpointRequest request = endpoint.GetRequest();
+
+         method.Parameters.AddRange(request.ToInterfaceMethodParameters());
 
          var invokeArgumentType = new CodeTypeReference(endpoint.GetResponse().GetSuccessReturnType().Type);
          string endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
@@ -61,15 +63,37 @@ namespace Ajuna.DotNet.Extensions
          }
          else
          {
-            method.Statements.Add(
-               new CodeMethodReturnStatement(
-                  new CodeMethodInvokeExpression(
-                     new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendRequestAsync", invokeArgumentType),
-                     new CodeVariableReferenceExpression("_httpClient"),
-                     new CodePrimitiveExpression(endpointUrl),
-                     new CodeSnippetExpression(GetEncodeCallParameterList(method.Parameters))
-               ))
-            );
+
+            if (method.Parameters.Count == 1 &&  request.KeyBuilderAttribute.ParameterType != typeof(void))
+            {
+               method.Statements.Add(
+                  new CodeMethodReturnStatement(
+                     new CodeMethodInvokeExpression(
+                        new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendRequestAsync", invokeArgumentType),
+                        new CodeVariableReferenceExpression("_httpClient"),
+                        new CodePrimitiveExpression(endpointUrl),
+                        new CodeMethodInvokeExpression(
+                           new CodeMethodReferenceExpression(
+                              new CodeTypeReferenceExpression(request.KeyBuilderAttribute.ClassType), 
+                              request.KeyBuilderAttribute.MethodName),
+                           new CodeVariableReferenceExpression(method.Parameters[0].Name)
+                        )
+                  ))
+               );
+            }
+            else
+            {
+               method.Statements.Add(
+                  new CodeMethodReturnStatement(
+                     new CodeMethodInvokeExpression(
+                        new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendRequestAsync", invokeArgumentType),
+                        new CodeVariableReferenceExpression("_httpClient"),
+                        new CodePrimitiveExpression(endpointUrl),
+                        new CodeSnippetExpression(GetEncodeCallParameterList(method.Parameters))
+                  ))
+               );
+            }
+
          }
          return method;
       }

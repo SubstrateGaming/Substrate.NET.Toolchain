@@ -1,4 +1,6 @@
 ﻿using Ajuna.DotNet.Extensions;
+using Ajuna.ServiceLayer.Attributes;
+using System;
 using System.Net.Http;
 using System.Reflection;
 
@@ -10,6 +12,7 @@ namespace Ajuna.DotNet.Client.Services
    internal class ReflectedEndpointGetRequest : ReflectedEndpointRequest
    {
       private readonly string _endpoint;
+      private readonly StorageKeyBuilderAttribute _keyBuilderAttribute;
 
       /// <summary>
       /// Constructs a new ReflectedEndpointGetRequest instance and extracts all [HttpGet] attribute parameters that we need
@@ -19,6 +22,7 @@ namespace Ajuna.DotNet.Client.Services
       internal ReflectedEndpointGetRequest(MethodInfo methodInfo) : base(methodInfo)
       {
          _endpoint = methodInfo.HttpGetEndpoint();
+         _keyBuilderAttribute = methodInfo.ExtractKeyBuilderAttribute();
       }
 
       /// <summary>
@@ -30,5 +34,10 @@ namespace Ajuna.DotNet.Client.Services
       /// The extracted endpoint template of [HttpGet] attribute.
       /// </summary>
       public override string Endpoint => _endpoint;
+
+      /// <summary>
+      /// The extracted key builder attribute.
+      /// </summary>
+      public override StorageKeyBuilderAttribute KeyBuilderAttribute => _keyBuilderAttribute;
    }
 }

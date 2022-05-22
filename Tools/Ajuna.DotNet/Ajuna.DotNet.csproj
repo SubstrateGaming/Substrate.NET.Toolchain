@@ -45,4 +45,8 @@
       <PackageReference Include="System.CodeDom" Version="6.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
    </ItemGroup>
+
+   <ItemGroup>
+     <ProjectReference Include="..\..\Ajuna.ServiceLayer\Ajuna.ServiceLayer.csproj" />
+   </ItemGroup>
 </Project>

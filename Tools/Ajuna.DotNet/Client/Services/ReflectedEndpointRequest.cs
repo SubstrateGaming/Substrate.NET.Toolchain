@@ -1,4 +1,5 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
+using Ajuna.ServiceLayer.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,11 @@ namespace Ajuna.DotNet.Client.Services
       /// The Endpoint URL.
       /// </summary>
       public abstract string Endpoint { get; }
+
+      /// <summary>
+      /// The KeyBuilder attribute that gives a hint how to build the encoded Key parameter.
+      /// </summary>
+      public abstract StorageKeyBuilderAttribute KeyBuilderAttribute { get; }
 
       /// <summary>
       /// Constructs an endpoint request using the given method.
