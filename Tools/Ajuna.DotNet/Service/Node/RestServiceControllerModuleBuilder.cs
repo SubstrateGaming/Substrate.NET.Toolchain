@@ -32,6 +32,7 @@ namespace Ajuna.DotNet.Service.Node
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Storage"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Microsoft.AspNetCore.Mvc"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.ServiceLayer.Attributes"));
          FileName = Module.Storage.Prefix + "Controller";
          ReferenzName = $"{ProjectName}.Generated.Controller.{FileName}";
          NamespaceName = $"{ProjectName}.Generated.Controller";
@@ -142,6 +143,13 @@ namespace Ajuna.DotNet.Service.Node
                    new CodeAttributeArgument[] {
                                 new CodeAttributeArgument(new CodeTypeOfExpression(baseReturnType)),
                                 new CodeAttributeArgument(new CodePrimitiveExpression(200))
+                   }));
+
+               getStorageMethod.CustomAttributes.Add(
+                   new CodeAttributeDeclaration("StorageKeyBuilder",
+                   new CodeAttributeArgument[] {
+                                new CodeAttributeArgument(new CodePrimitiveExpression($"{Module.Name}Storage")),
+                                new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params"))
                    }));
 
                if (parameterDeclaration != null)
