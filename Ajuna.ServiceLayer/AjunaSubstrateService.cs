@@ -7,8 +7,6 @@ namespace Ajuna.ServiceLayer
 {
    public class AjunaSubstrateService
    {
-      private SubstrateClient Client;
-
       private readonly AjunaSubstrateStorage GameStorage = new AjunaSubstrateStorage();
 
       public async Task InitializeAsync(AjunaStorageServiceConfiguration configuration)
@@ -18,12 +16,7 @@ namespace Ajuna.ServiceLayer
          //
          // Initialize substrate client API
          //
-         Log.Information("substrate client connecting to {uri}", configuration.Endpoint);
-
-         Client = new SubstrateClient(configuration.Endpoint);
-         await Client.ConnectAsync(configuration.CancellationToken);
-
-         Log.Information("substrate client connected");
+         await configuration.DataProvider.ConnectAsync(configuration.CancellationToken);
 
          //
          // Initialize storage systems
@@ -32,10 +25,10 @@ namespace Ajuna.ServiceLayer
          //
          // While we are loading storages any storage subscription notification will
          // wait to be processed until the initialization is complete.
-         await Client.State.SubscribeStorageAsync(null, GameStorage.OnStorageUpdate);
+         await configuration.DataProvider.SubscribeStorageAsync(GameStorage.OnStorageUpdate);
 
          // Load storages we are interested in.
-         await GameStorage.InitializeAsync(Client, configuration.Storages);
+         await GameStorage.InitializeAsync(configuration.DataProvider, configuration.Storages);
 
          // Start processing subscriptions.
          GameStorage.StartProcessingChanges();

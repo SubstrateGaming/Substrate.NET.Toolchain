@@ -9,7 +9,7 @@ namespace Ajuna.ServiceLayer
    {
       public CancellationToken CancellationToken { get; set; }
 
-      public Uri Endpoint { get; set; }
+      public IStorageDataProvider DataProvider { get; set; }
 
       public List<IStorage> Storages { get; set; }
    }

@@ -5,6 +5,6 @@ namespace Ajuna.ServiceLayer.Storage
 {
    public interface IStorage
    {
-      Task InitializeAsync(SubstrateClient client);
+      Task InitializeAsync(IStorageDataProvider dataProvider);
    }
 }

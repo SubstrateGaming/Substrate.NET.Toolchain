@@ -44,16 +44,16 @@ namespace Ajuna.ServiceLayer
          throw new KeyNotFoundException($"Could not find storage {typeof(T).Name} in storage list.");
       }
 
-      internal async Task InitializeAsync(SubstrateClient client, List<IStorage> storages)
+      internal async Task InitializeAsync(IStorageDataProvider dataProvider, List<IStorage> storages)
       {
          Storages = storages;
 
-         InitializeMetadataDisplayNames(client);
+         InitializeMetadataDisplayNames(dataProvider.GetMetadata());
          InitializeStorageChangeListener();
 
          foreach (IStorage storage in Storages)
          {
-            await storage.InitializeAsync(client);
+            await storage.InitializeAsync(dataProvider);
          }
       }
 
@@ -73,9 +73,9 @@ namespace Ajuna.ServiceLayer
          }
       }
 
-      private void InitializeMetadataDisplayNames(SubstrateClient client)
+      private void InitializeMetadataDisplayNames(MetaData metadata)
       {
-         foreach (PalletModule palletModule in client.MetaData.NodeMetadata.Modules.Values)
+         foreach (PalletModule palletModule in metadata.NodeMetadata.Modules.Values)
          {
             string moduleName = palletModule.Name;
 

@@ -1,4 +1,5 @@
 using Ajuna.ServiceLayer;
+using Ajuna.ServiceLayer.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace Ajuna.AspNetCore.Extensions
          }
 
          // Register storages for dependency injection..
-         foreach (var storage in configuration.Storages)
+         foreach (IStorage storage in configuration.Storages)
          {
             Type[] interfaceTypes = storage.GetType().GetInterfaces();
             if (interfaceTypes.Length > 0)

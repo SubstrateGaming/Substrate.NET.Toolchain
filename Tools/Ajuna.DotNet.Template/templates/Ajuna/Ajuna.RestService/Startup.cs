@@ -24,6 +24,7 @@ namespace Ajuna.RestService
    {
       private readonly CancellationTokenSource CTS = new CancellationTokenSource();
 
+      private IStorageDataProvider _storageDataProvider;
       private readonly StorageSubscriptionChangeDelegate _storageChangeDelegate = new StorageSubscriptionChangeDelegate();
 
       /// <summary>
@@ -51,11 +52,14 @@ namespace Ajuna.RestService
          // Configure web sockets to allow clients to subscribe to storage changes.
          services.AddAjunaSubscriptionHandler<StorageSubscriptionHandler>();
 
+         // Configure data provider
+         _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
+
          // Configure storage services
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
          {
             CancellationToken = CTS.Token,
-            Endpoint = new Uri(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944"),
+            DataProvider = _storageDataProvider,
             Storages = GetRuntimeStorages()
          });
 
@@ -80,7 +84,7 @@ namespace Ajuna.RestService
          return Assembly.GetExecutingAssembly()
             .GetTypes()
             .Where(anyType => anyType.IsClass && typeof(IStorage).IsAssignableFrom(anyType))
-            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageChangeDelegate }))
+            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageDataProvider, _storageChangeDelegate }))
             .ToList();
       }
 

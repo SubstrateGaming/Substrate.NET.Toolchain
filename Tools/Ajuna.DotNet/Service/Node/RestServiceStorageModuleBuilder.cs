@@ -2,6 +2,7 @@
 using Ajuna.DotNet.Service.Node.Base;
 using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Meta;
+using Ajuna.ServiceLayer.Storage;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -76,6 +77,7 @@ namespace Ajuna.DotNet.Service.Node
             Attributes = MemberAttributes.Public | MemberAttributes.Final,
          };
 
+         constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("IStorageDataProvider"), "storageDataProvider"));
          constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("IStorageChangeDelegate"), "storageChangeDelegate"));
          constructor.Comments.AddRange(GetComments(new string[] { $"{ClassName} constructor." }));
 
@@ -88,7 +90,7 @@ namespace Ajuna.DotNet.Service.Node
             ReturnType = new CodeTypeReference("async Task")
 
          };
-         var clientParamter = new CodeParameterDeclarationExpression(typeof(SubstrateClient), "client");
+         var clientParamter = new CodeParameterDeclarationExpression(typeof(IStorageDataProvider), "dataProvider");
          initializeAsyncMethod.Parameters.Add(clientParamter);
          targetClass.Members.Add(initializeAsyncMethod);
          initializeAsyncMethod.Comments.AddRange(GetComments(new string[] { $"Connects to all storages and initializes the change subscription handling." }));
@@ -171,15 +173,15 @@ namespace Ajuna.DotNet.Service.Node
                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), prop.Name),
                new CodeObjectCreateExpression(field.Type,
                    new CodeExpression[] {
-                                new CodePrimitiveExpression($"{Module.Storage.Prefix}.{entry.Name}"),
-                                new CodeVariableReferenceExpression("storageChangeDelegate")
+                        new CodePrimitiveExpression($"{Module.Storage.Prefix}.{entry.Name}"),
+                        new CodeVariableReferenceExpression("storageDataProvider"),
+                        new CodeVariableReferenceExpression("storageChangeDelegate")
                    })));
 
                // create initialize records foreach storage
                CodeMethodInvokeExpression initializeAsyncInvoke = new(
                    new CodeVariableReferenceExpression($"await {prop.Name}"),
                    "InitializeAsync", new CodeExpression[] {
-                                new CodeVariableReferenceExpression("client"),
                                 new CodePrimitiveExpression(Module.Storage.Prefix),
                                 new CodePrimitiveExpression(entry.Name)
                });
