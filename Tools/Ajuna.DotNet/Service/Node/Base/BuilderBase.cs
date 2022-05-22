@@ -136,7 +136,8 @@ namespace Ajuna.DotNet.Service.Node.Base
 
             if (Files.Contains(path))
             {
-               Console.WriteLine($"Overwriting[BUG]: {path}");
+               // TODO (svnscha) Why does this happen?
+               // Console.WriteLine($"Overwriting[BUG]: {path}");
                //path += _index++;
             }
             else

@@ -194,7 +194,7 @@ namespace Ajuna.DotNet
          var filePath = ResolveRestServiceAssembly(configuration);
          if (string.IsNullOrEmpty(filePath))
          {
-            Log.Error("Could not resolve RestService assembly file path. Please build the RestService before generating RestClient project classes.");
+            Log.Information("Could not resolve RestService assembly file path. Please build the RestService before generating RestClient project classes.");
             return;
          }
 
@@ -254,15 +254,22 @@ namespace Ajuna.DotNet
 
          var framework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
-#if DEBUG
-         var fp = ResolveServicePath(framework, "Debug", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
-         if (File.Exists(fp))
-            return fp;
-#else
          var fp = ResolveServicePath(framework, "Release", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
          if (File.Exists(fp))
             return fp;
-#endif
+         else
+         {
+            Log.Information("The file path {path} does not exist.", fp);
+         }
+
+         // Check if Debug version exist (if Release isn't available)
+         fp = ResolveServicePath(framework, "Debug", configuration.Projects.RestService, configuration.RestClientSettings.ServiceAssembly);
+         if (File.Exists(fp))
+            return fp;
+         else
+         {
+            Log.Information("The file path {path} does not exist.", fp);
+         }
 
          return string.Empty;
       }

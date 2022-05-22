@@ -340,14 +340,6 @@ namespace Ajuna.DotNet.Service.Generators.Base
 
       private Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
       {
-         foreach (var test in nodeTypes)
-         {
-            if (test.Value.Path != null && test.Value.Path.Length == 2)
-            {
-               Console.WriteLine(test.Value.Path[0]);
-            }
-         }
-
          var nodeType = nodeTypes.Select(p => p.Value).Where(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType).FirstOrDefault();
          if (nodeType is null or not NodeTypeVariant)
          {
@@ -389,8 +381,9 @@ namespace Ajuna.DotNet.Service.Generators.Base
          }
 
          var generics = _countPaths.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
-         generics.ForEach(p =>
-             Console.WriteLine($"Fixing generic: {p} - please do it properly, once you've more time!!!"));
+         
+         // TODO (svnscha) Should really fix that instead of logging?
+         // generics.ForEach(p => Console.WriteLine($"Fixing generic: {p} - please do it properly, once you've more time!!!"));
 
          _countPaths.Clear();
          for (uint id = 0; id < nodeTypes.Keys.Max(); id++)
