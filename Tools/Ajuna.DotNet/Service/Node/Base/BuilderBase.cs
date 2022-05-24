@@ -44,9 +44,8 @@ namespace Ajuna.DotNet.Service.Node.Base
             Imports = {
                new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Base"),
                new CodeNamespaceImport("System.Collections.Generic")
-            }
+                           }
          };
-
          TargetUnit = new CodeCompileUnit();
          TargetUnit.Namespaces.Add(ImportsNamespace);
 
@@ -171,6 +170,18 @@ namespace Ajuna.DotNet.Service.Node.Base
          string path = Path.Combine(space.ToArray());
 
          return path;
+      }
+
+      protected void AddTargetClassCustomAttributes(CodeTypeDeclaration targetClass, NodeType typeDef)
+      {
+         // TODO (svnscha): Change version to given metadata version.
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Metadata.V14"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Attributes"));
+
+         targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("NodeType"), new CodeAttributeArgument(
+            new CodeSnippetExpression($"TypeDefEnum.{typeDef.TypeDef}")
+         )));
+
       }
    }
 }

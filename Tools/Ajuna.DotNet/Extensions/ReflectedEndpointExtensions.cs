@@ -1,9 +1,13 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
+using Ajuna.NetApi.Model.Types;
+using Ajuna.NetApi.Model.Types.Base;
+using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Ajuna.DotNet.Extensions
@@ -180,7 +184,7 @@ namespace Ajuna.DotNet.Extensions
       /// <param name="endpoint"></param>
       /// <param name="controller">The owning controller.</param>
       /// <param name="clientNamespace"></param>
-      internal static CodeTypeMember ToUnitTestMethod(this IReflectedEndpoint endpoint, IReflectedController controller, CodeNamespace clientNamespace)
+      internal static CodeTypeMember ToUnitTestMethod(this IReflectedEndpoint endpoint, CodeTypeMemberCollection currentMembers, IReflectedController controller, CodeNamespace clientNamespace)
       {
          var method = new CodeMemberMethod()
          {
@@ -191,17 +195,6 @@ namespace Ajuna.DotNet.Extensions
          };
 
          method.CustomAttributes.Add(new CodeAttributeDeclaration("Test"));
-
-         //
-         // Any unit test method uses the same pseudo-content.
-         // var x = new MockupClient(..)
-         // var setTestDataResult = x.SetXXX
-         // Assert.IsTrue(setTestDataResult)
-         //
-         // var y = new Client(..)
-         // var data = get(..)
-         //
-         // isequal
 
          clientNamespace.Imports.Add(new CodeNamespaceImport($"{clientNamespace.Name.Replace("Test", "Mockup")}.Clients"));
          clientNamespace.Imports.Add(new CodeNamespaceImport($"{clientNamespace.Name.Replace("Test.", "")}.Clients"));
@@ -221,12 +214,69 @@ namespace Ajuna.DotNet.Extensions
             // Not actually required since we use fully qualified items but we want to get rid of that later.
             clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
 
-            // var mockupValue = new()
-            method.Statements.Add(
-               new CodeVariableDeclarationStatement(
-                  new CodeTypeReference(defaultReturnType.Type),
-                  "mockupValue",
-                  new CodeObjectCreateExpression(defaultReturnType.Type)));
+            string[] expectedBaseTypeNames = new string[]
+            {
+               "BaseEnum",
+            };
+
+            string[] expectedTypeNames = new string[]
+            {
+               "BaseVec",
+               "BaseTuple"
+            };
+
+            bool needCustomInitializerFunction = false;
+
+            IEnumerable<PropertyInfo> fields = defaultReturnType.Type.GetTypeInfo().DeclaredProperties;
+            PropertyInfo[] usableFields = fields.Where(field => field.CanWrite && field.SetMethod.IsPublic && field.Name != "TypeSize").ToArray();
+
+            if (usableFields.Length == 0)
+            {
+               // We can directly initialize the given type (most likely).
+               needCustomInitializerFunction = true;
+
+               if (!IsPrimitiveType(defaultReturnType.Type)
+                  && !expectedTypeNames.Any(x => defaultReturnType.Type.Name.Contains(x))
+                  && !expectedBaseTypeNames.Any(x => defaultReturnType.Type.BaseType.Name.Contains(x)))
+               {
+                  method.Statements.Add(new CodeSnippetStatement());
+                  method.Statements.Add(new CodeCommentStatement($"TODO: The type {defaultReturnType.Type.Name} cannot be initialized with testing values from code generator."));
+                  method.Statements.Add(new CodeCommentStatement("Please test this manually."));
+                  method.Statements.Add(new CodeSnippetStatement());
+
+                  // Not supported. Make sure to default initialize the type (even empty).
+                  needCustomInitializerFunction = false;
+               }
+            }
+
+            if (needCustomInitializerFunction)
+            {
+               // var mockupValue = new()
+               method.Statements.Add(
+                  new CodeVariableDeclarationStatement(
+                     new CodeTypeReference(defaultReturnType.Type),
+                     "mockupValue",
+                     new CodeMethodInvokeExpression(
+                        CallGetTestValue(currentMembers, defaultReturnType.Type))));
+            }
+            else
+            {
+               // var mockupValue = new()
+               method.Statements.Add(
+                  new CodeVariableDeclarationStatement(
+                     new CodeTypeReference(defaultReturnType.Type),
+                     "mockupValue",
+                     new CodeObjectCreateExpression(defaultReturnType.Type)));
+
+               foreach (PropertyInfo field in usableFields)
+               {
+                  method.Statements.Add(new CodeAssignStatement(
+                     new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("mockupValue"), field.Name),
+                     new CodeMethodInvokeExpression(
+                        CallGetTestValue(currentMembers, field.PropertyType))
+                  ));
+               }
+            }
          }
          else
          {
@@ -326,34 +376,6 @@ namespace Ajuna.DotNet.Extensions
          method.Statements.Add(new CodeCommentStatement("Test that the expected mockup value matches the actual result from RPC service."));
          method.Statements.Add(new CodeSnippetExpression("Assert.AreEqual(mockupValue.Encode(), rpcResult.Encode())"));
 
-
-         // TODO (svnscha) finish.
-
-         //IReflectedEndpointRequest request = endpoint.GetRequest();
-
-         //IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
-         //if (defaultReturnType != null)
-         //{
-         //   // Ensure we are importing all model items.
-         //   // Not actually required since we use fully qualified items but we want to get rid of that later.
-         //   clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
-         //   method.Parameters.Add(new CodeParameterDeclarationExpression(defaultReturnType.Type, "value"));
-         //}
-
-         //method.Parameters.AddRange(request.ToInterfaceMethodParameters());
-
-         //string endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
-
-         //method.Statements.Add(
-         //   new CodeMethodReturnStatement(
-         //      new CodeMethodInvokeExpression(
-         //         new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendMockupRequestAsync"),
-         //         new CodeVariableReferenceExpression("_httpClient"),
-         //         new CodePrimitiveExpression(endpointUrl),
-         //         new CodeSnippetExpression(GetEncodeCallParameterList(method.Parameters, ".Encode()"))
-         //   ))
-         //);
-
          return method;
       }
 
@@ -362,6 +384,76 @@ namespace Ajuna.DotNet.Extensions
       /// </summary>
       /// <param name="endpoint">The endpoint to query the client method name for.</param>
       internal static string GetClientMethodName(this IReflectedEndpoint endpoint) => endpoint.Name;
+
+      private static bool IsPrimitiveType(Type type)
+      {
+         var expectedPrimitiveTypes = new Type[]
+         {
+            typeof(Bool),
+            typeof(I8),
+            typeof(I16),
+            typeof(I32),
+            typeof(I64),
+            typeof(I128),
+            typeof(I256),
+            typeof(U8),
+            typeof(U16),
+            typeof(U32),
+            typeof(U64),
+            typeof(U128),
+            typeof(U256),
+            typeof(PrimChar),
+            typeof(Str),
+         };
+
+         return expectedPrimitiveTypes.Contains(type);
+      }
+
+      private static CodeMethodReferenceExpression CallGetTestValue(CodeTypeMemberCollection currentMembers, Type type)
+      {
+         if (IsPrimitiveType(type))
+         {
+            return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), $"GetTestValue{type.Name}");
+         }
+
+         if (type.IsGenericType)
+         {
+            return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type));
+         }
+
+         // Build a wrapper function for the type
+         string functionName = $"GetTestValue{type.Name}";
+         
+         bool found = false;
+         foreach (CodeTypeMember member in currentMembers)
+         {
+            if (member.Name == functionName)
+            {
+               found = true;
+               break;
+            }
+         }
+
+         if (!found)
+         {
+            var method = new CodeMemberMethod()
+            {
+               Name = functionName,
+               ReturnType = new CodeTypeReference(type),
+               Attributes = MemberAttributes.Public | MemberAttributes.Final,
+            };
+
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(
+                        new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type)))));
+
+            currentMembers.Add(method);
+         }
+
+         return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), functionName);
+      }
 
       // Utility to build a parameter list separated by comma.
       private static string GetEncodeCallParameterList(CodeParameterDeclarationExpressionCollection parameters, string nameSuffix)

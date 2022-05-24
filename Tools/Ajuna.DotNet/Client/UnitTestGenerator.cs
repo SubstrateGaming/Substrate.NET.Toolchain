@@ -63,7 +63,7 @@ namespace Ajuna.DotNet.Client
          // Generate methods.
          foreach (IReflectedEndpoint endpoint in controller.GetEndpoints())
          {
-            controllerClient.Members.Add(endpoint.ToUnitTestMethod(controller, clientNamespace));
+            controllerClient.Members.Add(endpoint.ToUnitTestMethod(controllerClient.Members, controller, clientNamespace));
          }
 
          ClientCodeWriter.Write(_configuration, dom, clientNamespace, controller.GetUnitTestClassName());

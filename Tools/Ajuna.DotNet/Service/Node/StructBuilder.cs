@@ -132,6 +132,7 @@ namespace Ajuna.DotNet.Service.Node
 
          // add comment to class if exists
          targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
+         AddTargetClassCustomAttributes(targetClass, typeDef);
 
          typeNamespace.Types.Add(targetClass);
 
