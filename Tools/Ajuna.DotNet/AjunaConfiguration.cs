@@ -24,6 +24,15 @@ namespace Ajuna.DotNet
 
       [JsonProperty("rest_client")]
       public string RestClient { get; set; }
+
+      [JsonIgnore]
+      public string RestClientMockup
+      {
+         get
+         {
+            return $"{RestClient}.Mockup";
+         }
+      }
    }
 
    public class AjunaConfigurationMetadata

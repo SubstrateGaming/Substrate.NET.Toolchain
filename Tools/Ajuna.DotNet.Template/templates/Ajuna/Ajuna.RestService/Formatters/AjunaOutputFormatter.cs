@@ -45,9 +45,38 @@ namespace Ajuna.RestService.Formatters
       /// <param name="selectedEncoding">The given encoding.</param>
       public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
       {
-         var httpContext = context.HttpContext;
+         HttpContext httpContext = context.HttpContext;
          var baseType = (BaseType)context.Object;
-         await httpContext.Response.WriteAsync(JsonConvert.SerializeObject(new { result = Utils.Bytes2HexString(baseType.Encode()) }), selectedEncoding);
+
+         if (baseType == null)
+         {
+            await NotFoundAsync(selectedEncoding, httpContext);
+         }
+         else
+         {
+            try
+            {
+               byte[] encoded = baseType.Encode();
+               if (encoded == null)
+               {
+                  await NotFoundAsync(selectedEncoding, httpContext);
+               }
+               else
+               {
+                  await httpContext.Response.WriteAsync(JsonConvert.SerializeObject(new { result = Utils.Bytes2HexString(encoded) }), selectedEncoding);
+               }
+            }
+            catch (ArgumentNullException)
+            {
+               await NotFoundAsync(selectedEncoding, httpContext);
+            }
+         }
+      }
+
+      private static async Task NotFoundAsync(Encoding selectedEncoding, HttpContext httpContext)
+      {
+         httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+         await httpContext.Response.WriteAsync(string.Empty, selectedEncoding);
       }
    }
 }

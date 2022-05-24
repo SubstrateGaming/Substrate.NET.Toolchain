@@ -224,6 +224,14 @@ namespace Ajuna.DotNet
          // Build and execute the client generator.
          var client = new ClientGenerator(clientConfiguration);
          client.Generate(Log.Logger);
+
+         // Mockup client.
+         clientConfiguration.OutputDirectory = Path.Join(Environment.CurrentDirectory, configuration.Projects.RestClientMockup);
+         clientConfiguration.BaseNamespace = configuration.Projects.RestClientMockup;
+         clientConfiguration.ClientClassname = "MockupClient";
+
+         var mockupClient = new MockupClientGenerator(clientConfiguration);
+         mockupClient.Generate(Log.Logger);
       }
 
       /// <summary>

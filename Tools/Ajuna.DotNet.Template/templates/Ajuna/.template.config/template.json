@@ -50,9 +50,11 @@
       }
    },
    "primaryOutputs": [
+      { "path": "Ajuna.RestService/Ajuna.RestService.csproj" },
       { "path": "Ajuna.NetApiExt/Ajuna.NetApiExt.csproj" },
       { "path": "Ajuna.RestClient/Ajuna.RestClient.csproj" },
-      { "path": "Ajuna.RestService/Ajuna.RestService.csproj" }
+      { "path": "Ajuna.RestClient.Mockup/Ajuna.RestClient.Mockup.csproj" },
+      { "path": "Ajuna.RestClient.Test/Ajuna.RestClient.Test.csproj" },
    ],
    "postActions": [
       {

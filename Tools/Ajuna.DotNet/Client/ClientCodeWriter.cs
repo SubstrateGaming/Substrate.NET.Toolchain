@@ -32,6 +32,7 @@ namespace Ajuna.DotNet.Client
          code = PatchNamespaceUsage(code, ns.Imports);
          code = PatchPublicVirtualWithAsyncPublic(code);
          code = PatchSendRequestFunctionCall(code);
+         code = PatchSendMockupRequestFunctionCall(code);
          File.WriteAllText(filePath, code);
       }
       /// <summary>
@@ -91,6 +92,14 @@ namespace Ajuna.DotNet.Client
       private static string PatchSendRequestFunctionCall(string code)
       {
          return code.Replace("return this.SendRequest", "return await SendRequest");
+      }
+
+      /// <summary>
+      /// Dirty workaround: This will patch "return this.SendRequest" to "return await SendRequest"
+      /// </summary>
+      private static string PatchSendMockupRequestFunctionCall(string code)
+      {
+         return code.Replace("return this.SendMockupRequestAsync", "return await SendMockupRequestAsync");
       }
    }
 }
