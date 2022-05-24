@@ -33,6 +33,8 @@ namespace Ajuna.DotNet.Client
          code = PatchPublicVirtualWithAsyncPublic(code);
          code = PatchSendRequestFunctionCall(code);
          code = PatchSendMockupRequestFunctionCall(code);
+         code = PatchMockupSetResultFunctionCall(code);
+         code = PatchMockupGetResultFunctionCall(code);
          File.WriteAllText(filePath, code);
       }
       /// <summary>
@@ -101,5 +103,22 @@ namespace Ajuna.DotNet.Client
       {
          return code.Replace("return this.SendMockupRequestAsync", "return await SendMockupRequestAsync");
       }
+
+      /// <summary>
+      /// Dirty workaround: This will patch "bool mockupSetResult = " to "bool mockupSetResult = await "
+      /// </summary>
+      private static string PatchMockupSetResultFunctionCall(string code)
+      {
+         return code.Replace("bool mockupSetResult = ", "bool mockupSetResult = await ");
+      }
+
+      /// <summary>
+      /// Dirty workaround: This will patch "rpcResult = " to "rpcResult = await "
+      /// </summary>
+      private static string PatchMockupGetResultFunctionCall(string code)
+      {
+         return code.Replace("rpcResult = ", "rpcResult = await ");
+      }
+
    }
 }

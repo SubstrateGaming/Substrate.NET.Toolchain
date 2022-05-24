@@ -120,6 +120,8 @@ namespace Ajuna.DotNet
          Log.Information("Using NetApi Project = {name}", configuration.Projects.NetApi);
          Log.Information("Using RestService Project = {name}", configuration.Projects.RestService);
          Log.Information("Using RestClient Project = {name}", configuration.Projects.RestClient);
+         Log.Information("Using RestClient.Mockup Project = {name}", configuration.Projects.RestClientMockup);
+         Log.Information("Using RestClient.Test Project = {name}", configuration.Projects.RestClientTest);
          Log.Information("Using RestService assembly for RestClient = {assembly}", configuration.RestClientSettings.ServiceAssembly);
          Log.Information("Using Node Runtime = {runtime}", configuration.Metadata.Runtime);
 
@@ -232,6 +234,14 @@ namespace Ajuna.DotNet
 
          var mockupClient = new MockupClientGenerator(clientConfiguration);
          mockupClient.Generate(Log.Logger);
+
+         // Unit test.
+         clientConfiguration.OutputDirectory = Path.Join(Environment.CurrentDirectory, configuration.Projects.RestClientTest);
+         clientConfiguration.BaseNamespace = configuration.Projects.RestClientTest;
+         clientConfiguration.ClientClassname = string.Empty;
+
+         var unitTestClient = new UnitTestGenerator(clientConfiguration);
+         unitTestClient.Generate(Log.Logger);
       }
 
       /// <summary>

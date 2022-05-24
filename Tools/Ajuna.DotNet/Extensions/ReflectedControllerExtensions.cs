@@ -109,6 +109,45 @@ namespace Ajuna.DotNet.Extensions
       }
 
       /// <summary>
+      /// Converts a reflected controller to a unit test class that tests the generated Client.
+      /// The generated client class is public but sealed.
+      /// </summary>
+      /// <param name="controller">The controller to convert.</param>
+      /// <param name="currentNamespace">The current namespace where the generated class will be attached to.</param>
+      internal static CodeTypeDeclaration ToUnitTest(this IReflectedController controller, CodeNamespace currentNamespace)
+      {
+         // Client class
+         var target = new CodeTypeDeclaration(controller.GetUnitTestClassName())
+         {
+            TypeAttributes = TypeAttributes.Public | TypeAttributes.Class,
+         };
+
+         // Generate private member variabels.
+         target.Members.AddHttpClientPrivateMember(currentNamespace);
+         target.BaseTypes.Add(new CodeTypeReference("ClientTestBase"));
+
+         var method = new CodeMemberMethod()
+         {
+            Name = "Setup",
+            // TODO (svnscha): Should use async modifier directly to avoid patching the code.
+            ReturnType = new CodeTypeReference(typeof(void)),
+            Attributes = MemberAttributes.Public | MemberAttributes.Final,
+            CustomAttributes = new CodeAttributeDeclarationCollection()
+            {
+               new CodeAttributeDeclaration("SetUp")
+            }
+         };
+
+         method.Statements.Add(new CodeAssignStatement(
+            new CodeVariableReferenceExpression("_httpClient"),
+            new CodeSnippetExpression("CreateHttpClient()")));
+
+         target.Members.Add(method);
+
+         return target;
+      }
+
+      /// <summary>
       /// Returns an interface name for the given controller.
       /// The generated name uses the following pattern: I[Controller]Client.
       /// </summary>
@@ -135,6 +174,13 @@ namespace Ajuna.DotNet.Extensions
       /// </summary>
       /// <param name="controller">The controller to query the client class name for.</param>
       internal static string GetMockupClientClassName(this IReflectedController controller) => $"{controller.Name}MockupClient";
+
+      /// <summary>
+      /// Returns a unit test client class name for the given controller.
+      /// The generated name uses the following pattern: [Controller]Client.
+      /// </summary>
+      /// <param name="controller">The controller to query the client class name for.</param>
+      internal static string GetUnitTestClassName(this IReflectedController controller) => $"{controller.Name}ClientTest";
 
       /// <summary>
       /// Returns an URL string for the given controller.

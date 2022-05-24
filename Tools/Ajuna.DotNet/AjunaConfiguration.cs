@@ -33,6 +33,15 @@ namespace Ajuna.DotNet
             return $"{RestClient}.Mockup";
          }
       }
+
+      [JsonIgnore]
+      public string RestClientTest
+      {
+         get
+         {
+            return $"{RestClient}.Test";
+         }
+      }
    }
 
    public class AjunaConfigurationMetadata
