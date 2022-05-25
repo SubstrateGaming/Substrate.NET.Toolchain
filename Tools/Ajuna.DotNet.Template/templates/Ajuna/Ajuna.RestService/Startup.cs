@@ -1,6 +1,6 @@
 using Ajuna.AspNetCore;
 using Ajuna.AspNetCore.Extensions;
-using Ajuna.RestService.Formatters;
+using Juce.RestService.Formatters;
 using Ajuna.ServiceLayer;
 using Ajuna.ServiceLayer.Storage;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.IO;
 
 namespace Ajuna.RestService
 {
@@ -53,7 +54,10 @@ namespace Ajuna.RestService
          services.AddAjunaSubscriptionHandler<StorageSubscriptionHandler>();
 
          // Configure data provider
-         _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
+         // _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
+
+         // TODO (svnscha): Remove hard coded path.
+         _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText(@"D:\tmp\code\test\.ajuna\metadata.json"));
 
          // Configure storage services
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
@@ -63,18 +67,19 @@ namespace Ajuna.RestService
             Storages = GetRuntimeStorages()
          });
 
+         // Register data provider as singleton.
+         services.AddSingleton(_storageDataProvider);
 
          services.AddRouting(options => { options.LowercaseQueryStrings = true; options.LowercaseUrls = true; });
          services.AddControllers(options =>
          {
-            options.OutputFormatters.Clear();
             options.OutputFormatters.Add(new AjunaOutputFormatter());
          });
 
          services.AddSwaggerGen(c =>
          {
             c.CustomSchemaIds(type => type.ToString());
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ajuna.RestService", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Juce.RestService", Version = "v1" });
          });
 
       }
@@ -105,7 +110,7 @@ namespace Ajuna.RestService
          app.UseSwaggerUI(
              c =>
              {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ajuna.RestService v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Juce.RestService v1");
              }
          );
 

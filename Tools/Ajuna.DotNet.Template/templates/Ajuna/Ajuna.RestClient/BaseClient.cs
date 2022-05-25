@@ -1,4 +1,4 @@
-﻿﻿using Ajuna.NetApi;
+﻿using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Types.Base;
 using Newtonsoft.Json;
 using System;
@@ -17,7 +17,7 @@ namespace Ajuna.RestClient
 
       protected async Task<T> SendRequestAsync<T>(HttpClient client, string endpoint, string key)
       {
-         return await SendRequestAsync<T>(client, $"{endpoint}?key={Uri.EscapeDataString(key)}");
+         return await SendRequestAsync<T>(client, $"{endpoint}?key={Uri.EscapeDataString(key.ToLower())}");
       }
 
       protected async Task<T> SendRequestAsync<T>(HttpClient client, string endpoint)
@@ -32,7 +32,13 @@ namespace Ajuna.RestClient
             throw new InvalidOperationException($"Invalid response received while sending request to {endpoint}!");
          }
 
-         var json = JsonConvert.DeserializeObject<DefaultResponse>(await response.Content.ReadAsStringAsync());
+         string content = await response.Content.ReadAsStringAsync();
+         if (string.IsNullOrEmpty(content))
+         {
+            throw new InvalidOperationException($"Invalid response data received while sending request to {endpoint}!");
+         }
+
+         DefaultResponse json = JsonConvert.DeserializeObject<DefaultResponse>(content);
          var resultingObject = (T)Activator.CreateInstance(typeof(T));
          var resultObjectBaseType = resultingObject as BaseType;
          resultObjectBaseType.Create(Utils.HexToByteArray(json.Result));

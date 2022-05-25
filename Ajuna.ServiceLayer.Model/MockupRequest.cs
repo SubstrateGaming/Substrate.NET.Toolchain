@@ -11,6 +11,6 @@ namespace Ajuna.ServiceLayer.Model
       public byte[] Value { get; set; }
 
       [JsonProperty("key")]
-      public byte[] Key { get; set; }
+      public string Key { get; set; }
    }
 }

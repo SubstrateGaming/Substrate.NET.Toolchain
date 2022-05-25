@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ajuna.NetApi" Version="0.1.6" />
+		<PackageReference Include="Ajuna.NetApi" Version="0.1.8" />
 	</ItemGroup>
 
 </Project>

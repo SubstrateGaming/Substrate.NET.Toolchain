@@ -369,6 +369,16 @@ namespace Ajuna.DotNet.Service.Node
          // if it is a map fill hashers and key
          if (hashers != null && hashers.Length > 0)
          {
+            CodeExpression keyReference = new CodeArrayCreateExpression(
+               new CodeTypeReference(typeof(IType)),
+               new CodeArgumentReferenceExpression[] {
+                  new CodeArgumentReferenceExpression("key")
+            });
+
+            if (hashers.Length > 1)
+            {
+               keyReference = new CodeSnippetExpression("key.Value");
+            }
 
             codeExpressions = new CodeExpression[] {
                         new CodePrimitiveExpression(module),
@@ -379,10 +389,7 @@ namespace Ajuna.DotNet.Service.Node
                             new CodeTypeReference(typeof(Storage.Hasher)),
                                 hashers.Select(p => new CodePropertyReferenceExpression(
                                     new CodeTypeReferenceExpression(typeof(Storage.Hasher)), p.ToString())).ToArray()),
-                        new CodeArrayCreateExpression(
-                            new CodeTypeReference(typeof(IType)),
-                            new CodeArgumentReferenceExpression[] {
-                                new CodeArgumentReferenceExpression("key") })
+                        keyReference
                     };
          }
 

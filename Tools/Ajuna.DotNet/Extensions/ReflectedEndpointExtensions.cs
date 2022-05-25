@@ -125,7 +125,7 @@ namespace Ajuna.DotNet.Extensions
                         new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendRequestAsync", invokeArgumentType),
                         new CodeVariableReferenceExpression("_httpClient"),
                         new CodePrimitiveExpression(endpointUrl),
-                        new CodeSnippetExpression(GetEncodeCallParameterList(method.Parameters, string.Empty))
+                        new CodeSnippetExpression(GetEncodeCallParameterList(method.Parameters))
                   ))
                );
             }
@@ -163,17 +163,47 @@ namespace Ajuna.DotNet.Extensions
 
          method.Parameters.AddRange(request.ToInterfaceMethodParameters());
 
-         string endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
+         string endpointUrl = $"{controller.Name.Replace("Controller", string.Empty)}/{endpoint.Endpoint}";
 
-         method.Statements.Add(
-            new CodeMethodReturnStatement(
-               new CodeMethodInvokeExpression(
-                  new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendMockupRequestAsync"),
-                  new CodeVariableReferenceExpression("_httpClient"),
-                  new CodePrimitiveExpression(endpointUrl),
-                  new CodeSnippetExpression(GetEncodeCallParameterList(method.Parameters, ".Encode()"))
-            ))
-         );
+         CodeExpression valueReference = new CodeSnippetExpression("value.Encode()");
+
+         if (method.Parameters.Count == 1)
+         {
+            // Params() without key argument
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendMockupRequestAsync"),
+                     new CodeVariableReferenceExpression("_httpClient"),
+                     new CodePrimitiveExpression(endpointUrl),
+                     valueReference,
+                     new CodeMethodInvokeExpression(
+                        new CodeMethodReferenceExpression(
+                           new CodeTypeReferenceExpression(request.KeyBuilderAttribute.ClassType),
+                           request.KeyBuilderAttribute.MethodName))
+               ))
+            );
+         }
+         else
+         {
+            // Params() with key argument
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "SendMockupRequestAsync"),
+                     new CodeVariableReferenceExpression("_httpClient"),
+                     new CodePrimitiveExpression(endpointUrl),
+                     valueReference,
+                     new CodeMethodInvokeExpression(
+                        new CodeMethodReferenceExpression(
+                           new CodeTypeReferenceExpression(request.KeyBuilderAttribute.ClassType),
+                           request.KeyBuilderAttribute.MethodName),
+                        new CodeVariableReferenceExpression("key"))
+               ))
+            );
+         }
+
+         
 
          return method;
       }
@@ -190,7 +220,7 @@ namespace Ajuna.DotNet.Extensions
          {
             Name = endpoint.GetClientMethodName().Replace("Get", "Test"),
             // TODO (svnscha): Should use async modifier directly to avoid patching the code.
-            ReturnType = new CodeTypeReference(typeof(void)),
+            ReturnType = new CodeTypeReference(typeof(Task)),
             Attributes = MemberAttributes.Public,
          };
 
@@ -227,8 +257,7 @@ namespace Ajuna.DotNet.Extensions
 
             bool needCustomInitializerFunction = false;
 
-            IEnumerable<PropertyInfo> fields = defaultReturnType.Type.GetTypeInfo().DeclaredProperties;
-            PropertyInfo[] usableFields = fields.Where(field => field.CanWrite && field.SetMethod.IsPublic && field.Name != "TypeSize").ToArray();
+            PropertyInfo[] usableFields = GetUsableFields(defaultReturnType.Type);
 
             if (usableFields.Length == 0)
             {
@@ -256,26 +285,13 @@ namespace Ajuna.DotNet.Extensions
                   new CodeVariableDeclarationStatement(
                      new CodeTypeReference(defaultReturnType.Type),
                      "mockupValue",
-                     new CodeMethodInvokeExpression(
-                        CallGetTestValue(currentMembers, defaultReturnType.Type))));
+                     new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, defaultReturnType.Type))));
             }
             else
             {
                // var mockupValue = new()
-               method.Statements.Add(
-                  new CodeVariableDeclarationStatement(
-                     new CodeTypeReference(defaultReturnType.Type),
-                     "mockupValue",
-                     new CodeObjectCreateExpression(defaultReturnType.Type)));
-
-               foreach (PropertyInfo field in usableFields)
-               {
-                  method.Statements.Add(new CodeAssignStatement(
-                     new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("mockupValue"), field.Name),
-                     new CodeMethodInvokeExpression(
-                        CallGetTestValue(currentMembers, field.PropertyType))
-                  ));
-               }
+               method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(defaultReturnType.Type), "mockupValue", new CodeObjectCreateExpression(defaultReturnType.Type)));
+               InitializeUsableFields("mockupValue", currentMembers, method, usableFields);
             }
          }
          else
@@ -288,15 +304,21 @@ namespace Ajuna.DotNet.Extensions
 
          if (methodParams.Count == 1)
          {
+            IReflectedEndpointRequest request = endpoint.GetRequest();
+
+            Type underlyingMethodType = request.GetInterfaceMethodParameterType();
+
             // var mockupKey = new ()
             method.Statements.Add(
                new CodeVariableDeclarationStatement(
                   methodParams[0].Type,
                   "mockupKey",
-                  new CodeObjectCreateExpression(methodParams[0].Type)));
+                  new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, underlyingMethodType))));
 
             // Empty line
             method.Statements.Add(new CodeSnippetStatement());
+
+
 
             // bool mockupSetResult = await mockupClient. XXXXX (mockupValue, mockupKey);
             method.Statements.Add(new CodeCommentStatement($"Save the previously generated mockup value in RPC service storage."));
@@ -309,7 +331,8 @@ namespace Ajuna.DotNet.Extensions
                         new CodeVariableReferenceExpression("mockupClient"), endpoint.GetClientMethodName().Replace("Get", "Set")),
                      new CodeVariableReferenceExpression("mockupValue"),
                      new CodeVariableReferenceExpression("mockupKey")
-               )));
+                  )
+               ));
          }
          else
          {
@@ -379,11 +402,41 @@ namespace Ajuna.DotNet.Extensions
          return method;
       }
 
+      private static void InitializeUsableFields(string variableReference, CodeTypeMemberCollection currentMembers, CodeMemberMethod method, PropertyInfo[] usableFields)
+      {
+         foreach (PropertyInfo field in usableFields)
+         {
+            method.Statements.Add(new CodeAssignStatement(
+               new CodeFieldReferenceExpression(new CodeVariableReferenceExpression(variableReference), field.Name),
+               new CodeMethodInvokeExpression(
+                  CallGetTestValue(currentMembers, field.PropertyType))
+            ));
+         }
+      }
+
+      private static PropertyInfo[] GetUsableFields(Type type)
+      {
+         IEnumerable<PropertyInfo> fields = type.GetTypeInfo().DeclaredProperties;
+         return fields.Where(field => field.CanWrite && field.SetMethod.IsPublic && field.Name != "TypeSize").ToArray();
+      }
+
       /// <summary>
       /// Returns a client method name for the given endpoint.
       /// </summary>
       /// <param name="endpoint">The endpoint to query the client method name for.</param>
       internal static string GetClientMethodName(this IReflectedEndpoint endpoint) => endpoint.Name;
+
+      private static bool IsInitializerField(string typeName) => IsArrayInitializerField(typeName) || IsBaseTupleField(typeName);
+
+      private static bool IsArrayInitializerField(string typeName)
+      {
+         return typeName == "Arr32U8" || typeName == "BaseVec`1";
+      }
+
+      private static bool IsBaseTupleField(string typeName)
+      {
+         return typeName.StartsWith("BaseTuple");
+      }
 
       private static bool IsPrimitiveType(Type type)
       {
@@ -416,22 +469,27 @@ namespace Ajuna.DotNet.Extensions
             return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), $"GetTestValue{type.Name}");
          }
 
+         // Build a wrapper function for the type
+         // TODO (svnscha): Remove again.
+         string functionName = $"GetTestValue{type.Name}";
+
+         bool found = false;
+
          if (type.IsGenericType)
          {
-            return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type));
-         }
+            // Generate a unique suffix to avoid name collisions.
+            int i = 0;
 
-         // Build a wrapper function for the type
-         string functionName = $"GetTestValue{type.Name}";
-         
-         bool found = false;
-         foreach (CodeTypeMember member in currentMembers)
-         {
-            if (member.Name == functionName)
+            do
             {
-               found = true;
-               break;
-            }
+               i++;
+               functionName = $"GetTestValueGeneric{i}";
+
+            } while (HasFunctionDeclared(currentMembers, functionName));
+         }
+         else
+         {
+            found = HasFunctionDeclared(currentMembers, functionName);
          }
 
          if (!found)
@@ -443,25 +501,147 @@ namespace Ajuna.DotNet.Extensions
                Attributes = MemberAttributes.Public | MemberAttributes.Final,
             };
 
-            method.Statements.Add(
-               new CodeMethodReturnStatement(
-                  new CodeMethodInvokeExpression(
-                     new CodeMethodReferenceExpression(
-                        new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type)))));
-
             currentMembers.Add(method);
+
+            method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(type), "result"));
+
+            if (IsPrimitiveType(type))
+            {
+               method.Statements.Add(new CodeAssignStatement(
+                  new CodeVariableReferenceExpression("result"),
+                  new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type)))
+               ));
+            }
+            else 
+            {
+               method.Statements.Add(new CodeAssignStatement(
+                  new CodeVariableReferenceExpression("result"),
+                  new CodeObjectCreateExpression(new CodeTypeReference(type))
+               ));
+            }
+
+            if (IsInitializerField(type.Name))
+            {
+               // Can be directly initialized.
+               GenerateFieldInitializer(currentMembers, new CodeVariableReferenceExpression("result"), method, type);
+            }
+            else
+            {
+               // Requires property initialization.
+               PropertyInfo[] usableFields = GetUsableFields(type);
+               if (usableFields.Length > 0)
+               {
+                  // Now we must initialize the fields in this complex type.
+                  foreach (PropertyInfo field in usableFields)
+                  {
+                     method.Statements.Add(new CodeAssignStatement(
+                        new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("result"), field.Name),
+                        new CodeObjectCreateExpression(new CodeTypeReference(field.PropertyType)))
+                     );
+
+                     Type propType = field.PropertyType;
+                     CodeExpression targetObject = new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("result"), field.Name);
+                     GenerateFieldInitializer(currentMembers, targetObject, method, propType);
+                  }
+
+               }
+            }
+
+            method.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result")));
          }
 
          return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), functionName);
       }
 
+      private static bool HasFunctionDeclared(CodeTypeMemberCollection currentMembers, string functionName)
+      {
+         bool found = false;
+         foreach (CodeTypeMember member in currentMembers)
+         {
+            if (member.Name == functionName)
+            {
+               found = true;
+               break;
+            }
+         }
+
+         return found;
+      }
+
+      private static void GenerateFieldInitializer(CodeTypeMemberCollection currentMembers, CodeExpression targetObject, CodeMemberMethod method, Type propType)
+      {
+         // Now some types require extended initialization.
+         // Array<> for example.
+         if (IsArrayInitializerField(propType.Name))
+         {
+            Type elementType = null;
+
+            int elementArraySize = 0;
+
+            // Here we want to generate an array with 32 instances of U8.
+            if (propType.IsGenericType)
+            {
+               elementType = propType.GetGenericArguments()[0];
+               elementArraySize = 1;
+            }
+            else
+            {
+               // Get the actual array type field.
+               FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.Name == "_value");
+               elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+               elementArraySize = 32;
+            }
+
+            if (elementType == null)
+            {
+               method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator ould not deduct array initializer element type!"))));
+               return;
+            }
+
+            var arrayInitialize = new CodeExpression[elementArraySize];
+            for (int i = 0; i < elementArraySize; i++)
+            {
+               arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, elementType));
+            }
+
+            method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", new CodeArrayCreateExpression(elementType, arrayInitialize)));
+         }
+         else if (IsBaseTupleField(propType.Name))
+         {
+            if (!propType.IsGenericType)
+            {
+               method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator could not deduct BaseTuple field."))));
+               return;
+            }
+
+            Type[] arguments = propType.GenericTypeArguments.ToArray();
+
+            var arrayInitialize = new CodeExpression[arguments.Length];
+            for (int i = 0; i < arguments.Length; i++)
+            {
+               arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, arguments[i]));
+            }
+
+            // Get the actual BaseTuple IType type field.
+            FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.FieldType.IsArray);
+            Type elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+
+            method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", arrayInitialize));
+         }
+         else
+         {
+            // TODO (svnscha): How to handle?
+         }
+      }
+
       // Utility to build a parameter list separated by comma.
-      private static string GetEncodeCallParameterList(CodeParameterDeclarationExpressionCollection parameters, string nameSuffix)
+      private static string GetEncodeCallParameterList(CodeParameterDeclarationExpressionCollection parameters)
       {
          var parameterList = new List<string>();
          foreach (CodeParameterDeclarationExpression parameter in parameters)
          {
-            parameterList.Add($"{parameter.Name}{nameSuffix}");
+            // parameterList.Add($"{parameter.Name}{nameSuffix}");
+            parameterList.Add(parameter.Name);
          }
 
          return string.Join(", ", parameterList);

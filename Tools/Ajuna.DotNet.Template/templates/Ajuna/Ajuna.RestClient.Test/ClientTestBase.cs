@@ -1,7 +1,6 @@
 ﻿using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.Net.Http;
-using System.Numerics;
 
 namespace Ajuna.RestClient.Test
 {
@@ -25,121 +24,117 @@ namespace Ajuna.RestClient.Test
 
       protected Bool GetTestValueBool()
       {
-         return new Bool
-         {
-            Value = true
-         };
+         var result = new Bool();
+         result.Create(true);
+         return result;
       }
 
       protected I8 GetTestValueI8()
       {
-         return new I8
-         {
-            Value = sbyte.MaxValue
-         };
+         var result = new I8();
+         result.Create(sbyte.MaxValue);
+         return result;
       }
 
       protected I16 GetTestValueI16()
       {
-         return new I16
-         {
-            Value = Int16.MaxValue
-         };
+         var result = new I16();
+         result.Create(Int16.MaxValue);
+         return result;
       }
 
       protected I32 GetTestValueI32()
       {
-         return new I32
-         {
-            Value = Int32.MaxValue
-         };
+         var result = new I32();
+         result.Create(Int32.MaxValue);
+         return result;
       }
 
       protected I64 GetTestValueI64()
       {
-         return new I64
-         {
-            Value = Int64.MaxValue
-         };
+         var result = new I64();
+         result.Create(Int64.MaxValue);
+         return result;
       }
 
       protected I128 GetTestValueI128()
       {
-         return new I128
-         {
-            Value = BigInteger.Pow(2, 64)
-         };
+         var result = new I128();
+         result.Create(GetTestValueBytes(result.TypeSize));
+         return result;
       }
 
       protected I256 GetTestValueI256()
       {
-         return new I256
+         var result = new I256();
+         result.Create(GetTestValueBytes(result.TypeSize));
+         return result;
+      }
+
+      protected byte[] GetTestValueBytes(int typeSize)
+      {
+         byte[] data = new byte[typeSize];
+         for (int i = 0; i < data.Length; i++)
          {
-            Value = BigInteger.Pow(2, 128)
-         };
+            data[i] = byte.MaxValue;
+         }
+         return data;
       }
 
       protected U8 GetTestValueU8()
       {
-         return new U8
-         {
-            Value = byte.MaxValue
-         };
+         var result = new U8();
+         result.Create(byte.MaxValue);
+         return result;
       }
 
       protected U16 GetTestValueU16()
       {
-         return new U16
-         {
-            Value = UInt16.MaxValue
-         };
+         var result = new U16();
+         result.Create(UInt16.MaxValue);
+         return result;
       }
 
       protected U32 GetTestValueU32()
       {
-         return new U32
-         {
-            Value = UInt32.MaxValue
-         };
+         var result = new U32();
+         result.Create(UInt32.MaxValue);
+         return result;
       }
 
       protected U64 GetTestValueU64()
       {
-         return new U64
-         {
-            Value = UInt64.MaxValue
-         };
+         var result = new U64();
+         result.Create(UInt64.MaxValue);
+         return result;
       }
 
       protected U128 GetTestValueU128()
       {
-         return new U128
-         {
-            Value = BigInteger.Pow(2, 64)
-         };
+         var result = new U128();
+         result.Create(GetTestValueBytes(result.TypeSize));
+         return result;
       }
 
       protected U256 GetTestValueU256()
       {
-         return new U256
-         {
-            Value = BigInteger.Pow(2, 128)
-         };
+         var result = new U256();
+         result.Create(GetTestValueBytes(result.TypeSize));
+         return result;
       }
 
       protected PrimChar GetTestValuePrimChar()
       {
-         return new PrimChar
-         {
-            Value = 'a'
-         };
+         var result = new PrimChar();
+         result.Create('a');
+         return result;
       }
 
       protected Str GetTestValueStr()
       {
-         var x = new Str();
-         x.Create("ajuna");
-         return x;
+         var result = new Str();
+         result.Create("ajuna");
+         return result;
       }
    }
 }

@@ -44,5 +44,12 @@ namespace Ajuna.ServiceLayer
       {
          await Client.State.SubscribeStorageAsync(null, onStorageUpdate);
       }
+
+      public void BroadcastLocalStorageChange(string id, StorageChangeSet changeSet)
+      {
+         // Do not implement this in this provider.
+         // This is only useful for mockup providers.
+         throw new NotImplementedException();
+      }
    }
 }

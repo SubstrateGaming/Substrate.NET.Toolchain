@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Ajuna.ServiceLayer.Attributes;
 
 namespace Ajuna.DotNet.Client.Services
 {
@@ -29,6 +30,7 @@ namespace Ajuna.DotNet.Client.Services
          return assembly
             .GetTypes()
             .Where(type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(baseType))
+            .Where(type => !type.CustomAttributes.Any(x => x.AttributeType == typeof(AjunaControllerIgnoreAttribute)))
             .Select(controllerType => new ReflectedController(controllerType) { })
             .ToList();
       }

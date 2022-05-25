@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Ajuna.ServiceLayer.Model;
 using System;
+using Ajuna.NetApi.Model.Types.Base;
 
 namespace Ajuna.RestClient.Mockup
 {
    public class MockupBaseClient
    {
-      protected async Task<bool> SendMockupRequestAsync(HttpClient client, string storage, byte[] value, byte[] key)
+      protected async Task<bool> SendMockupRequestAsync(HttpClient client, string storage, byte[] value, string key)
       {
          var request = new MockupRequest()
          {
@@ -30,7 +31,7 @@ namespace Ajuna.RestClient.Mockup
 
       protected async Task<bool> SendMockupRequestAsync(HttpClient client, string storage, byte[] value)
       {
-         return await SendMockupRequestAsync(client, storage, value, new byte[] { });
+         return await SendMockupRequestAsync(client, storage, value, string.Empty);
       }
 
       private async Task<bool> ProcessResponseAsync(HttpResponseMessage response)
@@ -39,8 +40,8 @@ namespace Ajuna.RestClient.Mockup
          {
             throw new InvalidOperationException($"Invalid response received while sending request to mockup endpoint!");
          }
-
-         return JsonConvert.DeserializeObject<bool>(await response.Content.ReadAsStringAsync());
+         string result = await response.Content.ReadAsStringAsync();
+         return JsonConvert.DeserializeObject<bool>(result);
       }
    }
 }

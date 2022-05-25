@@ -1,5 +1,4 @@
-﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Meta;
+﻿using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Rpc;
 using Ajuna.NetApi.Model.Types;
 using Ajuna.NetApi.Model.Types.Metadata;
@@ -14,6 +13,7 @@ namespace Ajuna.ServiceLayer
    public class AjunaMockupDataProvider : IStorageDataProvider
    {
       private readonly MetaData _metaData;
+      private Action<string, StorageChangeSet> _storageUpdate;
 
       public AjunaMockupDataProvider(string metadata)
       {
@@ -45,7 +45,13 @@ namespace Ajuna.ServiceLayer
 
       public Task SubscribeStorageAsync(Action<string, StorageChangeSet> onStorageUpdate)
       {
+         _storageUpdate = onStorageUpdate;
          return Task.FromResult(0);
+      }
+
+      public void BroadcastLocalStorageChange(string id, StorageChangeSet changeSet)
+      {
+         _storageUpdate?.Invoke(id, changeSet);
       }
    }
 }

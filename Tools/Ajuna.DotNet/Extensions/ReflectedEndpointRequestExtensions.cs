@@ -55,5 +55,34 @@ namespace Ajuna.DotNet.Extensions
          }
          return result;
       }
+
+      internal static Type GetInterfaceMethodParameterType(this IReflectedEndpointRequest request)
+      {
+         var parameterList = request.GetParameters().ToList();
+         if (parameterList.Count != 1)
+         {
+            throw new NotImplementedException();
+         }
+
+         // Get the parameter.
+         IReflectedEndpointNamedType parameter = parameterList[0];
+
+         // All parameters are generated with "string key" at this point.
+         // Once the Rest Service learns new parameters we have to update the client generator accordingly. We cannot
+         // predict at this point what may will come in future.
+         if (parameter.Name != "key" || parameter.Type != typeof(string))
+         {
+            throw new NotImplementedException();
+         }
+
+         // The key parameter is an encoded parameter depending on the controller storage access implementation.
+         StorageKeyBuilderAttribute att = request.KeyBuilderAttribute;
+         if (att.ParameterType != typeof(void))
+         {
+            return att.ParameterType;
+         }
+
+         return parameter.Type;
+      }
    }
 }

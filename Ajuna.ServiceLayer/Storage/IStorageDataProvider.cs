@@ -15,5 +15,6 @@ namespace Ajuna.ServiceLayer.Storage
       MetaData GetMetadata();
       Task ConnectAsync(CancellationToken cancellationToken);
       Task SubscribeStorageAsync(Action<string, StorageChangeSet> onStorageUpdate);
+      void BroadcastLocalStorageChange(string id, StorageChangeSet changeSet);
    }
 }
