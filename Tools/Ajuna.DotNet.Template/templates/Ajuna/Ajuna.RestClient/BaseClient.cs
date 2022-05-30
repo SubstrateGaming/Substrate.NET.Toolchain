@@ -1,5 +1,5 @@
 ﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Types.Base;
+using Ajuna.NetApi.Model.Types;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
@@ -40,7 +40,7 @@ namespace Ajuna.RestClient
 
          DefaultResponse json = JsonConvert.DeserializeObject<DefaultResponse>(content);
          var resultingObject = (T)Activator.CreateInstance(typeof(T));
-         var resultObjectBaseType = resultingObject as BaseType;
+         var resultObjectBaseType = resultingObject as IType;
          resultObjectBaseType.Create(Utils.HexToByteArray(json.Result));
 
          return resultingObject;

@@ -1,6 +1,10 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
+using Ajuna.NetApi;
+using Ajuna.NetApi.Attributes;
+using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types;
 using Ajuna.NetApi.Model.Types.Base;
+using Ajuna.NetApi.Model.Types.Metadata.V14;
 using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.CodeDom;
@@ -203,7 +207,7 @@ namespace Ajuna.DotNet.Extensions
             );
          }
 
-         
+
 
          return method;
       }
@@ -230,12 +234,7 @@ namespace Ajuna.DotNet.Extensions
          clientNamespace.Imports.Add(new CodeNamespaceImport($"{clientNamespace.Name.Replace("Test.", "")}.Clients"));
 
          // var mockupClient = new MockupClient()
-         method.Statements.Add(new CodeCommentStatement($"Construct new Mockup client to test with."));
-         method.Statements.Add(
-            new CodeVariableDeclarationStatement(
-               new CodeTypeReference(controller.GetMockupClientClassName()),
-               "mockupClient",
-               new CodeSnippetExpression($"new {controller.GetMockupClientClassName()}(_httpClient)")));
+         GenerateNewMockupClientStatement(controller, method);
 
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)
@@ -244,55 +243,41 @@ namespace Ajuna.DotNet.Extensions
             // Not actually required since we use fully qualified items but we want to get rid of that later.
             clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
 
-            string[] expectedBaseTypeNames = new string[]
-            {
-               "BaseEnum",
-            };
+            //string[] expectedBaseTypeNames = new string[]
+            //{
+            //   "BaseEnum",
+            //};
 
-            string[] expectedTypeNames = new string[]
-            {
-               "BaseVec",
-               "BaseTuple"
-            };
+            //string[] expectedTypeNames = new string[]
+            //{
+            //   "BaseVec",
+            //   "BaseTuple"
+            //};
 
-            bool needCustomInitializerFunction = false;
+            //bool needCustomInitializerFunction = false;
 
-            PropertyInfo[] usableFields = GetUsableFields(defaultReturnType.Type);
+            //PropertyInfo[] usableFields = GetUsableFields(defaultReturnType.Type);
 
-            if (usableFields.Length == 0)
-            {
-               // We can directly initialize the given type (most likely).
-               needCustomInitializerFunction = true;
+            //if (usableFields.Length == 0)
+            //{
+            //   // We can directly initialize the given type (most likely).
+            //   needCustomInitializerFunction = true;
 
-               if (!IsPrimitiveType(defaultReturnType.Type)
-                  && !expectedTypeNames.Any(x => defaultReturnType.Type.Name.Contains(x))
-                  && !expectedBaseTypeNames.Any(x => defaultReturnType.Type.BaseType.Name.Contains(x)))
-               {
-                  method.Statements.Add(new CodeSnippetStatement());
-                  method.Statements.Add(new CodeCommentStatement($"TODO: The type {defaultReturnType.Type.Name} cannot be initialized with testing values from code generator."));
-                  method.Statements.Add(new CodeCommentStatement("Please test this manually."));
-                  method.Statements.Add(new CodeSnippetStatement());
+            //   if (!IsPrimitiveType(defaultReturnType.Type)
+            //      && !expectedTypeNames.Any(x => defaultReturnType.Type.Name.Contains(x))
+            //      && !expectedBaseTypeNames.Any(x => defaultReturnType.Type.BaseType.Name.Contains(x)))
+            //   {
+            //      method.Statements.Add(new CodeSnippetStatement());
+            //      method.Statements.Add(new CodeCommentStatement($"TODO: The type {defaultReturnType.Type.Name} cannot be initialized with testing values from code generator."));
+            //      method.Statements.Add(new CodeCommentStatement("Please test this manually."));
+            //      method.Statements.Add(new CodeSnippetStatement());
 
-                  // Not supported. Make sure to default initialize the type (even empty).
-                  needCustomInitializerFunction = false;
-               }
-            }
+            //      // Not supported. Make sure to default initialize the type (even empty).
+            //      needCustomInitializerFunction = false;
+            //   }
+            //}
 
-            if (needCustomInitializerFunction)
-            {
-               // var mockupValue = new()
-               method.Statements.Add(
-                  new CodeVariableDeclarationStatement(
-                     new CodeTypeReference(defaultReturnType.Type),
-                     "mockupValue",
-                     new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, defaultReturnType.Type))));
-            }
-            else
-            {
-               // var mockupValue = new()
-               method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(defaultReturnType.Type), "mockupValue", new CodeObjectCreateExpression(defaultReturnType.Type)));
-               InitializeUsableFields("mockupValue", currentMembers, method, usableFields);
-            }
+            GenerateMockupValueStatement(currentMembers, method, defaultReturnType.Type);
          }
          else
          {
@@ -309,16 +294,10 @@ namespace Ajuna.DotNet.Extensions
             Type underlyingMethodType = request.GetInterfaceMethodParameterType();
 
             // var mockupKey = new ()
-            method.Statements.Add(
-               new CodeVariableDeclarationStatement(
-                  methodParams[0].Type,
-                  "mockupKey",
-                  new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, underlyingMethodType))));
+            GenerateMockupKeyStatement(currentMembers, method, underlyingMethodType);
 
             // Empty line
             method.Statements.Add(new CodeSnippetStatement());
-
-
 
             // bool mockupSetResult = await mockupClient. XXXXX (mockupValue, mockupKey);
             method.Statements.Add(new CodeCommentStatement($"Save the previously generated mockup value in RPC service storage."));
@@ -353,9 +332,7 @@ namespace Ajuna.DotNet.Extensions
          }
 
          // Assert.IsTrue(mockupSetResult)
-         method.Statements.Add(new CodeSnippetStatement());
-         method.Statements.Add(new CodeCommentStatement("Test that the expected mockup value was handled successfully from RPC service."));
-         method.Statements.Add(new CodeSnippetExpression("Assert.IsTrue(mockupSetResult)"));
+         GenerateAssertIsTrueStatement(method);
 
          // Empty line
          method.Statements.Add(new CodeSnippetStatement());
@@ -402,17 +379,44 @@ namespace Ajuna.DotNet.Extensions
          return method;
       }
 
-      private static void InitializeUsableFields(string variableReference, CodeTypeMemberCollection currentMembers, CodeMemberMethod method, PropertyInfo[] usableFields)
+      private static void GenerateAssertIsTrueStatement(CodeMemberMethod method)
       {
-         foreach (PropertyInfo field in usableFields)
-         {
-            method.Statements.Add(new CodeAssignStatement(
-               new CodeFieldReferenceExpression(new CodeVariableReferenceExpression(variableReference), field.Name),
-               new CodeMethodInvokeExpression(
-                  CallGetTestValue(currentMembers, field.PropertyType))
-            ));
-         }
+         method.Statements.Add(new CodeSnippetStatement());
+         method.Statements.Add(new CodeCommentStatement("Test that the expected mockup value was handled successfully from RPC service."));
+         method.Statements.Add(new CodeSnippetExpression("Assert.IsTrue(mockupSetResult)"));
       }
+
+      private static void GenerateMockupKeyStatement(CodeTypeMemberCollection currentMembers, CodeMemberMethod method, Type underlyingMethodType)
+      {
+         method.Statements.Add(new CodeVariableDeclarationStatement(underlyingMethodType, "mockupKey", new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, underlyingMethodType))));
+      }
+
+      private static void GenerateMockupValueStatement(CodeTypeMemberCollection currentMembers, CodeMemberMethod method, Type elementType)
+      {
+         method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(elementType), "mockupValue", new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, elementType))));
+      }
+
+      private static void GenerateNewMockupClientStatement(IReflectedController controller, CodeMemberMethod method)
+      {
+         method.Statements.Add(new CodeCommentStatement($"Construct new Mockup client to test with."));
+         method.Statements.Add(
+            new CodeVariableDeclarationStatement(
+               new CodeTypeReference(controller.GetMockupClientClassName()),
+               "mockupClient",
+               new CodeSnippetExpression($"new {controller.GetMockupClientClassName()}(_httpClient)")));
+      }
+
+      //private static void InitializeUsableFields(string variableReference, CodeTypeMemberCollection currentMembers, CodeMemberMethod method, PropertyInfo[] usableFields)
+      //{
+      //   foreach (PropertyInfo field in usableFields)
+      //   {
+      //      method.Statements.Add(new CodeAssignStatement(
+      //         new CodeFieldReferenceExpression(new CodeVariableReferenceExpression(variableReference), field.Name),
+      //         new CodeMethodInvokeExpression(
+      //            CallGetTestValue(currentMembers, field.PropertyType))
+      //      ));
+      //   }
+      //}
 
       private static PropertyInfo[] GetUsableFields(Type type)
       {
@@ -426,22 +430,64 @@ namespace Ajuna.DotNet.Extensions
       /// <param name="endpoint">The endpoint to query the client method name for.</param>
       internal static string GetClientMethodName(this IReflectedEndpoint endpoint) => endpoint.Name;
 
-      private static bool IsInitializerField(string typeName) => IsArrayInitializerField(typeName) || IsBaseTupleField(typeName);
-
-      private static bool IsArrayInitializerField(string typeName)
+      private static bool IsArrayInitializerField(Type type)
       {
-         return typeName == "Arr32U8" || typeName == "BaseVec`1";
+         if (type.Name == "BaseVec`1")
+         {
+            return true;
+         }
+
+         AjunaNodeTypeAttribute attribute = type.GetCustomAttribute<AjunaNodeTypeAttribute>(false);
+         if (attribute == null)
+         {
+            return false;
+         }
+
+         return attribute.NodeType == TypeDefEnum.Array;
       }
 
-      private static bool IsBaseTupleField(string typeName)
+      private static bool IsBaseTupleField(Type type)
       {
-         return typeName.StartsWith("BaseTuple");
+         return type.Name.StartsWith("BaseTuple");
       }
+
+      private static bool IsBaseOptField(Type type)
+      {
+         return type.Name.StartsWith("BaseOpt");
+      }
+
+      private static bool IsBaseComField(Type type)
+      {
+         return type.Name.StartsWith("BaseCom");
+      }
+
+      private static bool IsBaseEnumType(Type type)
+      {
+         if (type.BaseType?.Name == "BaseEnum`1")
+         {
+            return true;
+         }
+
+         return false;
+      }
+
+      private static bool IsBaseEnumExtType(Type type)
+      {
+         if (type.BaseType?.Name.StartsWith("BaseEnumExt`") ?? false)
+         {
+            return true;
+         }
+
+         return false;
+      }
+
+      private static bool IsPrimitiveSystemTypeBoolean(Type type) => type == typeof(bool);
 
       private static bool IsPrimitiveType(Type type)
       {
          var expectedPrimitiveTypes = new Type[]
          {
+            typeof(BaseVoid),
             typeof(Bool),
             typeof(I8),
             typeof(I16),
@@ -469,88 +515,270 @@ namespace Ajuna.DotNet.Extensions
             return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), $"GetTestValue{type.Name}");
          }
 
-         // Build a wrapper function for the type
-         // TODO (svnscha): Remove again.
-         string functionName = $"GetTestValue{type.Name}";
+         //// Build a wrapper function for the type
+         //// TODO (svnscha): Remove again.
+         //string functionName = $"GetTestValue{type.Name}";
 
-         bool found = false;
+         //if (functionName == "GetTestValueBalanceLock")
+         //{
+         //   Debugger.Break();
+         //}
 
-         if (type.IsGenericType)
+         //bool found = false;
+
+         //if (type.IsGenericType)
+         //{
+         //   // Generate a unique suffix to avoid name collisions.
+         //   int i = 0;
+
+         //   do
+         //   {
+         //      i++;
+         //      functionName = $"GetTestValueGeneric{i}";
+
+         //   } while (HasFunctionDeclared(currentMembers, functionName));
+         //}
+         //else
+         //{
+         //   found = HasFunctionDeclared(currentMembers, functionName);
+         //}
+
+         //if (!found)
+         //{
+         //   var method = new CodeMemberMethod()
+         //   {
+         //      Name = functionName,
+         //      ReturnType = new CodeTypeReference(type),
+         //      Attributes = MemberAttributes.Public | MemberAttributes.Final,
+         //   };
+
+         //   currentMembers.Add(method);
+
+         //   method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(type), "result"));
+
+         //   if (IsPrimitiveType(type))
+         //   {
+         //      method.Statements.Add(new CodeAssignStatement(
+         //         new CodeVariableReferenceExpression("result"),
+         //         new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type)))
+         //      ));
+         //   }
+         //   else 
+         //   {
+         //      method.Statements.Add(new CodeAssignStatement(
+         //         new CodeVariableReferenceExpression("result"),
+         //         new CodeObjectCreateExpression(new CodeTypeReference(type))
+         //      ));
+         //   }
+
+         //   if (IsInitializerField(type.Name))
+         //   {
+         //      // Can be directly initialized.
+         //      GenerateFieldInitializer(currentMembers, new CodeVariableReferenceExpression("result"), method, type);
+         //   }
+         //   else
+         //   {
+         //      // Requires property initialization.
+         //      PropertyInfo[] usableFields = GetUsableFields(type);
+         //      if (usableFields.Length > 0)
+         //      {
+         //         // Now we must initialize the fields in this complex type.
+         //         foreach (PropertyInfo field in usableFields)
+         //         {
+         //            method.Statements.Add(new CodeAssignStatement(
+         //               new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("result"), field.Name),
+         //               new CodeObjectCreateExpression(new CodeTypeReference(field.PropertyType)))
+         //            );
+
+         //            Type propType = field.PropertyType;
+         //            CodeExpression targetObject = new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("result"), field.Name);
+         //            GenerateFieldInitializer(currentMembers, targetObject, method, propType);
+         //         }
+
+         //      }
+         //   }
+
+         //   method.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result")));
+         //}
+
+         var method = new CodeMemberMethod()
          {
-            // Generate a unique suffix to avoid name collisions.
-            int i = 0;
+            Name = $"GetTestValue{currentMembers.Count}",
+            ReturnType = new CodeTypeReference(type),
+            Attributes = MemberAttributes.Public | MemberAttributes.Final,
+         };
 
-            do
-            {
-               i++;
-               functionName = $"GetTestValueGeneric{i}";
+         currentMembers.Add(method);
 
-            } while (HasFunctionDeclared(currentMembers, functionName));
-         }
-         else
+         method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(type), "result"));
+
+         var targetObject = new CodeVariableReferenceExpression("result");
+
+         // Initialize properties.
+         PropertyInfo[] usableFields = GetUsableFields(type);
+
+         if (!GenerateDirectInitializeStatement(currentMembers, method, type, targetObject))
          {
-            found = HasFunctionDeclared(currentMembers, functionName);
-         }
-
-         if (!found)
-         {
-            var method = new CodeMemberMethod()
+            if (usableFields.Length > 0)
             {
-               Name = functionName,
-               ReturnType = new CodeTypeReference(type),
-               Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            };
+               foreach (PropertyInfo usableField in usableFields)
+               {
+                  Type fieldType = usableField.PropertyType;
+                  var fieldReference = new CodeFieldReferenceExpression(targetObject, usableField.Name);
 
-            currentMembers.Add(method);
-
-            method.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference(type), "result"));
-
-            if (IsPrimitiveType(type))
-            {
-               method.Statements.Add(new CodeAssignStatement(
-                  new CodeVariableReferenceExpression("result"),
-                  new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetTestValue", new CodeTypeReference(type)))
-               ));
-            }
-            else 
-            {
-               method.Statements.Add(new CodeAssignStatement(
-                  new CodeVariableReferenceExpression("result"),
-                  new CodeObjectCreateExpression(new CodeTypeReference(type))
-               ));
-            }
-
-            if (IsInitializerField(type.Name))
-            {
-               // Can be directly initialized.
-               GenerateFieldInitializer(currentMembers, new CodeVariableReferenceExpression("result"), method, type);
+                  if (!GenerateDirectInitializeStatement(currentMembers, method, fieldType, fieldReference))
+                  {
+                     method.Statements.Add(new CodeAssignStatement(
+                        fieldReference,
+                        new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, fieldType))));
+                  }
+               }
             }
             else
             {
-               // Requires property initialization.
-               PropertyInfo[] usableFields = GetUsableFields(type);
-               if (usableFields.Length > 0)
-               {
-                  // Now we must initialize the fields in this complex type.
-                  foreach (PropertyInfo field in usableFields)
-                  {
-                     method.Statements.Add(new CodeAssignStatement(
-                        new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("result"), field.Name),
-                        new CodeObjectCreateExpression(new CodeTypeReference(field.PropertyType)))
-                     );
+               method.Statements.Add(new CodeCommentStatement($"NOT IMPLEMENTED >> Initialize {type.FullName}"));
+            }
+         }
+         method.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result")));
 
-                     Type propType = field.PropertyType;
-                     CodeExpression targetObject = new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("result"), field.Name);
-                     GenerateFieldInitializer(currentMembers, targetObject, method, propType);
-                  }
+         return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), method.Name);
+      }
 
-               }
+      private static bool GenerateDirectInitializeStatement(CodeTypeMemberCollection currentMembers, CodeMemberMethod method, Type fieldType, CodeExpression fieldReference)
+      {
+         if (IsArrayInitializerField(fieldType))
+         {
+            method.Statements.Add(new CodeAssignStatement(fieldReference, new CodeObjectCreateExpression(fieldType)));
+            GenerateArrayInitializeStatement(currentMembers, method, fieldType, fieldReference);
+            return true;
+         }
+         else if (IsBaseEnumType(fieldType))
+         {
+            method.Statements.Add(new CodeAssignStatement(fieldReference, new CodeObjectCreateExpression(fieldType)));
+            GenerateBaseEnumInitializeStatement(method, fieldType.BaseType, fieldReference);
+            return true;
+         }
+         else if (IsBaseEnumExtType(fieldType))
+         {
+            method.Statements.Add(new CodeAssignStatement(fieldReference, new CodeObjectCreateExpression(fieldType)));
+            GenerateBaseEnumExtInitializeStatement(currentMembers, method, fieldType.BaseType, fieldReference);
+            return true;
+         }
+         else if (IsBaseTupleField(fieldType) || IsBaseOptField(fieldType) || IsBaseComField(fieldType))
+         {
+            method.Statements.Add(new CodeAssignStatement(fieldReference, new CodeObjectCreateExpression(fieldType)));
+
+            if (fieldType.IsGenericType)
+            {
+               GenerateGenericTypeArgumentInitializeStatement(currentMembers, method, fieldType, fieldReference);
             }
 
-            method.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result")));
+            return true;
+         }
+         else if (IsPrimitiveType(fieldType))
+         {
+            method.Statements.Add(new CodeAssignStatement(
+               fieldReference,
+               new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), $"GetTestValue{fieldType.Name}")));
+
+            return true;
+         }
+         else
+         {
+            method.Statements.Add(new CodeAssignStatement(fieldReference, new CodeObjectCreateExpression(fieldType)));
          }
 
-         return new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), functionName);
+         return false;
+      }
+
+      private static void GenerateBaseEnumInitializeStatement(CodeMemberMethod method, Type propertyType, CodeExpression fieldReference)
+      {
+         Type elementType = propertyType.GetGenericArguments()[0];
+         method.Statements.Add(new CodeMethodInvokeExpression(fieldReference, "Create",
+            new CodeMethodInvokeExpression(
+               new CodeMethodReferenceExpression(
+                  new CodeThisReferenceExpression(), "GetTestValueEnum", new CodeTypeReference(elementType)))));
+      }
+
+      private static void GenerateBaseEnumExtInitializeStatement(CodeTypeMemberCollection currentMembers, CodeMemberMethod method, Type propertyType, CodeExpression fieldReference)
+      {
+         //
+         // Each enum value may have a different value type.
+         // Since we use the first enum value in GetTestValueEnum() call we can simply use the first value type argument.
+         //
+         Type elementType = propertyType.GetGenericArguments()[0];
+         Type valueType = propertyType.GetGenericArguments()[1];
+
+         method.Statements.Add(new CodeMethodInvokeExpression(fieldReference, "Create",
+            new CodeMethodInvokeExpression(
+               new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "GetTestValueEnum", new CodeTypeReference(elementType))),
+               new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, valueType))
+            ));
+      }
+
+      private static void GenerateGenericTypeArgumentInitializeStatement(CodeTypeMemberCollection currentMembers, CodeMemberMethod method, Type propertyType, CodeExpression fieldReference)
+      {
+         Type[] arguments = propertyType.GenericTypeArguments.ToArray();
+
+         var arrayInitialize = new CodeExpression[arguments.Length];
+         for (int i = 0; i < arguments.Length; i++)
+         {
+            if (IsBaseComField(propertyType))
+            {
+               arrayInitialize[i] =
+                  new CodeObjectCreateExpression(typeof(CompactInteger),
+                     new CodeFieldReferenceExpression(
+                        new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, arguments[i])),
+                        "Value"));
+            }
+            else
+            {
+               arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, arguments[i]));
+            }
+         }
+
+         // Get the actual BaseTuple IType type field.
+         FieldInfo privateValueFieldInfo = propertyType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.FieldType.IsArray);
+         Type elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+         method.Statements.Add(new CodeMethodInvokeExpression(fieldReference, "Create", arrayInitialize));
+      }
+
+      private static void GenerateArrayInitializeStatement(CodeTypeMemberCollection currentMembers, CodeMemberMethod method, Type propertyType, CodeExpression fieldReference)
+      {
+         Type elementType = null;
+
+         int elementArraySize = 0;
+
+         if (propertyType.IsGenericType)
+         {
+            // Vectors should be of "any" size. So we simply pass one.
+            elementType = propertyType.GetGenericArguments()[0];
+            elementArraySize = 1;
+         }
+         else
+         {
+            // Get the actual array type field.
+            var instanced = Activator.CreateInstance(propertyType.GetTypeInfo()) as IType;
+
+            FieldInfo privateValueFieldInfo = propertyType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.Name == "_value");
+            elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+            elementArraySize = instanced.TypeSize;
+         }
+
+         if (elementType == null)
+         {
+            method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator could not deduct array initializer element type!"))));
+         }
+         else
+         {
+            var arrayInitialize = new CodeExpression[elementArraySize];
+            for (int i = 0; i < elementArraySize; i++)
+            {
+               arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, elementType));
+            }
+
+            method.Statements.Add(new CodeMethodInvokeExpression(fieldReference, "Create", new CodeArrayCreateExpression(elementType, arrayInitialize)));
+         }
       }
 
       private static bool HasFunctionDeclared(CodeTypeMemberCollection currentMembers, string functionName)
@@ -568,71 +796,76 @@ namespace Ajuna.DotNet.Extensions
          return found;
       }
 
-      private static void GenerateFieldInitializer(CodeTypeMemberCollection currentMembers, CodeExpression targetObject, CodeMemberMethod method, Type propType)
-      {
-         // Now some types require extended initialization.
-         // Array<> for example.
-         if (IsArrayInitializerField(propType.Name))
-         {
-            Type elementType = null;
+      //private static void GenerateFieldInitializer(CodeTypeMemberCollection currentMembers, CodeExpression targetObject, CodeMemberMethod method, Type propType)
+      //{
+      //   // Now some types require extended initialization.
+      //   // Array<> for example.
+      //   if (IsArrayInitializerField(propType.Name))
+      //   {
+      //      Type elementType = null;
 
-            int elementArraySize = 0;
+      //      int elementArraySize = 0;
 
-            // Here we want to generate an array with 32 instances of U8.
-            if (propType.IsGenericType)
-            {
-               elementType = propType.GetGenericArguments()[0];
-               elementArraySize = 1;
-            }
-            else
-            {
-               // Get the actual array type field.
-               FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.Name == "_value");
-               elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
-               elementArraySize = 32;
-            }
+      //      // Here we want to generate an array with 32 instances of U8.
+      //      if (propType.IsGenericType)
+      //      {
+      //         elementType = propType.GetGenericArguments()[0];
+      //         elementArraySize = 1;
+      //      }
+      //      else
+      //      {
+      //         // Get the actual array type field.
+      //         FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.Name == "_value");
+      //         elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+      //         elementArraySize = 32;
+      //      }
 
-            if (elementType == null)
-            {
-               method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator ould not deduct array initializer element type!"))));
-               return;
-            }
+      //      if (elementType == null)
+      //      {
+      //         method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator ould not deduct array initializer element type!"))));
+      //         return;
+      //      }
 
-            var arrayInitialize = new CodeExpression[elementArraySize];
-            for (int i = 0; i < elementArraySize; i++)
-            {
-               arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, elementType));
-            }
+      //      var arrayInitialize = new CodeExpression[elementArraySize];
+      //      for (int i = 0; i < elementArraySize; i++)
+      //      {
+      //         arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, elementType));
+      //      }
 
-            method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", new CodeArrayCreateExpression(elementType, arrayInitialize)));
-         }
-         else if (IsBaseTupleField(propType.Name))
-         {
-            if (!propType.IsGenericType)
-            {
-               method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator could not deduct BaseTuple field."))));
-               return;
-            }
+      //      method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", new CodeArrayCreateExpression(elementType, arrayInitialize)));
+      //   }
+      //   else if (IsBaseTupleField(propType.Name))
+      //   {
+      //      if (!propType.IsGenericType)
+      //      {
+      //         method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator could not deduct BaseTuple field."))));
+      //         return;
+      //      }
 
-            Type[] arguments = propType.GenericTypeArguments.ToArray();
+      //      Type[] arguments = propType.GenericTypeArguments.ToArray();
 
-            var arrayInitialize = new CodeExpression[arguments.Length];
-            for (int i = 0; i < arguments.Length; i++)
-            {
-               arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, arguments[i]));
-            }
+      //      var arrayInitialize = new CodeExpression[arguments.Length];
+      //      for (int i = 0; i < arguments.Length; i++)
+      //      {
+      //         arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, arguments[i]));
+      //      }
 
-            // Get the actual BaseTuple IType type field.
-            FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.FieldType.IsArray);
-            Type elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+      //      // Get the actual BaseTuple IType type field.
+      //      FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.FieldType.IsArray);
+      //      Type elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
 
-            method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", arrayInitialize));
-         }
-         else
-         {
-            // TODO (svnscha): How to handle?
-         }
-      }
+      //      method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", arrayInitialize));
+      //   }
+      //   else
+      //   {
+      //      // TODO (svnscha): How to handle?
+      //      method.Statements.Add(new CodeAssignStatement(
+      //         targetObject,
+      //         new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, propType))
+      //         )
+      //      );
+      //   }
+      //}
 
       // Utility to build a parameter list separated by comma.
       private static string GetEncodeCallParameterList(CodeParameterDeclarationExpressionCollection parameters)

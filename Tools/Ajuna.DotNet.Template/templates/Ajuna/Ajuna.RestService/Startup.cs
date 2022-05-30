@@ -15,9 +15,29 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ajuna.RestService
 {
+   class AjunaOutputFormatterSetup : IConfigureOptions<MvcOptions>
+   {
+      void IConfigureOptions<MvcOptions>.Configure(MvcOptions options)
+      {
+         options.OutputFormatters.Insert(0, new AjunaOutputFormatter());
+      }
+   }
+
+   public static class MvcBuilderExtensions
+   {
+      public static IMvcBuilder AddAjunaOutputFormatter(this IMvcBuilder builder)
+      {
+         builder.Services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<MvcOptions>, AjunaOutputFormatterSetup>());
+         return builder;
+      }
+   }
+
    /// <summary>
    /// This class implements configuration and setting up services.
    /// </summary>
@@ -71,10 +91,8 @@ namespace Ajuna.RestService
          services.AddSingleton(_storageDataProvider);
 
          services.AddRouting(options => { options.LowercaseQueryStrings = true; options.LowercaseUrls = true; });
-         services.AddControllers(options =>
-         {
-            options.OutputFormatters.Add(new AjunaOutputFormatter());
-         });
+         services.AddControllers(options => { })
+            .AddAjunaOutputFormatter();
 
          services.AddSwaggerGen(c =>
          {
@@ -128,7 +146,8 @@ namespace Ajuna.RestService
          _storageChangeDelegate.SetSubscriptionHandler(handler);
 
          // Accept the subscriptions from now on.
-         app.UseSubscription("/ws", handler);
+         // TODO (svnscha) Enable this again.
+         // app.UseSubscription("/ws", handler);
       }
    }
 }

@@ -1,5 +1,5 @@
 ﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Types.Base;
+using Ajuna.NetApi.Model.Types;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
@@ -35,7 +35,7 @@ namespace Ajuna.RestService.Formatters
       /// <returns>Returns true whether the requested type is formattable or not.</returns>
       protected override bool CanWriteType(Type type)
       {
-         return typeof(BaseType).IsAssignableFrom(type);
+         return typeof(IType).IsAssignableFrom(type);
       }
 
       /// <summary>
@@ -46,7 +46,7 @@ namespace Ajuna.RestService.Formatters
       public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
       {
          HttpContext httpContext = context.HttpContext;
-         var baseType = (BaseType)context.Object;
+         var baseType = (IType)context.Object;
 
          if (baseType == null)
          {

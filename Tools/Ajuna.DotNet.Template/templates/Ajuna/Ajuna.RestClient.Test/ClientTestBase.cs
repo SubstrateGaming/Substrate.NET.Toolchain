@@ -1,4 +1,5 @@
-﻿using Ajuna.NetApi.Model.Types.Primitive;
+﻿using Ajuna.NetApi.Model.Types.Base;
+using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.Net.Http;
 
@@ -15,6 +16,12 @@ namespace Ajuna.RestClient.Test
 
          httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/ajuna");
          return httpClient;
+      }
+
+      protected BaseVoid GetTestValueBaseVoid()
+      {
+         var result = new BaseVoid();
+         return result;
       }
 
       protected T GetTestValue<T>() where T : class, new()
@@ -112,7 +119,11 @@ namespace Ajuna.RestClient.Test
       protected U128 GetTestValueU128()
       {
          var result = new U128();
-         result.Create(GetTestValueBytes(result.TypeSize));
+         var bytes = GetTestValueBytes(result.TypeSize);
+         bytes[15] = 0x00;
+         bytes[14] = 0x00;
+         bytes[13] = 0x00;
+         result.Create(bytes);
          return result;
       }
 
@@ -135,6 +146,11 @@ namespace Ajuna.RestClient.Test
          var result = new Str();
          result.Create("ajuna");
          return result;
+      }
+
+      protected TEnum GetTestValueEnum<TEnum>() where TEnum : struct, Enum
+      {
+         return Enum.GetValues<TEnum>()[0];
       }
    }
 }

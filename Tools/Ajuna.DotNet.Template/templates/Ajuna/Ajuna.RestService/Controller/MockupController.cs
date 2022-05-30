@@ -33,7 +33,12 @@ namespace Ajuna.RestService.Controller
       {
          if (string.IsNullOrEmpty(request.Key))
          {
-            return Ok(new JsonResult(false));
+            return Ok(false);
+         }
+
+         if (request.Value == null)
+         {
+            return Ok(false);
          }
 
          try
@@ -66,7 +71,7 @@ namespace Ajuna.RestService.Controller
             // TODO (svnscha) Will be logged as soon as we expose a configurable logging interface to the RestService template.
          }
 
-         return Ok(new JsonResult(false));
+         return Ok(false);
 
 
       }

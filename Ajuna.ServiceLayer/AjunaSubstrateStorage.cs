@@ -18,7 +18,6 @@ namespace Ajuna.ServiceLayer
       private readonly ManualResetEvent StorageStartProcessingEvent = new ManualResetEvent(false);
       private readonly object Lock = new object();
 
-      private readonly Dictionary<string, string> StorageModuleNames = new Dictionary<string, string>();
       private readonly Dictionary<string, ItemInfo> StorageModuleItemInfos = new Dictionary<string, ItemInfo>();
 
       private readonly Dictionary<string, Tuple<object, MethodInfo>> StorageChangeListener = new Dictionary<string, Tuple<object, MethodInfo>>();
@@ -79,7 +78,6 @@ namespace Ajuna.ServiceLayer
          {
             string moduleName = palletModule.Name;
 
-            // skip pallets with out storage
             if (palletModule.Storage == null || palletModule.Storage.Entries == null)
             {
                continue;
@@ -93,31 +91,21 @@ namespace Ajuna.ServiceLayer
                   StorageName = storage.Name
                };
 
-               //Log.Debug("ItemInfo[{module}, {name}]: {state}", itemInfo.ModuleName, itemInfo.StorageName, "Ok");
+               Log.Debug("loading [{module}, {name}]: {state}", itemInfo.ModuleName, itemInfo.StorageName, "Ok");
 
                string key = Utils.Bytes2HexString(
                    RequestGenerator.GetStorageKeyBytesHash(itemInfo.ModuleName, itemInfo.StorageName),
                    Utils.HexStringFormat.Prefixed)
                    .ToLower();
 
-               string moduleNameHash = $"0x{key.Substring(2, 32)}";
-               string storageItemNameHash = $"0x{key.Substring(34, 32)}";
-
-               if (!StorageModuleNames.ContainsKey(moduleNameHash))
+               if (!StorageModuleItemInfos.ContainsKey(key))
                {
-                  StorageModuleNames.Add(moduleNameHash, itemInfo.ModuleName);
-               }
-
-               if (!StorageModuleItemInfos.ContainsKey(storageItemNameHash))
-               {
-                  StorageModuleItemInfos.Add(storageItemNameHash, itemInfo);
+                  StorageModuleItemInfos.Add(key, itemInfo);
                }
             }
          }
 
-         Log.Information("loaded storage metadata module names {count}", StorageModuleNames.Count);
-
-         Log.Information("loaded storage metadata module item names {count}", StorageModuleItemInfos.Count);
+         Log.Information("loaded storage metadata modules {count}", StorageModuleItemInfos.Count);
       }
 
       [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "May be used later.")]
@@ -141,19 +129,11 @@ namespace Ajuna.ServiceLayer
                   continue;
                }
 
-               // [0x][Hash128(ModuleName)][Hash128(StorageName)]
-               string moduleNameHash = $"0x{key.Substring(2, 32)}";
+               string indexedKey = $"0x{key.Substring(2, 32)}{key.Substring(34, 32)}";
 
-               string storageItemNameHash = $"0x{key.Substring(34, 32)}";
-               if (!StorageModuleNames.TryGetValue(moduleNameHash, out _))
+               if (!StorageModuleItemInfos.TryGetValue(indexedKey, out ItemInfo itemInfo))
                {
-                  Log.Debug($"Unable to find a module with moduleNameHash {moduleNameHash}!");
-                  continue;
-               }
-
-               if (!StorageModuleItemInfos.TryGetValue(storageItemNameHash, out ItemInfo itemInfo))
-               {
-                  Log.Debug($"Unable to find a storage with storageItemNameHash {storageItemNameHash}!");
+                  Log.Debug($"Unable to find a storage module with key={indexedKey}!");
                   continue;
                }
 

@@ -176,9 +176,9 @@ namespace Ajuna.DotNet.Service.Node.Base
       {
          // TODO (svnscha): Change version to given metadata version.
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Metadata.V14"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Attributes"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi.Attributes"));
 
-         targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("NodeType"), new CodeAttributeArgument(
+         targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("AjunaNodeType"), new CodeAttributeArgument(
             new CodeSnippetExpression($"TypeDefEnum.{typeDef.TypeDef}")
          )));
 
