@@ -2,7 +2,7 @@
 This document covers requirements and guidelines to give some hints about developing the tools you find here. Please make sure you have read the [Contributing](./CONTRIBUTING.md) guidelines since this document is more technical and documents the development environment instead of general contributing guidelines.
 
 ## .NET Framework Versions
-Libraries must be compatible with `netstandard2.0` framework. Even though it is rather old, we keep support for that so that ][Unity client system](https://docs.unity3d.com/2019.1/Documentation/Manual/dotnetProfileSupport.html) can easily use the libraries here.
+Libraries must be compatible with `netstandard2.0` framework. Even though it is rather old, we keep support for that so that [Unity client system](https://docs.unity3d.com/2019.1/Documentation/Manual/dotnetProfileSupport.html) can use the libraries here.
 
 Tools and services are currently implemented to support `net5.0` and `net6.0`.
 
