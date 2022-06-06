@@ -2,7 +2,7 @@
 ![ajuna-Header-1080p_with_logo](https://user-images.githubusercontent.com/17710198/136852531-d9eb47cd-efcd-4c88-bdbf-78dfcbffe287.png)
 
 # What is Ajuna.SDK ?
-[![license](https://img.shields.io/github/license/ajuna-network/Ajuna.SDK)](https://github.com/ajuna-network/Ajuna.SDK/blob/origin/LICENSE)
+[![license](https://img.shields.io/github/license/ajuna-network/Ajuna.SDK)](./LICENSE)
 [![contributors](https://img.shields.io/github/contributors/ajuna-network/Ajuna.SDK)](https://github.com/ajuna-network/Ajuna.SDK/graphs/contributors) 
 [![GitHub issues](https://img.shields.io/github/issues/ajuna-network/Ajuna.SDK.svg)](https://github.com/ajuna-network/Ajuna.SDK/issues)
 
@@ -21,7 +21,7 @@ Below is a high-level technical overview of libraries and tools available in Aju
 | Ajuna.ServiceLayer | Implements the fundamental layer to access substrate node storage changes with a convenient API. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer)](https://www.nuget.org/packages/Ajuna.ServiceLayer/) |
 | Ajuna.ServiceLayer.Model | Implements standard classes to easily share types between services and clients. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer.Model)](https://www.nuget.org/packages/Ajuna.ServiceLayer.Model/) |
 | Ajuna.AspNetCore | Extends the service layer and implements extensions to quickly build a RESTful service to access your substrate node storage. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.AspNetCore)](https://www.nuget.org/packages/Ajuna.AspNetCore/) |
-| Ajuna.DotNET, Ajuna.DotNet.Template | .NET developer toolchain to scaffold actual projects such as a RESTful service including all the storage classes, types, and consumer clients. The projects generated with the generator toolchain are intended to be used for scaffolding and starting a substrate node service quickly. |
+| Ajuna.DotNet, Ajuna.DotNet.Template | .NET developer toolchain to scaffold actual projects such as a RESTful service including all the storage classes, types, and consumer clients. The projects generated with the generator toolchain are intended to be used for scaffolding and starting a substrate node service quickly. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.DotNet)](https://www.nuget.org/packages/Ajuna.DotNet/) [![Nuget](https://img.shields.io/nuget/v/Ajuna.DotNet.Template)](https://www.nuget.org/packages/Ajuna.DotNet.Template/)|
 
 
 ## Getting Started
@@ -51,7 +51,7 @@ Create a new directory and open a terminal of your choice in that directory and 
 ```sh
 dotnet new sln
 dotnet new ajuna \
-   --sdk_version 0.1.7 \
+   --sdk_version 0.1.8 \
    --rest_service AjunaExample.RestService \
    --net_api AjunaExample.NetApi \
    --rest_client AjunaExample.RestClient \
