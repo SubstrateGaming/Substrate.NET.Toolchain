@@ -156,7 +156,7 @@ namespace Ajuna.DotNet
       }
 
       /// <summary>
-      /// Fetches and generates .ajuna/metadata.json
+      /// Fetches and generates .ajuna/metadata.txt
       /// </summary>
       /// <param name="websocket">The websocket to connect to</param>
       /// <param name="token">Cancellation token.</param>
@@ -264,9 +264,9 @@ namespace Ajuna.DotNet
       private static string ResolveConfigurationFilePath() => Path.Join(ResolveConfigurationDirectory(), "ajuna-config.json");
 
       /// <summary>
-      /// Returns the file path to .ajuna/metadata.json
+      /// Returns the file path to .ajuna/metadata.txt
       /// </summary>
-      private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.json");
+      private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.txt");
 
       private static string ResolveRestServiceAssembly(AjunaConfiguration configuration)
       {

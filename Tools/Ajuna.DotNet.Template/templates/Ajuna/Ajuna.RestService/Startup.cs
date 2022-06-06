@@ -77,7 +77,7 @@ namespace Ajuna.RestService
          // _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
 
          // TODO (svnscha): Remove hard coded path.
-         _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText(@"D:\tmp\code\test\.ajuna\metadata.json"));
+         _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText(@"D:\tmp\code\test\.ajuna\metadata.txt"));
 
          // Configure storage services
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
