@@ -49,7 +49,7 @@ jobs:
       ##
       - name: Publish Ajuna.AspNetCore
         id: publish_nuget_1
-        uses: rohith/publish-nuget@v2
+        uses: alirezanet/publish-nuget@v3.0.4
         with:
           PROJECT_FILE_PATH: Ajuna.AspNetCore/Ajuna.AspNetCore.csproj
           VERSION_FILE_PATH: Version.props
@@ -59,7 +59,7 @@ jobs:
 
       - name: Publish Ajuna.ServiceLayer
         id: publish_nuget_2
-        uses: rohith/publish-nuget@v2
+        uses: alirezanet/publish-nuget@v3.0.4
         with:
           PROJECT_FILE_PATH: Ajuna.ServiceLayer/Ajuna.ServiceLayer.csproj
           VERSION_FILE_PATH: Version.props
@@ -69,7 +69,7 @@ jobs:
 
       - name: Publish Ajuna.ServiceLayer.Model
         id: publish_nuget_3
-        uses: rohith/publish-nuget@v2
+        uses: alirezanet/publish-nuget@v3.0.4
         with:
           PROJECT_FILE_PATH: Ajuna.ServiceLayer.Model/Ajuna.ServiceLayer.Model.csproj
           VERSION_FILE_PATH: Version.props
@@ -79,7 +79,7 @@ jobs:
 
       - name: Publish Tools/Ajuna.DotNet
         id: publish_nuget_4
-        uses: rohith/publish-nuget@v2
+        uses: alirezanet/publish-nuget@v3.0.4
         with:
           PROJECT_FILE_PATH: Tools/Ajuna.DotNet/Ajuna.DotNet.csproj
           VERSION_FILE_PATH: Version.props
@@ -89,7 +89,7 @@ jobs:
 
       - name: Publish Tools/Ajuna.DotNet.Template
         id: publish_nuget_5
-        uses: rohith/publish-nuget@v2
+        uses: alirezanet/publish-nuget@v3.0.4
         with:
           PROJECT_FILE_PATH: Tools/Ajuna.DotNet.Template/Ajuna.DotNet.Template.csproj
           VERSION_FILE_PATH: Version.props
