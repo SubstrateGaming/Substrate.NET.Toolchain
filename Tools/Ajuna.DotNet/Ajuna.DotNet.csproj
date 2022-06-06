@@ -49,4 +49,8 @@
    <ItemGroup>
      <ProjectReference Include="..\..\Ajuna.ServiceLayer\Ajuna.ServiceLayer.csproj" />
    </ItemGroup>
+
+   <ItemGroup>
+     <Folder Include="Properties\" />
+   </ItemGroup>
 </Project>
