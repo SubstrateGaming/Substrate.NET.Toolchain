@@ -1,16 +1,16 @@
 # Ajuna.SDK Development
-This document covers requirements and guidelines to give some hints about developing the tools you find here. Please make sure you have read the [Contributing](./CONTRIBUTING.md) guidelines since this document is more technical and documents the development environment instead of general contributing guidelines.
+This document covers requirements and guidelines to give hints about developing the tools you find here. Please make sure you have read the [Contributing](./CONTRIBUTING.md) guidelines since this document is more technical and documents the development environment instead of general contributing guidelines.
 
 ## .NET Framework Versions
-Libraries must be compatible with `netstandard2.0` framework. Even though it is rather old, we keep support for that so that [Unity client system](https://docs.unity3d.com/2019.1/Documentation/Manual/dotnetProfileSupport.html) can use the libraries here.
+Libraries must be compatible with `netstandard2.0` framework. Even though it is rather old, we keep support for that so that [the Unity client system](https://docs.unity3d.com/2019.1/Documentation/Manual/dotnetProfileSupport.html) can use the libraries here.
 
-Tools and services are currently implemented to support `net5.0` and `net6.0`.
+Tools and services are implemented to support `net5.0` and `net6.0`.
 
 ## NuGet Package Versions
-All NuGet packages here are sharing a common version number that is defined in [Version.props](./Version.props).
+All NuGet packages here share a standard version number that is defined in [Version.props](./Version.props).
 
 ## Developing this toolchain locally
-To develop and debug toolchain changes locally you must setup a local NuGet repository and maintain the libraries that are being compiled there. There are many different ways to achieve that. A very simple approach is listed below which gives a simple batch file for Windows to easily clear existing local packages and re-build everything.
+To develop and debug toolchain changes locally, you must set up a local NuGet repository and maintain the libraries that are being compiled there. There are many different ways to achieve that. A straightforward approach is listed below, which gives a simple batch file for Windows to quickly clear existing local packages and re-build everything.
 
 ```bat
 set AJUNA_ROOT=D:\Ajuna.SDK
