@@ -103,7 +103,7 @@ namespace Ajuna.RestService
          services.AddSwaggerGen(c =>
          {
             c.CustomSchemaIds(type => type.ToString());
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Juce.RestService", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ajuna.RestService", Version = "v1" });
          });
 
       }
@@ -134,7 +134,7 @@ namespace Ajuna.RestService
          app.UseSwaggerUI(
              c =>
              {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Juce.RestService v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ajuna.RestService v1");
              }
          );
 
