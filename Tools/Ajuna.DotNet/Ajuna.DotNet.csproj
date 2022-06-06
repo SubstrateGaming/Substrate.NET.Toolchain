@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <AssemblyTitle>Ajuna.DotNet</AssemblyTitle>
+      <AssemblyName>Ajuna.DotNet</AssemblyName>
+      <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+      
+      <!-- HINT: Use dotnet pack instead. -->
+      <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+      <!-- 
+         .NET 6 removed runtime configuration. 
+         This is required for resolving assemblies (having local NuGet feeds) when reflection hits this service. 
+      -->
+      <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+
+      <Description>Ajuna .NET toolchain to generate code.</Description>
+      <PackAsTool>true</PackAsTool>
+      <ToolCommandName>ajuna</ToolCommandName>
+      <PackageOutputPath>./nupkg</PackageOutputPath>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App"></FrameworkReference>
+   </ItemGroup>
+   
+   <ItemGroup>
+     <Compile Remove="nupkg\**" />
+     <EmbeddedResource Remove="nupkg\**" />
+     <None Remove="nupkg\**" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <None Include="..\..\LICENSE">
+         <Pack>True</Pack>
+         <PackagePath></PackagePath>
+      </None>
+   </ItemGroup>
+
+   <ItemGroup>
+      <PackageReference Include="Ajuna.NetApi" Version="0.1.9" />
+      <PackageReference Include="Serilog" Version="2.11.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+      <PackageReference Include="System.CodeDom" Version="6.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <ProjectReference Include="..\..\Ajuna.ServiceLayer\Ajuna.ServiceLayer.csproj" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <Folder Include="Properties\" />
+   </ItemGroup>
+</Project>

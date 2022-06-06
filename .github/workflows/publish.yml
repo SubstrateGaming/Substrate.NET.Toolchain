@@ -1,0 +1,88 @@
+name: publish
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: build & test & publish
+    runs-on: ubuntu-latest
+        
+    steps:
+      - uses: actions/checkout@v2
+
+      ##
+      # Setup
+      # Setup multiple .NET versions so we can build against all referenced .NET versions.
+      ##
+      - name: Setup .NET Core 2.1.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 2.1.x
+     
+      - name: Setup .NET Core 3.1.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Setup .NET 5.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Setup .NET 6.0.x
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      ##
+      # Dependencies
+      # Restore the project and its dependencies.
+      ##
+      - name: Install dependencies
+        run: dotnet restore
+
+      ##
+      # Publishing
+      # Publish all NuGet packages from Ajuna.SDK.
+      ##
+      - name: Publish Ajuna.AspNetCore
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Ajuna.AspNetCore/Ajuna.AspNetCore.csproj
+          PACKAGE_NAME: Ajuna.AspNetCore
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+      - name: Publish Ajuna.ServiceLayer
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Ajuna.ServiceLayer/Ajuna.ServiceLayer.csproj
+          PACKAGE_NAME: Ajuna.ServiceLayer
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+      - name: Publish Ajuna.ServiceLayer.Model
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Ajuna.ServiceLayer.Model/Ajuna.ServiceLayer.Model.csproj
+          PACKAGE_NAME: Ajuna.ServiceLayer.Model
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+      - name: Publish Tools/Ajuna.DotNet
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Tools/Ajuna.DotNet/Ajuna.DotNet.csproj
+          PACKAGE_NAME: Ajuna.DotNet
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+      - name: Publish Tools/Ajuna.DotNet.Template
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Tools/Ajuna.DotNet.Template/Ajuna.DotNet.Template.csproj
+          PACKAGE_NAME: Ajuna.DotNet.Template
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
