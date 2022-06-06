@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "Ajuna.DotNet": {
-      "commandName": "Project",
-      "commandLineArgs": "upgrade",
-      "workingDirectory": "D:\\tmp\\code\\test"
-    }
-  }
-}
