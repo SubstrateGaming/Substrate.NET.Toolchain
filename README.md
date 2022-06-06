@@ -23,9 +23,66 @@ Below is a high level technical overview about libraries and tools avaiiable in 
 | Ajuna.AspNetCore | Extends the service layer and implements .ASP Net Core extensions to easily build a RESTful service to access you substrate node storages. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.AspNetCore)](https://www.nuget.org/packages/Ajuna.AspNetCore/) |
 | Ajuna.DotNET, Ajuna.DotNet.Template | .NET developer toolchain to scaffold actual projects such as a RESTful service including all the storage classes, types and consumer clients. The projects generated with the generator toolchain are intended to be used to easily scaffold and start a substrate node storage node services. |
 
+
+## Getting Started
+
 ---
 
+### Template Installation
+
+---
+
+Install our .NET new template with:
+
+```sh
+dotnet new --install Ajuna.DotNet.Template
+```
+
+which makes `dotnet new ajuna` available.
+
+### Scaffolding a project
+
+---
+
+Create a new directory and open a terminal of your choice in that directory and execute the following command:
+
+```sh
+dotnet new sln
+dotnet new ajuna \
+   --rest_service AjunaExample.RestService \
+   --net_api AjunaExample.NetApi \
+   --rest_client AjunaExample.RestClient \
+   --metadata_websocket ws://127.0.0.1:9944
+   --metadata_runtime ajuna_solo_runtime
+   --force \
+   --allow-scripts yes
+```
+
+which generates a couple of .NET projects in your project directory.
+
+```txt
+.
+├─── .ajuna
+├─── .config
+├─── AjunaExample.NetApi
+├─── AjunaExample.RestClient
+├─── AjunaExample.RestClient.Mockup
+├─── AjunaExample.RestClient.Test
+├─── AjunaExample.RestService
+```
+
+That'll generates everything to get you started making awesome substrate services and clients in .NET.
+
+
+## Documents
+
+- [Ajuna.DotNet](/Tools/Ajuna.DotNet/README.md)
+- [Ajuna.DotNet.Template](/Tools/Ajuna.DotNet.Template/README.md)
+
+
+
 ## Community
+
 [![Discord Banner 1](https://discordapp.com/api/guilds/849331368558198803/widget.png?style=banner2)](https://discord.gg/cE72GYcFgY)
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/447132563924844544/widget.png?style=banner2)](https://discord.gg/GXYmNWtPzQ)
