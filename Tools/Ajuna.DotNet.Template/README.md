@@ -21,7 +21,7 @@ Please refer to the root [README.md](../../README.md) for general usage guides.
 ## Command Line Options
 This template comes with some arguments to specify template parameters. 
 
-To list all available template parameters simply run the command `dotnet new ajuna --help` which prints all the available parameters.
+To list all available template parameters, simply run the command `dotnet new ajuna --help`, which prints all the available parameters.
 
 | Parameter | Description |
 |---|---|
