@@ -55,8 +55,8 @@ dotnet new ajuna \
    --rest_service AjunaExample.RestService \
    --net_api AjunaExample.NetApi \
    --rest_client AjunaExample.RestClient \
-   --metadata_websocket ws://127.0.0.1:9944
-   --metadata_runtime ajuna_solo_runtime
+   --metadata_websocket ws://127.0.0.1:9944 \
+   --metadata_runtime ajuna_solo_runtime \
    --force \
    --allow-scripts yes
 ```
