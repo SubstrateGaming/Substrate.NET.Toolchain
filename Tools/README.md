@@ -3,6 +3,6 @@
 
 Please browse the documents below.
 
-- [Ajuna.DotNet](Tools/Ajuna.DotNet/README.md)
-- [Ajuna.DotNet.Template](Tools/Ajuna.DotNet.Template/README.md)
+- [Ajuna.DotNet](Ajuna.DotNet/README.md)
+- [Ajuna.DotNet.Template](Ajuna.DotNet.Template/README.md)
 
