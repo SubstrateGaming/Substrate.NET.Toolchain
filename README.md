@@ -78,7 +78,6 @@ That'll generates everything to get you started making awesome substrate service
 
 - [Contributing](./CONTRIBUTING.md)
 - [Development](./DEVELOPMENT.md)
-- [Development](.DEVELOPMENT.md)
 - `dotnet ajuna` toolchain with [Ajuna.DotNet](/Tools/Ajuna.DotNet/README.md)
 - `dotnet new ajuna` template with [Ajuna.DotNet.Template](/Tools/Ajuna.DotNet.Template/README.md)
 
