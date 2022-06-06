@@ -52,6 +52,8 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Ajuna.AspNetCore/Ajuna.AspNetCore.csproj
+          VERSION_FILE_PATH: Version.props
+          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
           PACKAGE_NAME: Ajuna.AspNetCore
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -60,6 +62,8 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Ajuna.ServiceLayer/Ajuna.ServiceLayer.csproj
+          VERSION_FILE_PATH: Version.props
+          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
           PACKAGE_NAME: Ajuna.ServiceLayer
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -68,6 +72,8 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Ajuna.ServiceLayer.Model/Ajuna.ServiceLayer.Model.csproj
+          VERSION_FILE_PATH: Version.props
+          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
           PACKAGE_NAME: Ajuna.ServiceLayer.Model
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -76,6 +82,8 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Tools/Ajuna.DotNet/Ajuna.DotNet.csproj
+          VERSION_FILE_PATH: Version.props
+          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
           PACKAGE_NAME: Ajuna.DotNet
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -84,5 +92,7 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: Tools/Ajuna.DotNet.Template/Ajuna.DotNet.Template.csproj
+          VERSION_FILE_PATH: Version.props
+          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
           PACKAGE_NAME: Ajuna.DotNet.Template
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
