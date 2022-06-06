@@ -3,7 +3,7 @@
       <TargetFramework>netstandard2.0</TargetFramework>
    </PropertyGroup>
    <ItemGroup>
-      <PackageReference Include="Ajuna.ServiceLayer.Model" Version="0.1.6" />
+      <PackageReference Include="Ajuna.ServiceLayer.Model" Version="AJUNA_SDK_VERSION" />
    </ItemGroup>
    <ItemGroup>
       <ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />

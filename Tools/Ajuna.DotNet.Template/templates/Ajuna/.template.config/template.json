@@ -10,6 +10,13 @@
       "type": "project"
    },
    "symbols": {
+      "sdk_version": {
+         "datatype": "string",
+         "defaultValue": "0.1.6",
+         "description": "Uses the given Ajuna SDK version.",
+         "replaces": "AJUNA_SDK_VERSION",
+         "type": "parameter"
+      },
       "net_api": {
          "datatype": "string",
          "defaultValue": "Ajuna.NetApiExt",

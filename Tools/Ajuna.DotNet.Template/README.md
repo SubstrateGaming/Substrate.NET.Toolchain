@@ -23,8 +23,9 @@ This template comes with some arguments to specify template parameters.
 
 To list all available template parameters simply run the command `dotnet new ajuna --help` which prints all the available parameters.
 
-|   |   |
+| Parameter | Description |
 |---|---|
+| --sdk_version | This parameter specifies the used Ajuna SDK version. Defaults to the latest version. |
 | --metadata_websocket | This parameter tells the generator where to pull the substrate metadata from. Default is localhost `ws://127.0.0.1:9944`. |
 | --metadata_runtime | This parameter tells the generator which runtime to use to generate classes for. Default is `ajuna_solo_runtime`. |
 | -net_api | This parameters controls how to name the generated type extension library. Default is `Ajuna.NetApiExt`. |
