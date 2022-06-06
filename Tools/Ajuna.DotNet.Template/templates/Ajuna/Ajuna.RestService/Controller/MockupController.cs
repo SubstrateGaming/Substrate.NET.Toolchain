@@ -1,16 +1,12 @@
 ﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Rpc;
-using Ajuna.NetApi.Model.Types;
 using Ajuna.ServiceLayer.Model;
 using Ajuna.ServiceLayer.Storage;
 using Ajuna.ServiceLayer.Attributes;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
-using System.Text;
-using static Ajuna.NetApi.Model.Meta.Storage;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Ajuna.RestService.Controller
 {
@@ -20,10 +16,12 @@ namespace Ajuna.RestService.Controller
    public class MockupController : ControllerBase
    {
       private readonly IStorageDataProvider _storageDataProvider;
+      private readonly IWebHostEnvironment _webEnv;
 
-      public MockupController(IStorageDataProvider storageDataProvider)
+      public MockupController(IStorageDataProvider storageDataProvider, IWebHostEnvironment env)
       {
          _storageDataProvider = storageDataProvider;
+         _webEnv = env;
       }
 
       [HttpPost("data")]
@@ -31,6 +29,12 @@ namespace Ajuna.RestService.Controller
       [ProducesResponseType(typeof(bool), 200)]
       public IActionResult HandleMockupData([FromBody] MockupRequest request)
       {
+         if (!_webEnv.IsDevelopment())
+         {
+            // Do not make this available in production environments.
+            return NotFound();
+         }
+
          if (string.IsNullOrEmpty(request.Key))
          {
             return Ok(false);
