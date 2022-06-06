@@ -17,6 +17,13 @@
          "replaces": "AJUNA_SDK_VERSION",
          "type": "parameter"
       },
+      "api_version": {
+         "datatype": "string",
+         "defaultValue": "0.1.9",
+         "description": "Uses the given Ajuna .NET API version.",
+         "replaces": "AJUNA_NETAPI_VERSION",
+         "type": "parameter"
+      },
       "net_api": {
          "datatype": "string",
          "defaultValue": "Ajuna.NetApiExt",
