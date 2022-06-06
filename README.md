@@ -26,6 +26,8 @@ Below is a high level technical overview about libraries and tools avaiiable in 
 
 ## Getting Started
 
+Assuming you have your [substrate node running locally](https://github.com/ajuna-network/Ajuna), you're ready to build your services and clients using the Ajuna SDK toolchain.
+
 ---
 
 ### Template Installation
