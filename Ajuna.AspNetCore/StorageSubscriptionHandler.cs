@@ -121,7 +121,7 @@ namespace Ajuna.AspNetCore
             return identifier.ToLowerInvariant();
          }
 
-         return $"{ identifier.ToLowerInvariant() }/{ key.ToLowerInvariant() }";
+         return $"{identifier.ToLowerInvariant()}/{key.ToLowerInvariant()}";
       }
 
       private string[] GetSubscribedSockets(string identifier, string key)

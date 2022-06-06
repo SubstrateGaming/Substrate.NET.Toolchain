@@ -73,11 +73,17 @@ namespace Ajuna.RestService
          // Configure web sockets to allow clients to subscribe to storage changes.
          services.AddAjunaSubscriptionHandler<StorageSubscriptionHandler>();
 
-         // Configure data provider
-         // _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
-
-         // TODO (svnscha): Remove hard coded path.
-         _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText(@"D:\tmp\code\test\.ajuna\metadata.txt"));
+         string useMockupProvider = Environment.GetEnvironmentVariable("AJUNA_USE_MOCKUP_PROVIDER") ?? "false";
+         if (!string.IsNullOrEmpty(useMockupProvider) && useMockupProvider.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+         {
+            // Configure mockup data provider
+            _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText("..\\.ajuna\\metadata.txt"));
+         }
+         else
+         {
+            // Configure regular data provider
+            _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
+         }
 
          // Configure storage services
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()

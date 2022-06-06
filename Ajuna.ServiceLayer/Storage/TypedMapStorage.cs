@@ -1,6 +1,4 @@
-﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Types;
-using Ajuna.ServiceLayer.Extensions;
+﻿using Ajuna.NetApi.Model.Types;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading.Tasks;

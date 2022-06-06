@@ -19,7 +19,7 @@ namespace Ajuna.ServiceLayer
       {
          var runtimeMetadata = new RuntimeMetadata();
          runtimeMetadata.Create(metadata);
-         
+
          _metaData = new MetaData(runtimeMetadata, string.Empty);
       }
 

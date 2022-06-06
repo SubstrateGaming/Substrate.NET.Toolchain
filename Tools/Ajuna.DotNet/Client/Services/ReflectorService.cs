@@ -1,9 +1,9 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
+using Ajuna.ServiceLayer.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Ajuna.ServiceLayer.Attributes;
 
 namespace Ajuna.DotNet.Client.Services
 {

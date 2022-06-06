@@ -1,7 +1,6 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
 using Ajuna.NetApi;
 using Ajuna.NetApi.Attributes;
-using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types;
 using Ajuna.NetApi.Model.Types.Base;
 using Ajuna.NetApi.Model.Types.Metadata.V14;
@@ -9,7 +8,6 @@ using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -795,77 +793,6 @@ namespace Ajuna.DotNet.Extensions
 
          return found;
       }
-
-      //private static void GenerateFieldInitializer(CodeTypeMemberCollection currentMembers, CodeExpression targetObject, CodeMemberMethod method, Type propType)
-      //{
-      //   // Now some types require extended initialization.
-      //   // Array<> for example.
-      //   if (IsArrayInitializerField(propType.Name))
-      //   {
-      //      Type elementType = null;
-
-      //      int elementArraySize = 0;
-
-      //      // Here we want to generate an array with 32 instances of U8.
-      //      if (propType.IsGenericType)
-      //      {
-      //         elementType = propType.GetGenericArguments()[0];
-      //         elementArraySize = 1;
-      //      }
-      //      else
-      //      {
-      //         // Get the actual array type field.
-      //         FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.Name == "_value");
-      //         elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
-      //         elementArraySize = 32;
-      //      }
-
-      //      if (elementType == null)
-      //      {
-      //         method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator ould not deduct array initializer element type!"))));
-      //         return;
-      //      }
-
-      //      var arrayInitialize = new CodeExpression[elementArraySize];
-      //      for (int i = 0; i < elementArraySize; i++)
-      //      {
-      //         arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, elementType));
-      //      }
-
-      //      method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", new CodeArrayCreateExpression(elementType, arrayInitialize)));
-      //   }
-      //   else if (IsBaseTupleField(propType.Name))
-      //   {
-      //      if (!propType.IsGenericType)
-      //      {
-      //         method.Statements.Add(new CodeThrowExceptionStatement(new CodeObjectCreateExpression(typeof(InvalidOperationException), new CodePrimitiveExpression("Generator could not deduct BaseTuple field."))));
-      //         return;
-      //      }
-
-      //      Type[] arguments = propType.GenericTypeArguments.ToArray();
-
-      //      var arrayInitialize = new CodeExpression[arguments.Length];
-      //      for (int i = 0; i < arguments.Length; i++)
-      //      {
-      //         arrayInitialize[i] = new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, arguments[i]));
-      //      }
-
-      //      // Get the actual BaseTuple IType type field.
-      //      FieldInfo privateValueFieldInfo = propType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.FieldType.IsArray);
-      //      Type elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
-
-      //      method.Statements.Add(new CodeMethodInvokeExpression(targetObject, "Create", arrayInitialize));
-      //   }
-      //   else
-      //   {
-      //      // TODO (svnscha): How to handle?
-      //      method.Statements.Add(new CodeAssignStatement(
-      //         targetObject,
-      //         new CodeMethodInvokeExpression(CallGetTestValue(currentMembers, propType))
-      //         )
-      //      );
-      //   }
-      //}
 
       // Utility to build a parameter list separated by comma.
       private static string GetEncodeCallParameterList(CodeParameterDeclarationExpressionCollection parameters)

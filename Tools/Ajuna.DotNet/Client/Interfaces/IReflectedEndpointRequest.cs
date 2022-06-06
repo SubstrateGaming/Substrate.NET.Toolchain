@@ -23,7 +23,7 @@ namespace Ajuna.DotNet.Client.Interfaces
       /// The KeyBuilder attribute that gives a hint how to build the encoded Key parameter.
       /// </summary>
       StorageKeyBuilderAttribute KeyBuilderAttribute { get; }
-      
+
       /// <summary>
       /// Enumerable set of request parameters such as query parameters.
       /// </summary>

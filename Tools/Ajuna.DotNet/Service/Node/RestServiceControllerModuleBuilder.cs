@@ -11,7 +11,7 @@ namespace Ajuna.DotNet.Service.Node
    public class RestServiceControllerModuleBuilder : ModuleBuilderBase
    {
       private string NetApiProjectName { get; }
-      
+
       private RestServiceControllerModuleBuilder(string projectName, string netApiProjectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(projectName, id, module, typeDict, nodeTypes)
       {

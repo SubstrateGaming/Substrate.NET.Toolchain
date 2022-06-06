@@ -72,8 +72,6 @@ namespace Ajuna.RestService.Controller
          }
 
          return Ok(false);
-
-
       }
    }
 }
