@@ -1,6 +1,6 @@
 using Ajuna.AspNetCore;
 using Ajuna.AspNetCore.Extensions;
-using Juce.RestService.Formatters;
+using Ajuna.RestService.Formatters;
 using Ajuna.ServiceLayer;
 using Ajuna.ServiceLayer.Storage;
 using Microsoft.AspNetCore.Builder;
