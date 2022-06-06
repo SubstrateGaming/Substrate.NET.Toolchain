@@ -25,7 +25,7 @@ namespace Ajuna.DotNet.Service.Generators
          SolutionGeneratorBase.GetGenericStructs(metadata.NodeMetadata.Types);
 
          // generate types
-         var typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);
+         Dictionary<uint, (string, List<string>)> typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);
 
          // generate modules
          GenerateModules(ProjectName, metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory);
@@ -38,9 +38,9 @@ namespace Ajuna.DotNet.Service.Generators
       private static void GenerateModules(string projectName, Dictionary<uint, PalletModule> modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes, string basePath)
       {
          List<(string, List<string>)> moduleNames = new();
-         foreach (var module in modules.Values)
+         foreach (PalletModule module in modules.Values)
          {
-            var moduleNameTuple = ModuleGenBuilder
+            (string, List<string>) moduleNameTuple = ModuleGenBuilder
                 .Init(projectName, module.Index, module, typeDict, nodeTypes)
                 .Create()
                 .Build(write: true, out bool _, basePath);
