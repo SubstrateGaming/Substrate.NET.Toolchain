@@ -54,9 +54,9 @@ rem Install .NET new template
 dotnet new --install Ajuna.DotNet.Template
 ```
 
-Using that script should get you started on Windows and give insights on other platforms how to maintain the local NuGet packages.
+Using that script should get you started on Windows and give insights on other platforms on how to maintain the local NuGet packages.
 
-Having this installed you can scaffold a new project a documented [here](./README.md).
+Having this installed, you can scaffold a new project as documented [here](./README.md).
 
 ## Debugging the code generators
-Since the .NET new template just provides the absolute minimum to scaffold the projects you can debug and inspect the actual code generators. Simply debug `Ajuna.DotNet` as any other project having the command line arguments `update` or `upgrade`.
+Since the .NET new template provides the absolute minimum to scaffold the projects, you can debug and inspect the actual code generators. Debug Ajuna.DotNet, like any other project.
