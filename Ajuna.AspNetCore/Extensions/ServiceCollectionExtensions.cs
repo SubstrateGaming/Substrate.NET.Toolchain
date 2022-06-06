@@ -43,10 +43,10 @@ namespace Ajuna.AspNetCore.Extensions
          return services;
       }
 
-      public static IServiceCollection AddAjunaSubscriptionHandler<TService>(this IServiceCollection services) where TService : class
+      public static IServiceCollection AddAjunaSubscriptionHandler(this IServiceCollection services)
       {
          services.AddTransient<SubscriptionManager>();
-         services.AddSingleton<TService>();
+         services.AddSingleton<StorageSubscriptionHandler>();
          return services;
       }
    }

@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Ajuna.AspNetCore
 {
-   public class SubscriptionMiddleware
+   public class SubscriptionMiddleware : IMiddleware
    {
-      private SubscriptionHandlerBase WebSocketHandler { get; set; }
+      private StorageSubscriptionHandler WebSocketHandler { get; set; }
 
-      public SubscriptionMiddleware(SubscriptionHandlerBase webSocketHandler)
+      public SubscriptionMiddleware(StorageSubscriptionHandler webSocketHandler)
       {
          WebSocketHandler = webSocketHandler;
       }
 
-      public async Task InvokeAsync(HttpContext context)
+      public async Task InvokeAsync(HttpContext context, RequestDelegate next)
       {
          if (!context.WebSockets.IsWebSocketRequest)
          {

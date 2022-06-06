@@ -10,18 +10,18 @@ namespace Ajuna.AspNetCore
    {
       protected SubscriptionManager Manager { get; set; }
 
-      public SubscriptionHandlerBase(SubscriptionManager subscriptionManager)
+      internal SubscriptionHandlerBase(SubscriptionManager subscriptionManager)
       {
          Manager = subscriptionManager;
       }
 
-      public virtual Task OnConnectedAsync(WebSocket socket)
+      internal virtual Task OnConnectedAsync(WebSocket socket)
       {
          Manager.AddSocket(socket);
          return Task.FromResult(0);
       }
 
-      public virtual async Task OnDisconnectedAsync(WebSocket socket)
+      internal virtual async Task OnDisconnectedAsync(WebSocket socket)
       {
          string socketId = Manager.GetId(socket);
 
@@ -29,14 +29,14 @@ namespace Ajuna.AspNetCore
          await Manager.RemoveSocketAsync(Manager.GetId(socket));
       }
 
-      public virtual async Task OnReceivedAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
+      internal virtual async Task OnReceivedAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
       {
          string socketId = Manager.GetId(socket);
 
          await ReceiveDelegateAsync(socket, socketId, result, buffer);
       }
 
-      public async Task SendMessageAsync(WebSocket socket, string message)
+      internal async Task SendMessageAsync(WebSocket socket, string message)
       {
          if (socket.State != WebSocketState.Open)
          {
@@ -46,7 +46,7 @@ namespace Ajuna.AspNetCore
          await socket.SendAsync(buffer: new ArraySegment<byte>(array: Encoding.ASCII.GetBytes(message), offset: 0, count: message.Length), messageType: WebSocketMessageType.Text, endOfMessage: true, cancellationToken: CancellationToken.None);
       }
 
-      public async Task SendMessageAsync(string socketId, string message)
+      internal async Task SendMessageAsync(string socketId, string message)
       {
          await SendMessageAsync(Manager.GetSocketById(socketId), message);
       }

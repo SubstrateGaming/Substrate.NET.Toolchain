@@ -70,9 +70,6 @@ namespace Ajuna.RestService
       /// <param name="services">Service collection to configure.</param>
       public void ConfigureServices(IServiceCollection services)
       {
-         // Configure web sockets to allow clients to subscribe to storage changes.
-         services.AddAjunaSubscriptionHandler<StorageSubscriptionHandler>();
-
          string useMockupProvider = Environment.GetEnvironmentVariable("AJUNA_USE_MOCKUP_PROVIDER") ?? "false";
          if (!string.IsNullOrEmpty(useMockupProvider) && useMockupProvider.Equals("true", StringComparison.InvariantCultureIgnoreCase))
          {
@@ -84,6 +81,9 @@ namespace Ajuna.RestService
             // Configure regular data provider
             _storageDataProvider = new AjunaSubstrateDataProvider(Environment.GetEnvironmentVariable("AJUNA_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
          }
+
+         // Configure web sockets to allow clients to subscribe to storage changes.
+         services.AddAjunaSubscriptionHandler();
 
          // Configure storage services
          services.AddAjunaStorageService(new AjunaStorageServiceConfiguration()
@@ -152,8 +152,7 @@ namespace Ajuna.RestService
          _storageChangeDelegate.SetSubscriptionHandler(handler);
 
          // Accept the subscriptions from now on.
-         // TODO (svnscha) Enable this again.
-         // app.UseSubscription("/ws", handler);
+         app.UseSubscription("/ws");
       }
    }
 }
