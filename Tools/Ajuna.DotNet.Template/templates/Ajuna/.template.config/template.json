@@ -12,7 +12,7 @@
    "symbols": {
       "sdk_version": {
          "datatype": "string",
-         "defaultValue": "0.1.8",
+         "defaultValue": "0.1.9",
          "description": "Uses the given Ajuna SDK version.",
          "replaces": "AJUNA_SDK_VERSION",
          "type": "parameter"
