@@ -43,6 +43,24 @@ namespace Ajuna.DotNet.Extensions
       /// </summary>
       /// <param name="endpoint">The endpoint to generate the interface method for.</param>
       /// <param name="currentNamespace">The current namespace where the generated class will be attached to.</param>
+      internal static CodeTypeMember ToSubscriptionInterfaceMethod(this IReflectedEndpoint endpoint)
+      {
+         var method = new CodeMemberMethod()
+         {
+            Name = endpoint.GetClientMethodName().Replace("Get", "Subscribe"),
+            ReturnType = new CodeTypeReference(typeof(Task<>).MakeGenericType(new[] { typeof(bool) }))
+         };
+
+         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters());
+         return method;
+      }
+
+      /// <summary>
+      /// Converts a reflected endpoint to an interface method code element.
+      /// The generated method is being implemented by an actual client.
+      /// </summary>
+      /// <param name="endpoint">The endpoint to generate the interface method for.</param>
+      /// <param name="currentNamespace">The current namespace where the generated class will be attached to.</param>
       internal static CodeTypeMember ToMockupInterfaceMethod(this IReflectedEndpoint endpoint, CodeNamespace currentNamespace)
       {
          var method = new CodeMemberMethod()
@@ -86,7 +104,7 @@ namespace Ajuna.DotNet.Extensions
          method.Parameters.AddRange(request.ToInterfaceMethodParameters());
 
          var invokeArgumentType = new CodeTypeReference(endpoint.GetResponse().GetSuccessReturnType().Type);
-         string endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
+         string endpointUrl = $"{controller.GetEndpointUrl().ToLower()}/{endpoint.Endpoint.ToLower()}";
 
          if (method.Parameters.Count == 0)
          {
@@ -135,6 +153,57 @@ namespace Ajuna.DotNet.Extensions
          }
          return method;
       }
+
+      /// <summary>
+      /// Converts a reflected controller endpoint to a client class method that implements the previously generated interface method.
+      /// </summary>
+      /// <param name="endpoint"></param>
+      /// <param name="controller">The owning controller.</param>
+      /// <param name="clientNamespace"></param>
+      internal static CodeTypeMember ToSubscriptionClientMethod(this IReflectedEndpoint endpoint, IReflectedController controller, CodeNamespace clientNamespace)
+      {
+         var method = new CodeMemberMethod()
+         {
+            Name = endpoint.GetClientMethodName().Replace("Get", "Subscribe"),
+            ReturnType = new CodeTypeReference(typeof(Task<>).MakeGenericType(new[] { typeof(bool) })),
+            Attributes = MemberAttributes.Public,
+         };
+
+         IReflectedEndpointRequest request = endpoint.GetRequest();
+         method.Parameters.AddRange(request.ToInterfaceMethodParameters());
+
+         var invokeArgumentType = new CodeTypeReference(endpoint.GetResponse().GetSuccessReturnType().Type);
+         string endpointUrl = $"{controller.GetEndpointUrl()}.{endpoint.Endpoint}";
+
+         if (method.Parameters.Count == 0)
+         {
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync", invokeArgumentType),
+                     new CodePrimitiveExpression(endpointUrl)
+               ))
+            );
+         }
+         else
+         {
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync", invokeArgumentType),
+                     new CodePrimitiveExpression(endpointUrl),
+                     new CodeMethodInvokeExpression(
+                        new CodeMethodReferenceExpression(
+                           new CodeTypeReferenceExpression(request.KeyBuilderAttribute.ClassType),
+                           request.KeyBuilderAttribute.MethodName),
+                        new CodeVariableReferenceExpression(method.Parameters[0].Name)
+                     )
+               ))
+            );
+         }
+         return method;
+      }
+
 
       /// <summary>
       /// Converts a reflected controller endpoint to a client class method that implements the previously generated interface method.
@@ -341,7 +410,7 @@ namespace Ajuna.DotNet.Extensions
             new CodeVariableDeclarationStatement(
                new CodeTypeReference(controller.GetClientClassName()),
                "rpcClient",
-               new CodeSnippetExpression($"new {controller.GetClientClassName()}(_httpClient)")));
+               new CodeSnippetExpression($"new {controller.GetClientClassName()}(_httpClient, _subscriptionClient)")));
 
          // bool rpcResult = await mockupClient.GetXXXXX (mockupKey);
          if (methodParams.Count == 1)

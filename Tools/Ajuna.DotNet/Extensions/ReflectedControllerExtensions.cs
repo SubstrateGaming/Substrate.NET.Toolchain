@@ -56,6 +56,7 @@ namespace Ajuna.DotNet.Extensions
 
          // Generate private member variabels.
          target.Members.AddHttpClientPrivateMember(currentNamespace);
+         target.Members.AddPrivateFieldAssignableFromConstructor("BaseSubscriptionClient", "_subscriptionClient", currentNamespace);
 
          // Generate constructor.
          var ctor = new CodeConstructor()
@@ -64,9 +65,9 @@ namespace Ajuna.DotNet.Extensions
          };
 
          ctor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(HttpClient), "httpClient"));
-         ctor.Statements.Add(new CodeAssignStatement(
-            new CodeVariableReferenceExpression("_httpClient"),
-            new CodeVariableReferenceExpression("httpClient")));
+         ctor.Parameters.Add(new CodeParameterDeclarationExpression("BaseSubscriptionClient", "subscriptionClient"));
+         ctor.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("_httpClient"), new CodeVariableReferenceExpression("httpClient")));
+         ctor.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("_subscriptionClient"), new CodeVariableReferenceExpression("subscriptionClient")));
 
          target.Members.Add(ctor);
          return target;
@@ -124,6 +125,7 @@ namespace Ajuna.DotNet.Extensions
 
          // Generate private member variabels.
          target.Members.AddHttpClientPrivateMember(currentNamespace);
+         target.Members.AddPrivateFieldAssignableFromConstructor("BaseSubscriptionClient", "_subscriptionClient", currentNamespace);
          target.BaseTypes.Add(new CodeTypeReference("ClientTestBase"));
 
          var method = new CodeMemberMethod()
@@ -141,6 +143,10 @@ namespace Ajuna.DotNet.Extensions
          method.Statements.Add(new CodeAssignStatement(
             new CodeVariableReferenceExpression("_httpClient"),
             new CodeSnippetExpression("CreateHttpClient()")));
+
+         method.Statements.Add(new CodeAssignStatement(
+            new CodeVariableReferenceExpression("_subscriptionClient"),
+            new CodeSnippetExpression("CreateSubscriptionClient()")));
 
          target.Members.Add(method);
 
@@ -187,6 +193,6 @@ namespace Ajuna.DotNet.Extensions
       /// The URL string is the base path for any endpoint request.
       /// </summary>
       /// <param name="controller">The controller to query the URL string for.</param>
-      internal static string GetEndpointUrl(this IReflectedController controller) => controller.Name.Replace("Controller", string.Empty).ToLower();
+      internal static string GetEndpointUrl(this IReflectedController controller) => controller.Name.Replace("Controller", string.Empty);
    }
 }

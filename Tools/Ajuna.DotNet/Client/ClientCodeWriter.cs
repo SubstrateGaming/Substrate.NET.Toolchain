@@ -32,6 +32,7 @@ namespace Ajuna.DotNet.Client
          code = PatchNamespaceUsage(code, ns.Imports);
          code = PatchPublicVirtualWithAsyncPublic(code);
          code = PatchSendRequestFunctionCall(code);
+         code = PatchSubscribeFunctionCall(code);
          code = PatchSendMockupRequestFunctionCall(code);
          code = PatchMockupSetResultFunctionCall(code);
          code = PatchMockupGetResultFunctionCall(code);
@@ -94,6 +95,14 @@ namespace Ajuna.DotNet.Client
       private static string PatchSendRequestFunctionCall(string code)
       {
          return code.Replace("return this.SendRequest", "return await SendRequest");
+      }
+
+      /// <summary>
+      /// Dirty workaround: This will patch "return _subscriptionClient.SubscribeAsync" to "return await _subscriptionClient.SubscribeAsync"
+      /// </summary>
+      private static string PatchSubscribeFunctionCall(string code)
+      {
+         return code.Replace("return _subscriptionClient.SubscribeAsync", "return await _subscriptionClient.SubscribeAsync");
       }
 
       /// <summary>
