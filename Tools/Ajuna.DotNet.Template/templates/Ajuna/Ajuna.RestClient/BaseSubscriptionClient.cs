@@ -68,6 +68,25 @@ namespace Ajuna.RestClient
          Abort();
          return false;
       }
+
+      public async Task<bool> SubscribeAsync(string id)
+      {
+         return await SubscribeAsync(new StorageSubscribeMessage()
+         {
+            Identifier = id,
+            Key = string.Empty
+         });
+      }
+
+      public async Task<bool> SubscribeAsync(string id, string key)
+      {
+         return await SubscribeAsync(new StorageSubscribeMessage()
+         {
+            Identifier = id,
+            Key = key
+         });
+      }
+
       public async Task<bool> SubscribeAsync(StorageSubscribeMessage request) => await SubscribeAsync(request, CancellationToken.None);
       public async Task<bool> SubscribeAsync(StorageSubscribeMessage request, CancellationToken cancellationToken)
       {

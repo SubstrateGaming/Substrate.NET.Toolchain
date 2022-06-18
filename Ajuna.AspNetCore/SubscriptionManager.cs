@@ -34,8 +34,17 @@ namespace Ajuna.AspNetCore
       public async Task RemoveSocketAsync(string id)
       {
          WebSocket socket;
-         _sockets.TryRemove(id, out socket);
-         await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure, statusDescription: "Closed", cancellationToken: CancellationToken.None);
+         if (_sockets.TryRemove(id, out socket))
+         {
+            if (socket.State == WebSocketState.Open)
+            { 
+               await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure, statusDescription: "Closed", cancellationToken: CancellationToken.None);
+            }
+            else
+            {
+               socket.Abort();
+            }
+         }
       }
 
       private string CreateConnectionId()

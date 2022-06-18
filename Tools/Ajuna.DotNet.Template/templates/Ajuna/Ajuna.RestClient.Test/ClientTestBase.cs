@@ -11,7 +11,7 @@ namespace Ajuna.RestClient.Test
    {
       protected string GetBaseAddress()
       {
-         return Environment.GetEnvironmentVariable("AJUNA_SERVICE_ENDPOINT") ?? "http://localhost:61752");
+         return Environment.GetEnvironmentVariable("AJUNA_SERVICE_ENDPOINT") ?? "http://localhost:61752";
       }
 
       protected HttpClient CreateHttpClient()
@@ -29,7 +29,7 @@ namespace Ajuna.RestClient.Test
       {
          var subscriptionClient = new BaseSubscriptionClient(new ClientWebSocket());
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-         subscriptionClient.ConnectAsync(new Uri($"{GetBaseAddress()}/ws"), CancellationToken.None)
+         subscriptionClient.ConnectAsync(new Uri($"{GetBaseAddress().Replace("http", "ws")}/ws"), CancellationToken.None)
             .Wait();
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
          return subscriptionClient;

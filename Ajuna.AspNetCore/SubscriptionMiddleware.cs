@@ -25,23 +25,32 @@ namespace Ajuna.AspNetCore
          WebSocket socket = await context.WebSockets.AcceptWebSocketAsync();
          await WebSocketHandler.OnConnectedAsync(socket);
 
-         await ReceiveAsync(socket, async (result, buffer) =>
+         try
          {
-            if (result.MessageType == WebSocketMessageType.Text)
+            await ReceiveAsync(socket, async (result, buffer) =>
             {
-               await WebSocketHandler.OnReceivedAsync(socket, result, buffer);
-            }
+               if (result.MessageType == WebSocketMessageType.Text)
+               {
+                  await WebSocketHandler.OnReceivedAsync(socket, result, buffer);
+               }
 
-            else if (result.MessageType == WebSocketMessageType.Close)
-            {
-               await WebSocketHandler.OnDisconnectedAsync(socket);
-            }
-         });
+               else if (result.MessageType == WebSocketMessageType.Close)
+               {
+                  await WebSocketHandler.OnDisconnectedAsync(socket);
+               }
+            });
+         }
+         catch (Exception)
+         {
+            // Ignored
+         }
+            
+         await WebSocketHandler.OnDisconnectedAsync(socket);
       }
 
       private async Task ReceiveAsync(WebSocket socket, Func<WebSocketReceiveResult, byte[], Task> handleMessage)
       {
-         byte[] buffer = new byte[1024 * 4];
+         byte[] buffer = new byte[ushort.MaxValue];
 
          while (socket.State == WebSocketState.Open)
          {

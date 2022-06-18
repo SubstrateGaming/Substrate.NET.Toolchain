@@ -172,7 +172,6 @@ namespace Ajuna.DotNet.Extensions
          IReflectedEndpointRequest request = endpoint.GetRequest();
          method.Parameters.AddRange(request.ToInterfaceMethodParameters());
 
-         var invokeArgumentType = new CodeTypeReference(endpoint.GetResponse().GetSuccessReturnType().Type);
          string endpointUrl = $"{controller.GetEndpointUrl()}.{endpoint.Endpoint}";
 
          if (method.Parameters.Count == 0)
@@ -180,7 +179,7 @@ namespace Ajuna.DotNet.Extensions
             method.Statements.Add(
                new CodeMethodReturnStatement(
                   new CodeMethodInvokeExpression(
-                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync", invokeArgumentType),
+                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync"),
                      new CodePrimitiveExpression(endpointUrl)
                ))
             );
@@ -190,7 +189,7 @@ namespace Ajuna.DotNet.Extensions
             method.Statements.Add(
                new CodeMethodReturnStatement(
                   new CodeMethodInvokeExpression(
-                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync", invokeArgumentType),
+                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync"),
                      new CodePrimitiveExpression(endpointUrl),
                      new CodeMethodInvokeExpression(
                         new CodeMethodReferenceExpression(
