@@ -2,20 +2,37 @@
 using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.Net.Http;
+using System.Net.WebSockets;
+using System.Threading;
 
 namespace Ajuna.RestClient.Test
 {
    public class ClientTestBase
    {
+      protected string GetBaseAddress()
+      {
+         return Environment.GetEnvironmentVariable("AJUNA_SERVICE_ENDPOINT") ?? "http://localhost:61752");
+      }
+
       protected HttpClient CreateHttpClient()
       {
          var httpClient = new HttpClient()
          {
-            BaseAddress = new Uri(Environment.GetEnvironmentVariable("AJUNA_SERVICE_ENDPOINT") ?? "http://localhost:61752")
+            BaseAddress = new Uri(GetBaseAddress())
          };
 
          httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/ajuna");
          return httpClient;
+      }
+
+      protected BaseSubscriptionClient CreateSubscriptionClient()
+      {
+         var subscriptionClient = new BaseSubscriptionClient(new ClientWebSocket());
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+         subscriptionClient.ConnectAsync(new Uri($"{GetBaseAddress()}/ws"), CancellationToken.None)
+            .Wait();
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+         return subscriptionClient;
       }
 
       protected BaseVoid GetTestValueBaseVoid()
