@@ -95,6 +95,9 @@ namespace Ajuna.RestService
 
          // Register data provider as singleton.
          services.AddSingleton(_storageDataProvider);
+         
+         // Register SubscriptionMiddleware for handling the 
+         services.AddSingleton<SubscriptionMiddleware>();
 
          services.AddRouting(options => { options.LowercaseQueryStrings = true; options.LowercaseUrls = true; });
          services.AddControllers(options => { })
