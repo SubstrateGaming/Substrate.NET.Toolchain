@@ -4,30 +4,29 @@
 # What is Ajuna.DotNet ?
 [![license](https://img.shields.io/github/license/ajuna-network/Ajuna.SDK)](https://github.com/ajuna-network/Ajuna.SDK/blob/origin/LICENSE)
 
-Ajuna.DotNet implements the command line utility to scaffold build substrate storage services and clients.
+Ajuna.DotNet implements a command line utility that can scaffold substrate storage, services and clients.
 
 ## Getting Started
-This tool is automatically installed and configured when scaffolding a new SDK project with `dotnet new ajuna`.
+Ajuna.DotNet is automatically installed and configured when scaffolding a new SDK project with `dotnet new ajuna`, but can also be used independently.
 
 ## Usage
-The command `dotnet ajuna update` updates your generated classes to the newest version. Use this to update the toolchain to a more recent version to re-generate all the classes.
 
-The command `dotnet ajuna upgrade` is used if:
+- The command `dotnet ajuna upgrade` downloads the metadata from your substrate node (storing the downloaded metadata in `.ajuna/metadata.txt`) and starts generating the respective classes. Use it when the tool is executed for the first time or after the substrate node has been updated.
 
-- a) The tool is executed the first time. It downloads the metadata from your substrate node and starts generating classes then.
-- b) The substrate node is updated. Use this to re-download all the metadata and generate the classes.
+
+- The command `dotnet ajuna update` generates new or updates existing classes using an already existing `.ajuna/metadata.txt` file. Use it when you already have a  `.ajuna/metadata.txt` file.
+
 
 ## Manual Installation
-It is possible to manually install the toolchain to your existing projects if it was not scaffolded with `dotnet new ajuna` template.
+It is possible to manually install the toolchain in your existing projects if it was not already installed by the `dotnet new ajuna` template.
 
-### Installation
-Install the toolchain with `dotnet tool install Ajuna.DotNet` from your working tree.
+This can be done by executing the `dotnet tool install Ajuna.DotNet` command in your working tree.
 
 ### Requirements
 
-This toolchain requires having a `.ajuna` directory in your working tree and its corresponding `.ajuna/ajuna-config.json`. The configuration file tells the generator how to generate the code, e.g: project namings.
+This toolchain requires having an `.ajuna` directory in your working tree and its corresponding `.ajuna/ajuna-config.json`. The configuration file contains the necessary information for the tool to run.
 
-Suppose your project was created with `dotnet new ajuna`; the configuration file is automatically created. Otherwise, you would need to make such a configuration file manually.
+In case your project has been created with `dotnet new ajuna`; the configuration file is automatically created. Otherwise, you would need to manually create such a configuration file.
 
 
 ```json
@@ -48,11 +47,11 @@ Suppose your project was created with `dotnet new ajuna`; the configuration file
 }
 ```
 
-As you can see this configuration file simply tells the toolchain how you want to name the projects and root namespaces of the generated projects.
+As you can see in the default configuration file above, it includes information regarding project names, root namespaces of the generated projects as well as the node url and the runtime name.
 
 ## What files are being generated?
 
-Running `dotnet ajuna upgrade` here will perform the following changes to your working directory:
+Running `dotnet ajuna upgrade` here will perform the following changes in your working directory:
 
 - Generate `.ajuna/metadata.txt` (from configured websocket endpoint)
 - Generate `AjunaExample.NetApi/Generated/*.cs` classes.
@@ -64,4 +63,4 @@ Running `dotnet ajuna upgrade` here will perform the following changes to your w
 - Generate `AjunaExample.RestClient.Mockup/Clients/*.cs` classes.
 - Generate `AjunaExample.RestClient.Mockup/Interfaces/*.cs` classes.
 
-Using `dotnet ajuna update` skips the first task (downloading metadata) and generates the remaining code.
+Using `dotnet ajuna update` skips the first task (downloading metadata) and only generates the respective code.
