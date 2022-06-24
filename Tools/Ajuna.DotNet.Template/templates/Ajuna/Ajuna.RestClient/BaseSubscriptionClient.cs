@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 
 namespace Ajuna.RestClient
 {
+   public delegate void OnStorageChange(StorageChangeMessage message);
+
    public class BaseSubscriptionClient
    {
       private readonly ClientWebSocket _ws;
+
+      public OnStorageChange OnStorageChange { get; set; }
 
       public BaseSubscriptionClient(ClientWebSocket websocket)
       {
@@ -172,6 +176,7 @@ namespace Ajuna.RestClient
 
       protected virtual void ProcessSubscriptionChange(StorageChangeMessage message)
       {
+         OnStorageChange?.Invoke(message);
       }
    }
 }

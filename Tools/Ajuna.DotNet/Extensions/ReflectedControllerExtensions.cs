@@ -125,7 +125,6 @@ namespace Ajuna.DotNet.Extensions
 
          // Generate private member variabels.
          target.Members.AddHttpClientPrivateMember(currentNamespace);
-         target.Members.AddPrivateFieldAssignableFromConstructor("BaseSubscriptionClient", "_subscriptionClient", currentNamespace);
          target.BaseTypes.Add(new CodeTypeReference("ClientTestBase"));
 
          var method = new CodeMemberMethod()
@@ -143,10 +142,6 @@ namespace Ajuna.DotNet.Extensions
          method.Statements.Add(new CodeAssignStatement(
             new CodeVariableReferenceExpression("_httpClient"),
             new CodeSnippetExpression("CreateHttpClient()")));
-
-         method.Statements.Add(new CodeAssignStatement(
-            new CodeVariableReferenceExpression("_subscriptionClient"),
-            new CodeSnippetExpression("CreateSubscriptionClient()")));
 
          target.Members.Add(method);
 

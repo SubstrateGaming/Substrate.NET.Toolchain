@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Serilog;
 using System;
 using System.Net.WebSockets;
 using System.Threading;
@@ -43,9 +44,10 @@ namespace Ajuna.AspNetCore
                }
             });
          }
-         catch (Exception)
+         catch (Exception ex)
          {
             // Ignored
+            Log.Warning(ex, "could not handle websocket");
          }
 
          await WebSocketHandler.OnDisconnectedAsync(socket);
