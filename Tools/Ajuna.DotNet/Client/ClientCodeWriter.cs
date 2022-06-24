@@ -68,7 +68,9 @@ namespace Ajuna.DotNet.Client
          foreach (string name in ns)
          {
             if (name == "System")
+            {
                continue;
+            }
 
             rhs = rhs.Replace($"{name}.", string.Empty);
          }
