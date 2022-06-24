@@ -6,21 +6,21 @@
 [![contributors](https://img.shields.io/github/contributors/ajuna-network/Ajuna.SDK)](https://github.com/ajuna-network/Ajuna.SDK/graphs/contributors) 
 [![GitHub issues](https://img.shields.io/github/issues/ajuna-network/Ajuna.SDK.svg)](https://github.com/ajuna-network/Ajuna.SDK/issues)
 
-Ajuna SDK is a .NET toolchain featuring .NET framework extensions and code generator utilities to build substrate storage services and clients quickly. The toolings ideally extend [Ajuna.NetApi](https://github.com/ajuna-network/Ajuna.NetApi) library, which provides raw access to substrate nodes.
+Ajuna SDK is a .NET toolchain featuring .NET framework extensions and code generation utilities to build substrate storage services and clients quickly. This toolchain ideally extends [Ajuna.NetApi](https://github.com/ajuna-network/Ajuna.NetApi) library, which provides raw access to substrate nodes.
 
 The project behind Ajuna.SDK is [Ajuna Network](https://ajuna.io/) and the flagship game [DOTMog](https://dotmog.com/), backed by the Swiss company [BloGa Tech AG](admin@bloga.tech).
 
 ## Important
-This toolchain is under heavy development, and things may change quickly. Use with caution until there is a stable release available.
+This toolchain is under heavy development, and things may change quickly. Please use it with caution until there is a stable release available.
 
 ## Projects
-Below is a high-level technical overview of libraries and tools available in Ajuna.SDK.
+Below is a high-level technical overview of the libraries and tools available in Ajuna.SDK.
 
-| Project | Description | NuGet 
-|---|---|---|
-| Ajuna.ServiceLayer | Implements the fundamental layer to access substrate node storage changes with a convenient API. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer)](https://www.nuget.org/packages/Ajuna.ServiceLayer/) |
-| Ajuna.ServiceLayer.Model | Implements standard classes to easily share types between services and clients. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer.Model)](https://www.nuget.org/packages/Ajuna.ServiceLayer.Model/) |
-| Ajuna.AspNetCore | Extends the service layer and implements extensions to quickly build a RESTful service to access your substrate node storage. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.AspNetCore)](https://www.nuget.org/packages/Ajuna.AspNetCore/) |
+| Project | Description                                                                                                                                                                                                                                                                               | NuGet 
+|---|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---|
+| Ajuna.ServiceLayer | Implements the fundamental layer to access substrate node storage changes with a convenient API.                                                                                                                                                                                          | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer)](https://www.nuget.org/packages/Ajuna.ServiceLayer/) |
+| Ajuna.ServiceLayer.Model | Implements standard classes to easily share types between services and clients.                                                                                                                                                                                                           | [![Nuget](https://img.shields.io/nuget/v/Ajuna.ServiceLayer.Model)](https://www.nuget.org/packages/Ajuna.ServiceLayer.Model/) |
+| Ajuna.AspNetCore | Implements extensions to the service layer that allow for quickly building a RESTful service to access your substrate node storage.                                                                                                                                                       | [![Nuget](https://img.shields.io/nuget/v/Ajuna.AspNetCore)](https://www.nuget.org/packages/Ajuna.AspNetCore/) |
 | Ajuna.DotNet, Ajuna.DotNet.Template | .NET developer toolchain to scaffold actual projects such as a RESTful service including all the storage classes, types, and consumer clients. The projects generated with the generator toolchain are intended to be used for scaffolding and starting a substrate node service quickly. | [![Nuget](https://img.shields.io/nuget/v/Ajuna.DotNet)](https://www.nuget.org/packages/Ajuna.DotNet/) [![Nuget](https://img.shields.io/nuget/v/Ajuna.DotNet.Template)](https://www.nuget.org/packages/Ajuna.DotNet.Template/)|
 
 
@@ -30,11 +30,11 @@ Assuming your [substrate node is running locally](https://github.com/ajuna-netwo
 
 ---
 
-### Template Installation
+### Installing the template
 
 ---
 
-Install our .NET new template with:
+Install our .NET template with the following command:
 
 ```sh
 dotnet new --install Ajuna.DotNet.Template
@@ -46,7 +46,7 @@ which makes `dotnet new ajuna` available.
 
 ---
 
-Create a new directory and open a terminal of your choice in that directory and execute the following command:
+Using a terminal of your choice, create a new directory for your project and execute the following command in that directory:
 
 ```sh
 dotnet new sln
@@ -61,7 +61,9 @@ dotnet new ajuna \
    --allow-scripts yes
 ```
 
-which generates a couple of .NET projects in your project directory.
+which generates a new solution and a couple of .NET projects in your project directory. 
+(A description for all command parameters can be found [here](Tools/Ajuna.DotNet.Template/README.md))
+    
 
 ```txt
 .
@@ -74,7 +76,7 @@ which generates a couple of .NET projects in your project directory.
 ├─── AjunaExample.RestService
 ```
 
-That'll generate everything to get you started making excellent substrate services and clients in .NET.
+This contains everything you need in order to get started making excellent substrate services and clients in .NET.
 
 
 ## Documents

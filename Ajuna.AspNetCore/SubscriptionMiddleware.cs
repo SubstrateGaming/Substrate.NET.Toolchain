@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Ajuna.AspNetCore
 {
+   /// <summary>
+   /// Middleware for handling the Web Socket Subscriptions
+   /// </summary>
    public class SubscriptionMiddleware : IMiddleware
    {
       private StorageSubscriptionHandler WebSocketHandler { get; set; }
