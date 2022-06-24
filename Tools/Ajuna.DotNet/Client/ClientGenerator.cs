@@ -77,7 +77,7 @@ namespace Ajuna.DotNet.Client
          };
          ctor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(HttpClient), "httpClient"));
          ctor.Parameters.Add(new CodeParameterDeclarationExpression("BaseSubscriptionClient", "subscriptionClient"));
-         
+
          ctor.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("_httpClient"), new CodeVariableReferenceExpression("httpClient")));
          ctor.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("_subscriptionClient"), new CodeVariableReferenceExpression("subscriptionClient")));
 

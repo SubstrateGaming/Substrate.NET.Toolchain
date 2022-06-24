@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Ajuna.ServiceLayer.Model
+﻿namespace Ajuna.ServiceLayer.Model
 {
    public enum StorageSubscriptionMessageType
    {

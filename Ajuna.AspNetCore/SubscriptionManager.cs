@@ -37,7 +37,7 @@ namespace Ajuna.AspNetCore
          if (_sockets.TryRemove(id, out socket))
          {
             if (socket.State == WebSocketState.Open)
-            { 
+            {
                await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure, statusDescription: "Closed", cancellationToken: CancellationToken.None);
             }
             else

@@ -47,7 +47,7 @@ namespace Ajuna.AspNetCore
          {
             // Ignored
          }
-            
+
          await WebSocketHandler.OnDisconnectedAsync(socket);
       }
 
