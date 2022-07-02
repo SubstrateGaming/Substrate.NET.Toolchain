@@ -8,6 +8,7 @@ using Ajuna.NetApi.Model.Types.Primitive;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -31,6 +32,24 @@ namespace Ajuna.DotNet.Extensions
          {
             Name = endpoint.GetClientMethodName(),
             ReturnType = endpoint.GetResponse().ToInterfaceMethodReturnType(currentNamespace),
+         };
+
+         method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters());
+         return method;
+      }
+
+      /// <summary>
+      /// Converts a reflected endpoint to an interface method code element.
+      /// The generated method is being implemented by an actual client.
+      /// </summary>
+      /// <param name="endpoint">The endpoint to generate the interface method for.</param>
+      /// <param name="currentNamespace">The current namespace where the generated class will be attached to.</param>
+      internal static CodeTypeMember ToSubscriptionInterfaceMethod(this IReflectedEndpoint endpoint)
+      {
+         var method = new CodeMemberMethod()
+         {
+            Name = endpoint.GetClientMethodName().Replace("Get", "Subscribe"),
+            ReturnType = new CodeTypeReference(typeof(Task<>).MakeGenericType(new[] { typeof(bool) }))
          };
 
          method.Parameters.AddRange(endpoint.GetRequest().ToInterfaceMethodParameters());
@@ -86,7 +105,7 @@ namespace Ajuna.DotNet.Extensions
          method.Parameters.AddRange(request.ToInterfaceMethodParameters());
 
          var invokeArgumentType = new CodeTypeReference(endpoint.GetResponse().GetSuccessReturnType().Type);
-         string endpointUrl = $"{controller.GetEndpointUrl()}/{endpoint.Endpoint.ToLower()}";
+         string endpointUrl = $"{controller.GetEndpointUrl().ToLower()}/{endpoint.Endpoint.ToLower()}";
 
          if (method.Parameters.Count == 0)
          {
@@ -135,6 +154,56 @@ namespace Ajuna.DotNet.Extensions
          }
          return method;
       }
+
+      /// <summary>
+      /// Converts a reflected controller endpoint to a client class method that implements the previously generated interface method.
+      /// </summary>
+      /// <param name="endpoint"></param>
+      /// <param name="controller">The owning controller.</param>
+      /// <param name="clientNamespace"></param>
+      internal static CodeTypeMember ToSubscriptionClientMethod(this IReflectedEndpoint endpoint, IReflectedController controller, CodeNamespace clientNamespace)
+      {
+         var method = new CodeMemberMethod()
+         {
+            Name = endpoint.GetClientMethodName().Replace("Get", "Subscribe"),
+            ReturnType = new CodeTypeReference(typeof(Task<>).MakeGenericType(new[] { typeof(bool) })),
+            Attributes = MemberAttributes.Public,
+         };
+
+         IReflectedEndpointRequest request = endpoint.GetRequest();
+         method.Parameters.AddRange(request.ToInterfaceMethodParameters());
+
+         string endpointUrl = $"{controller.GetEndpointUrl()}.{endpoint.Endpoint}";
+
+         if (method.Parameters.Count == 0)
+         {
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync"),
+                     new CodePrimitiveExpression(endpointUrl)
+               ))
+            );
+         }
+         else
+         {
+            method.Statements.Add(
+               new CodeMethodReturnStatement(
+                  new CodeMethodInvokeExpression(
+                     new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("_subscriptionClient"), "SubscribeAsync"),
+                     new CodePrimitiveExpression(endpointUrl),
+                     new CodeMethodInvokeExpression(
+                        new CodeMethodReferenceExpression(
+                           new CodeTypeReferenceExpression(request.KeyBuilderAttribute.ClassType),
+                           request.KeyBuilderAttribute.MethodName),
+                        new CodeVariableReferenceExpression(method.Parameters[0].Name)
+                     )
+               ))
+            );
+         }
+         return method;
+      }
+
 
       /// <summary>
       /// Converts a reflected controller endpoint to a client class method that implements the previously generated interface method.
@@ -231,8 +300,12 @@ namespace Ajuna.DotNet.Extensions
          clientNamespace.Imports.Add(new CodeNamespaceImport($"{clientNamespace.Name.Replace("Test", "Mockup")}.Clients"));
          clientNamespace.Imports.Add(new CodeNamespaceImport($"{clientNamespace.Name.Replace("Test.", "")}.Clients"));
 
-         // var mockupClient = new MockupClient()
          GenerateNewMockupClientStatement(controller, method);
+         
+         // Empty line
+         method.Statements.Add(new CodeSnippetStatement());
+
+         GenerateNewClientStatement(controller, method);
 
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)
@@ -240,40 +313,6 @@ namespace Ajuna.DotNet.Extensions
             // Ensure we are importing all model items.
             // Not actually required since we use fully qualified items but we want to get rid of that later.
             clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
-
-            //string[] expectedBaseTypeNames = new string[]
-            //{
-            //   "BaseEnum",
-            //};
-
-            //string[] expectedTypeNames = new string[]
-            //{
-            //   "BaseVec",
-            //   "BaseTuple"
-            //};
-
-            //bool needCustomInitializerFunction = false;
-
-            //PropertyInfo[] usableFields = GetUsableFields(defaultReturnType.Type);
-
-            //if (usableFields.Length == 0)
-            //{
-            //   // We can directly initialize the given type (most likely).
-            //   needCustomInitializerFunction = true;
-
-            //   if (!IsPrimitiveType(defaultReturnType.Type)
-            //      && !expectedTypeNames.Any(x => defaultReturnType.Type.Name.Contains(x))
-            //      && !expectedBaseTypeNames.Any(x => defaultReturnType.Type.BaseType.Name.Contains(x)))
-            //   {
-            //      method.Statements.Add(new CodeSnippetStatement());
-            //      method.Statements.Add(new CodeCommentStatement($"TODO: The type {defaultReturnType.Type.Name} cannot be initialized with testing values from code generator."));
-            //      method.Statements.Add(new CodeCommentStatement("Please test this manually."));
-            //      method.Statements.Add(new CodeSnippetStatement());
-
-            //      // Not supported. Make sure to default initialize the type (even empty).
-            //      needCustomInitializerFunction = false;
-            //   }
-            //}
 
             GenerateMockupValueStatement(currentMembers, method, defaultReturnType.Type);
          }
@@ -296,6 +335,8 @@ namespace Ajuna.DotNet.Extensions
 
             // Empty line
             method.Statements.Add(new CodeSnippetStatement());
+            method.Statements.Add(new CodeSnippetExpression($"Assert.IsTrue(await rpcClient.{endpoint.GetClientMethodName().Replace("Get", "Subscribe")}(mockupKey))"));
+            method.Statements.Add(new CodeSnippetStatement());
 
             // bool mockupSetResult = await mockupClient. XXXXX (mockupValue, mockupKey);
             method.Statements.Add(new CodeCommentStatement($"Save the previously generated mockup value in RPC service storage."));
@@ -316,6 +357,11 @@ namespace Ajuna.DotNet.Extensions
             // Empty line
             method.Statements.Add(new CodeSnippetStatement());
 
+            // Empty line
+            method.Statements.Add(new CodeSnippetStatement());
+            method.Statements.Add(new CodeSnippetExpression($"Assert.IsTrue(await rpcClient.{endpoint.GetClientMethodName().Replace("Get", "Subscribe")}())"));
+            method.Statements.Add(new CodeSnippetStatement());
+
             // bool mockupSetResult = await mockupClient. XXXXX (mockupValue);
             method.Statements.Add(new CodeCommentStatement($"Save the previously generated mockup value in RPC service storage."));
             method.Statements.Add(
@@ -332,16 +378,12 @@ namespace Ajuna.DotNet.Extensions
          // Assert.IsTrue(mockupSetResult)
          GenerateAssertIsTrueStatement(method);
 
+         // Assert.IsTrue(await subscriptionClient.ReceiveNextAsync(cts.Token));
+         method.Statements.Add(new CodeSnippetExpression("var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(1))"));
+         method.Statements.Add(new CodeSnippetExpression($"Assert.IsTrue(await subscriptionClient.ReceiveNextAsync(cts.Token))"));
+
          // Empty line
          method.Statements.Add(new CodeSnippetStatement());
-
-         // var mockupClient = new Client()
-         method.Statements.Add(new CodeCommentStatement($"Construct new RPC client to test against."));
-         method.Statements.Add(
-            new CodeVariableDeclarationStatement(
-               new CodeTypeReference(controller.GetClientClassName()),
-               "rpcClient",
-               new CodeSnippetExpression($"new {controller.GetClientClassName()}(_httpClient)")));
 
          // bool rpcResult = await mockupClient.GetXXXXX (mockupKey);
          if (methodParams.Count == 1)
@@ -404,17 +446,23 @@ namespace Ajuna.DotNet.Extensions
                new CodeSnippetExpression($"new {controller.GetMockupClientClassName()}(_httpClient)")));
       }
 
-      //private static void InitializeUsableFields(string variableReference, CodeTypeMemberCollection currentMembers, CodeMemberMethod method, PropertyInfo[] usableFields)
-      //{
-      //   foreach (PropertyInfo field in usableFields)
-      //   {
-      //      method.Statements.Add(new CodeAssignStatement(
-      //         new CodeFieldReferenceExpression(new CodeVariableReferenceExpression(variableReference), field.Name),
-      //         new CodeMethodInvokeExpression(
-      //            CallGetTestValue(currentMembers, field.PropertyType))
-      //      ));
-      //   }
-      //}
+      private static void GenerateNewClientStatement(IReflectedController controller, CodeMemberMethod method)
+      {
+         method.Statements.Add(new CodeCommentStatement($"Construct new subscription client to test with."));
+         method.Statements.Add(new CodeAssignStatement(
+            new CodeVariableReferenceExpression("var subscriptionClient"),
+            new CodeSnippetExpression("CreateSubscriptionClient()")));
+
+         // Empty line
+         method.Statements.Add(new CodeSnippetStatement());
+
+         method.Statements.Add(new CodeCommentStatement($"Construct new RPC client to test with."));
+         method.Statements.Add(
+            new CodeVariableDeclarationStatement(
+               new CodeTypeReference(controller.GetClientClassName()),
+               "rpcClient",
+               new CodeSnippetExpression($"new {controller.GetClientClassName()}(_httpClient, subscriptionClient)")));
+      }
 
       private static PropertyInfo[] GetUsableFields(Type type)
       {

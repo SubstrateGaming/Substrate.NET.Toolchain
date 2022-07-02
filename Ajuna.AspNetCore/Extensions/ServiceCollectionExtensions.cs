@@ -47,6 +47,7 @@ namespace Ajuna.AspNetCore.Extensions
       {
          services.AddTransient<SubscriptionManager>();
          services.AddSingleton<StorageSubscriptionHandler>();
+         services.AddSingleton<SubscriptionMiddleware>();
          return services;
       }
    }

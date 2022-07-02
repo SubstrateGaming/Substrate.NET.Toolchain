@@ -76,10 +76,14 @@ namespace Ajuna.DotNet.Client
             Attributes = MemberAttributes.Public
          };
          ctor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(HttpClient), "httpClient"));
+         ctor.Parameters.Add(new CodeParameterDeclarationExpression("BaseSubscriptionClient", "subscriptionClient"));
+
          ctor.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("_httpClient"), new CodeVariableReferenceExpression("httpClient")));
+         ctor.Statements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression("_subscriptionClient"), new CodeVariableReferenceExpression("subscriptionClient")));
 
          // Generate HttpClient private variable.
          target.Members.AddHttpClientPrivateMember(targetNamespace);
+         target.Members.AddPrivateFieldAssignableFromConstructor("BaseSubscriptionClient", "_subscriptionClient", targetNamespace);
 
          // Generate constructor assignments for all controller clients.
          foreach (IReflectedController controller in controllers)
@@ -95,7 +99,7 @@ namespace Ajuna.DotNet.Client
 
             ctor.Statements.Add(new CodeAssignStatement(
                new CodeVariableReferenceExpression(controllerMemberName),
-               new CodeSnippetExpression($"new {controller.GetClientClassName()}(_httpClient)")));
+               new CodeSnippetExpression($"new {controller.GetClientClassName()}(_httpClient, _subscriptionClient)")));
          }
 
          // Add constructor to member list.
@@ -128,6 +132,7 @@ namespace Ajuna.DotNet.Client
          foreach (IReflectedEndpoint endpoint in controller.GetEndpoints())
          {
             controllerClient.Members.Add(endpoint.ToClientMethod(controller, clientNamespace));
+            controllerClient.Members.Add(endpoint.ToSubscriptionClientMethod(controller, clientNamespace));
          }
 
          clientNamespace.Imports.Add(new CodeNamespaceImport(InterfaceNamespace));
@@ -152,6 +157,7 @@ namespace Ajuna.DotNet.Client
          foreach (IReflectedEndpoint endpoint in controller.GetEndpoints())
          {
             controllerInterface.Members.Add(endpoint.ToInterfaceMethod(interfaceNamespace));
+            controllerInterface.Members.Add(endpoint.ToSubscriptionInterfaceMethod());
          }
 
          ClientCodeWriter.Write(_configuration, dom, interfaceNamespace, controller.GetInterfaceName());

@@ -29,6 +29,23 @@ namespace Ajuna.DotNet.Extensions
       }
 
       /// <summary>
+      /// Addds a private member to the given target.
+      /// </summary>
+      /// <param name="target">The target code where to add the member to.</param>
+      /// <param name="type">The member type.</param>
+      /// <param name="name">The member name.</param>
+      /// <param name="ns">The namespace that we may need to add the given member type to.</param>
+      internal static void AddPrivateFieldAssignableFromConstructor(this CodeTypeMemberCollection target, string type, string name, CodeNamespace ns)
+      {
+         target.Add(new CodeMemberField()
+         {
+            Attributes = MemberAttributes.Private,
+            Name = name,
+            Type = new CodeTypeReference(type)
+         });
+      }
+
+      /// <summary>
       /// Adds a "private HttpClient _httpClient" member to the given target.
       /// </summary>
       /// <param name="target">The target code where to add the member to.</param>

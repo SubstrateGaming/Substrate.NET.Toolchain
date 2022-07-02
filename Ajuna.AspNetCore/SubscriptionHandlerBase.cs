@@ -24,15 +24,16 @@ namespace Ajuna.AspNetCore
       internal virtual async Task OnDisconnectedAsync(WebSocket socket)
       {
          string socketId = Manager.GetId(socket);
-
-         await DisconnectDelegateAsync(socket, socketId);
-         await Manager.RemoveSocketAsync(Manager.GetId(socket));
+         if (!string.IsNullOrEmpty(socketId))
+         {
+            await Manager.RemoveSocketAsync(socketId);
+            await DisconnectDelegateAsync(socket, socketId);
+         }
       }
 
       internal virtual async Task OnReceivedAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
       {
          string socketId = Manager.GetId(socket);
-
          await ReceiveDelegateAsync(socket, socketId, result, buffer);
       }
 

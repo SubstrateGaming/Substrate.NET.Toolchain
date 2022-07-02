@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Ajuna.DotNet launch settings
 Tools/Ajuna.DotNet/Properties/launchSettings.json
+
+# macOS DS_Store file
+.DS_Store

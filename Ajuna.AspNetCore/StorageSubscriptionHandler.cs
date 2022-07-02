@@ -40,17 +40,25 @@ namespace Ajuna.AspNetCore
             if (RegisterSubscription(socketId, command))
             {
                // Confirm the subscription.
-               await SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
+               await SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscriptionMessage()
                {
-                  Status = (int)HttpStatusCode.OK
+                  Type = StorageSubscriptionMessageType.StorageSubscribeMessageResult,
+                  Payload = JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
+                  {
+                     Status = (int)HttpStatusCode.OK
+                  })
                }));
 
                return;
             }
 
-            await SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
+            await SendMessageAsync(socket, JsonConvert.SerializeObject(new StorageSubscriptionMessage()
             {
-               Status = (int)HttpStatusCode.BadRequest
+               Type = StorageSubscriptionMessageType.StorageSubscribeMessageResult,
+               Payload = JsonConvert.SerializeObject(new StorageSubscribeMessageResult()
+               {
+                  Status = (int)HttpStatusCode.BadRequest
+               })
             }));
 
             return;
@@ -103,13 +111,17 @@ namespace Ajuna.AspNetCore
 
       private string FormatMessage(string identifier, string key, string data, StorageSubscriptionChangeType changeType)
       {
-         return JsonConvert.SerializeObject(new StorageChangeMessage()
+         return JsonConvert.SerializeObject(new StorageSubscriptionMessage()
          {
-            Type = changeType,
-            Identifier = identifier,
-            Key = key,
-            Data = data,
-            Timestamp = DateTime.UtcNow
+            Type = StorageSubscriptionMessageType.StorageChangeMessage,
+            Payload = JsonConvert.SerializeObject(new StorageChangeMessage()
+            {
+               Type = changeType,
+               Identifier = identifier,
+               Key = key,
+               Data = data,
+               Timestamp = DateTime.UtcNow
+            })
          });
       }
 
