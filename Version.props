@@ -6,7 +6,7 @@
       <VersionMinor>1</VersionMinor>
       <VersionPatch>9</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
-      <AjunaPackageVersion>0.1.9</AjunaPackageVersion>
+      <AjunaPackageVersion>0.1.10</AjunaPackageVersion>
 
       <!-- Variables -->
       <AjunaVersion>$(AssemblyVersion)</AjunaVersion>
