@@ -60,3 +60,21 @@ Having this installed, you can scaffold a new project as documented [here](./REA
 
 ## Debugging the code generators
 Since the .NET new template provides the absolute minimum to scaffold the projects, you can debug and inspect the actual code generators. Debug Ajuna.DotNet, like any other project.
+
+## Testing the generated artefacts
+
+First set the environment variable AJUNA_USE_MOCKUP_PROVIDER
+```set AJUNA_USE_MOCKUP_PROVIDER=true
+```
+Check if set with this command which should return true
+```echo %AJUNA_USE_MOCKUP_PROVIDER%
+```
+If it is the first time, you will be asked for certificate, when running the rest client
+```tbd
+```
+Afterwards you can execute the rest service in 
+```dotnet run --framework net6.0
+```
+Execute tests
+
+Please report any test failures, ... as issue!
