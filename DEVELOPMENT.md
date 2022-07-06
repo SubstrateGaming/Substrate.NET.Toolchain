@@ -64,16 +64,20 @@ Since the .NET new template provides the absolute minimum to scaffold the projec
 ## Testing the generated artefacts
 
 First set the environment variable AJUNA_USE_MOCKUP_PROVIDER
-```set AJUNA_USE_MOCKUP_PROVIDER=true
+```bat
+set AJUNA_USE_MOCKUP_PROVIDER=true
 ```
 Check if set with this command which should return true
-```echo %AJUNA_USE_MOCKUP_PROVIDER%
+```bat
+echo %AJUNA_USE_MOCKUP_PROVIDER%
 ```
 If it is the first time, you will be asked for certificate, when running the rest client
-```tbd
+```bat
+tbd
 ```
 Afterwards you can execute the rest service in 
-```dotnet run --framework net6.0
+```bat
+dotnet run --framework net6.0
 ```
 Execute tests
 
