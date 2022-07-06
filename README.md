@@ -86,6 +86,7 @@ This contains everything you need in order to get started making excellent subst
 
 - [Contributing](./CONTRIBUTING.md)
 - [Development](./DEVELOPMENT.md)
+- [Examples](./EXAMPLES.md)
 - `dotnet ajuna` toolchain with [Ajuna.DotNet](/Tools/Ajuna.DotNet/README.md)
 - `dotnet new ajuna` template with [Ajuna.DotNet.Template](/Tools/Ajuna.DotNet.Template/README.md)
 
