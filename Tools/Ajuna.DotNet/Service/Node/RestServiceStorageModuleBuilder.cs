@@ -77,7 +77,7 @@ namespace Ajuna.DotNet.Service.Node
          };
 
          constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("IStorageDataProvider"), "storageDataProvider"));
-         constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("IStorageChangeDelegate"), "storageChangeDelegate"));
+         constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("List<IStorageChangeDelegate>"), "storageChangeDelegates"));
          constructor.Comments.AddRange(GetComments(new string[] { $"{ClassName} constructor." }));
 
          targetClass.Members.Add(constructor);
@@ -174,7 +174,7 @@ namespace Ajuna.DotNet.Service.Node
                    new CodeExpression[] {
                         new CodePrimitiveExpression($"{Module.Storage.Prefix}.{entry.Name}"),
                         new CodeVariableReferenceExpression("storageDataProvider"),
-                        new CodeVariableReferenceExpression("storageChangeDelegate")
+                        new CodeVariableReferenceExpression("storageChangeDelegates")
                    })));
 
                // create initialize records foreach storage
