@@ -47,6 +47,8 @@ namespace Ajuna.RestService
 
       private IStorageDataProvider _storageDataProvider;
       private readonly StorageSubscriptionChangeDelegate _storageChangeDelegate = new StorageSubscriptionChangeDelegate();
+      private readonly StoragePersistenceChangeDelegate _storagePersistenceChangeDelegate = new StoragePersistenceChangeDelegate();
+
 
       /// <summary>
       /// >> Startup
@@ -112,7 +114,7 @@ namespace Ajuna.RestService
          return Assembly.GetExecutingAssembly()
             .GetTypes()
             .Where(anyType => anyType.IsClass && typeof(IStorage).IsAssignableFrom(anyType))
-            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageDataProvider, _storageChangeDelegate }))
+            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageDataProvider, new List<IStorageChangeDelegate>{_storageChangeDelegate, _storagePersistenceChangeDelegate} }))
             .ToList();
       }
 
