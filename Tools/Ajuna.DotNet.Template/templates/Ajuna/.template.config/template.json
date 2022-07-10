@@ -12,7 +12,7 @@
    "symbols": {
       "sdk_version": {
          "datatype": "string",
-         "defaultValue": "0.1.11",
+         "defaultValue": "0.1.12",
          "description": "Uses the given Ajuna SDK version.",
          "replaces": "AJUNA_SDK_VERSION",
          "type": "parameter"
@@ -53,13 +53,6 @@
          "defaultValue": "ws://127.0.0.1:9944",
          "description": "Uses the given websocket URL to query metadata.",
          "replaces": "ws://127.0.0.1:9944",
-         "type": "parameter"
-      },
-      "metadata_runtime": {
-         "datatype": "string",
-         "defaultValue": "ajuna_solo_runtime",
-         "description": "Uses the given runtime for metadata type building.",
-         "replaces": "ajuna_solo_runtime",
          "type": "parameter"
       }
    },

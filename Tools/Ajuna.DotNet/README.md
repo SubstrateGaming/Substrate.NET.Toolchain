@@ -39,7 +39,6 @@ In case your project has been created with `dotnet new ajuna`; the configuration
    },
    "metadata": {
       "websocket": "ws://127.0.0.1:9944",
-      "runtime": "ajuna_solo_runtime"
    },
    "rest_client_settings": {
       "service_assembly": "AjunaExample.RestService.dll"
