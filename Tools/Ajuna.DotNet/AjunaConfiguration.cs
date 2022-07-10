@@ -49,7 +49,7 @@ namespace Ajuna.DotNet
       [JsonProperty("websocket")]
       public string Websocket { get; set; }
 
-      [JsonProperty("runtime")]
+      [JsonIgnore]
       public string Runtime { get; set; }
    }
 

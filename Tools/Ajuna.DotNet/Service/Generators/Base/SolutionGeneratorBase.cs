@@ -78,7 +78,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                   case TypeDefEnum.Variant:
                      {
                         var type = nodeType as NodeTypeVariant;
-                        string variantType = SolutionGeneratorBase.GetVariantType(string.Join('.', nodeType.Path));
+                        string variantType = SolutionGeneratorBase.GetVariantType(NodeRuntime, string.Join('.', nodeType.Path));
                         CallVariant(variantType, type, ref typeDict, write, basePath);
                         break;
                      }
@@ -139,7 +139,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
          return typeDict;
       }
 
-      private static string GetVariantType(string path)
+      private static string GetVariantType(string nodeRunetime, string path)
       {
          if (path == "Option")
          {
@@ -162,7 +162,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
          {
             return "Error";
          }
-         else if (path.Contains("node_runtime.Event") || path.Contains("node_runtime.Call"))
+         else if (path.Contains($"{nodeRunetime}.Event") || path.Contains($"{nodeRunetime}.Call"))
          {
             return "Runtime";
          }

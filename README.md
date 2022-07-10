@@ -54,12 +54,11 @@ Using a terminal of your choice, create a new directory for your project and exe
 ```sh
 dotnet new sln
 dotnet new ajuna \
-   --sdk_version 0.1.11 \
+   --sdk_version 0.1.12 \
    --rest_service AjunaExample.RestService \
    --net_api AjunaExample.NetApi \
    --rest_client AjunaExample.RestClient \
    --metadata_websocket ws://127.0.0.1:9944 \
-   --metadata_runtime ajuna_solo_runtime \
    --force \
    --allow-scripts yes
 ```

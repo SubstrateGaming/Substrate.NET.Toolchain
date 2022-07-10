@@ -29,6 +29,22 @@ namespace Ajuna.DotNet.Service.Node
          return null;
       }
 
+      internal static string GetRuntimeFromFile(ILogger logger, string serviceArgument)
+      {
+         logger.Information("Loading runtime from file {file}...", serviceArgument);
+
+         try
+         {
+            return File.ReadAllText(serviceArgument).Replace("-", "_");
+         }
+         catch (Exception ex)
+         {
+            logger.Error(ex, $"Error while loading runtime from file: {serviceArgument}.");
+         }
+
+         return string.Empty;
+      }
+
       internal static MetaData? GetMetadataFromSerializedText(ILogger logger, string serializedText)
       {
          try
@@ -45,7 +61,6 @@ namespace Ajuna.DotNet.Service.Node
          return null;
       }
 
-
       internal static async Task<string?> GetMetadataFromNodeAsync(ILogger logger, string serviceArgument, CancellationToken cancellationToken)
       {
          logger.Information("Loading metadata from node {node}...", serviceArgument);
@@ -55,6 +70,24 @@ namespace Ajuna.DotNet.Service.Node
             using var client = new SubstrateClient(new Uri(serviceArgument));
             await client.ConnectAsync(true, cancellationToken);
             return await client.State.GetMetaDataAsync(cancellationToken);
+         }
+         catch (Exception ex)
+         {
+            logger.Error(ex, $"Error while loading metadata from node: {serviceArgument}.");
+         }
+
+         return null;
+      }
+
+      internal static async Task<string?> GetRuntimeFromNodeAsync(ILogger logger, string serviceArgument, CancellationToken cancellationToken)
+      {
+         logger.Information("Loading runtime from node {node}...", serviceArgument);
+
+         try
+         {
+            using var client = new SubstrateClient(new Uri(serviceArgument));
+            await client.ConnectAsync(true, cancellationToken);
+            return $"{client.RuntimeVersion.SpecName}_runtime";
          }
          catch (Exception ex)
          {

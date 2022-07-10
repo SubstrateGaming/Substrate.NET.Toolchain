@@ -123,7 +123,6 @@ namespace Ajuna.DotNet
          Log.Information("Using RestClient.Mockup Project = {name}", configuration.Projects.RestClientMockup);
          Log.Information("Using RestClient.Test Project = {name}", configuration.Projects.RestClientTest);
          Log.Information("Using RestService assembly for RestClient = {assembly}", configuration.RestClientSettings.ServiceAssembly);
-         Log.Information("Using Node Runtime = {runtime}", configuration.Metadata.Runtime);
 
          if (fetchMetadata)
          {
@@ -134,16 +133,33 @@ namespace Ajuna.DotNet
                Log.Error("Unable to fetch metadata from websocket {websocket}. Aborting.", configuration.Metadata.Websocket);
                return false;
             }
+
+            if (!await GenerateRuntimeAsync(configuration.Metadata.Websocket, token))
+            {
+               Log.Error("Unable to fetch runtime from websocket {websocket}. Aborting.", configuration.Metadata.Websocket);
+               return false;
+            }
          }
 
          string metadataFilePath = ResolveMetadataFilePath();
          Log.Information("Using Metadata = {metadataFilePath}", metadataFilePath);
+         
+         string runtimeFilePath = ResolveRuntimeFilePath();
+         Log.Information("Using Runtime = {runtimeFilePath}", runtimeFilePath);
 
          MetaData metadata = GetMetadata.GetMetadataFromFile(Log.Logger, metadataFilePath);
          if (metadata == null)
          {
             return false;
          }
+
+         configuration.Metadata.Runtime = GetMetadata.GetRuntimeFromFile(Log.Logger, runtimeFilePath);
+         if (string.IsNullOrEmpty(configuration.Metadata.Runtime))
+         {
+            return false;
+         }
+
+         Log.Information("Using Runtime {runtime}", configuration.Metadata.Runtime);
 
          // Service
          GenerateNetApiClasses(metadata, configuration);
@@ -181,6 +197,37 @@ namespace Ajuna.DotNet
          catch (Exception e)
          {
             Log.Error(e, $"Could not save metadata to filepath: {metadataFilePath}!");
+         }
+
+         return false;
+      }
+
+      /// <summary>
+      /// Fetches and generates .ajuna/runtime.txt
+      /// </summary>
+      /// <param name="websocket">The websocket to connect to</param>
+      /// <param name="token">Cancellation token.</param>
+      /// <returns>Returns true on success, otherwise false.</returns>
+      /// <exception cref="InvalidOperationException"></exception>
+      private static async Task<bool> GenerateRuntimeAsync(string websocket, CancellationToken token)
+      {
+         string runtime = await GetMetadata.GetRuntimeFromNodeAsync(Log.Logger, websocket, token);
+         if (runtime == null)
+         {
+            throw new InvalidOperationException($"Could not query runtime from node {websocket}!");
+         }
+
+         string runtimeFilePath = ResolveRuntimeFilePath();
+
+         try
+         {
+            Log.Information("Saving runtime to {runtimeFilePath}...", runtimeFilePath);
+            File.WriteAllText(runtimeFilePath, runtime);
+            return true;
+         }
+         catch (Exception e)
+         {
+            Log.Error(e, $"Could not save runtime to filepath: {runtimeFilePath}!");
          }
 
          return false;
@@ -267,6 +314,11 @@ namespace Ajuna.DotNet
       /// Returns the file path to .ajuna/metadata.txt
       /// </summary>
       private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.txt");
+
+      /// <summary>
+      /// Returns the file path to .ajuna/runtime.txt
+      /// </summary>
+      private static string ResolveRuntimeFilePath() => Path.Join(ResolveConfigurationDirectory(), "runtime.txt");
 
       private static string ResolveRestServiceAssembly(AjunaConfiguration configuration)
       {
