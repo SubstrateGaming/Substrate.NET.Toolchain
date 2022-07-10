@@ -210,6 +210,9 @@ namespace Ajuna.DotNet.Service.Node
          decodeMethod.Statements.Add(new CodeSnippetExpression("p += 1"));
          decodeMethod.Statements.Add(new CodeSnippetExpression("Value2 = DecodeOneOf(enumByte, byteArray, ref p)"));
          decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = p - start"));
+         decodeMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[TypeSize]"));
+         decodeMethod.Statements.Add(new CodeSnippetExpression("Array.Copy(byteArray, start, base.Bytes, 0, TypeSize)"));
+
          result.Add(decodeMethod);
 
          CodeMemberMethod decodeOneOfMethod = SimpleMethod("DecodeOneOf");
@@ -232,7 +235,7 @@ namespace Ajuna.DotNet.Service.Node
             Direction = FieldDirection.Ref
          });
          decodeOneOfMethod.Statements.Add(new CodeSnippetExpression("IType result"));
-         decodeOneOfMethod.Statements.Add(new CodeSnippetExpression("if (value == 0) { return null; }"));
+         decodeOneOfMethod.Statements.Add(new CodeSnippetExpression("if (value == 0) { return new BaseVoid(); }"));
          decodeOneOfMethod.Statements.Add(new CodeSnippetExpression("if (value == 1) { result = new Arr0U8(); result.Decode(byteArray, ref p); return result; }"));
          decodeOneOfMethod.Statements.Add(new CodeSnippetExpression("if (value == 2) { result = new Arr1U8(); result.Decode(byteArray, ref p); return result; }"));
          decodeOneOfMethod.Statements.Add(new CodeSnippetExpression("if (value == 3) { result = new Arr2U8(); result.Decode(byteArray, ref p); return result; }"));
