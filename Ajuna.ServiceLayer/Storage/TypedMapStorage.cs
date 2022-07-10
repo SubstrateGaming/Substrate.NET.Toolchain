@@ -10,7 +10,7 @@ namespace Ajuna.ServiceLayer.Storage
       internal string Identifier { get; private set; }
       public Dictionary<string, T> Dictionary { get; private set; }
       public IStorageDataProvider DataProvider { get; private set; }
-      public IStorageChangeDelegate ChangeDelegate { get; private set; }
+      public List<IStorageChangeDelegate> ChangeDelegates { get; private set; }
 
       public TypedMapStorage(string identifier, IStorageDataProvider dataProvider)
       {
@@ -18,11 +18,11 @@ namespace Ajuna.ServiceLayer.Storage
          DataProvider = dataProvider;
       }
 
-      public TypedMapStorage(string identifier, IStorageDataProvider dataProvider, IStorageChangeDelegate changeDelegate)
+      public TypedMapStorage(string identifier, IStorageDataProvider dataProvider, List<IStorageChangeDelegate>  changeDelegates)
       {
          Identifier = identifier;
          DataProvider = dataProvider;
-         ChangeDelegate = changeDelegate;
+         ChangeDelegates = changeDelegates;
       }
 
       public async Task InitializeAsync(string module, string moduleItem)
@@ -47,7 +47,7 @@ namespace Ajuna.ServiceLayer.Storage
          {
             Dictionary.Remove(key);
             Log.Debug($"[{Identifier}] item {{key}} was deleted.", key);
-            ChangeDelegate?.OnDelete(Identifier, key, data);
+            ChangeDelegates?.ForEach(x=>x.OnDelete(Identifier, key, data));
          }
          else
          {
@@ -58,13 +58,13 @@ namespace Ajuna.ServiceLayer.Storage
             {
                Dictionary[key] = iType;
                Log.Debug($"[{Identifier}] item {{key}} was updated.", key);
-               ChangeDelegate?.OnUpdate(Identifier, key, data);
+               ChangeDelegates?.ForEach(x=>x.OnUpdate(Identifier, key, data));
             }
             else
             {
                Dictionary.Add(key, iType);
                Log.Debug($"[{Identifier}] item {{key}} was created.", key);
-               ChangeDelegate?.OnCreate(Identifier, key, data);
+               ChangeDelegates?.ForEach(x=>x.OnCreate(Identifier, key, data));
             }
          }
       }
