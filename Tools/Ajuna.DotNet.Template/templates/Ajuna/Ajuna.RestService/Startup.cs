@@ -47,6 +47,8 @@ namespace Ajuna.RestService
 
       private IStorageDataProvider _storageDataProvider;
       private readonly StorageSubscriptionChangeDelegate _storageChangeDelegate = new StorageSubscriptionChangeDelegate();
+      
+      // Delegate for adding local persistence for any Storage Changes
       private readonly StoragePersistenceChangeDelegate _storagePersistenceChangeDelegate = new StoragePersistenceChangeDelegate();
 
 

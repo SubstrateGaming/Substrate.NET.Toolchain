@@ -10,6 +10,10 @@ namespace Ajuna.ServiceLayer.Storage
       internal string Identifier { get; private set; }
       public T Store { get; private set; }
       public IStorageDataProvider DataProvider { get; private set; }
+      
+      /// <summary>
+      /// A ChangeDelegate can be added in order to act upon any Storage Changes
+      /// </summary>
       public List<IStorageChangeDelegate> ChangeDelegates { get; private set; }
 
       public TypedStorage(string identifier, IStorageDataProvider dataProvider)
