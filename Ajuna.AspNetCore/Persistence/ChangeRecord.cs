@@ -1,12 +1,14 @@
 using System;
 
-namespace Ajuna.AspNetCore
+namespace Ajuna.AspNetCore.Persistence
 {
+   /// <summary>
+   /// Representation of a Node Storage Change 
+   /// </summary>
    public class ChangeRecord
    {
-      public ChangeRecord(DateTimeOffset updateDate)
+      public ChangeRecord()
       {
-         UpdateDate = updateDate;
       }
       
       public  ChangeRecord(string key, string identifier, ChangeAction action, string data )
