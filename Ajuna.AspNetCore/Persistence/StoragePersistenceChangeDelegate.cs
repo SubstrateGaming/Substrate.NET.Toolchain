@@ -1,10 +1,8 @@
-using Ajuna.AspNetCore.Persistence;
 using Ajuna.ServiceLayer.Storage;
 using System;
-using System.Globalization;
 using System.IO;
 
-namespace Ajuna.AspNetCore
+namespace Ajuna.AspNetCore.Persistence
 {
    /// <summary>
    /// Responsible for storing all changes in a CSV file including the Identifier, Action type, Data and Update Date
