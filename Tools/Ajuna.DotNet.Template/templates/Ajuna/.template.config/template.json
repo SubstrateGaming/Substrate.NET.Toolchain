@@ -19,7 +19,7 @@
       },
       "api_version": {
          "datatype": "string",
-         "defaultValue": "0.1.13",
+         "defaultValue": "0.1.14",
          "description": "Uses the given Ajuna .NET API version.",
          "replaces": "AJUNA_NETAPI_VERSION",
          "type": "parameter"
