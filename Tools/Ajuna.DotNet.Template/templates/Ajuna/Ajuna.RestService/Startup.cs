@@ -1,4 +1,5 @@
 using Ajuna.AspNetCore;
+using Ajuna.AspNetCore.Persistence;
 using Ajuna.AspNetCore.Extensions;
 using Ajuna.RestService.Formatters;
 using Ajuna.ServiceLayer;
@@ -64,7 +65,7 @@ namespace Ajuna.RestService
       }
 
       /// <summary>
-      /// Retreives the service configuration.
+      /// Retrieves the service configuration.
       /// </summary>
       public IConfiguration Configuration { get; }
 
