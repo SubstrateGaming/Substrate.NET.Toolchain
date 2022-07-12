@@ -48,9 +48,14 @@ namespace Ajuna.RestService
 
       private IStorageDataProvider _storageDataProvider;
       private readonly StorageSubscriptionChangeDelegate _storageChangeDelegate = new StorageSubscriptionChangeDelegate();
-      
+
       // Delegate for adding local persistence for any Storage Changes
+      // Changes are going to be saved in a CSV file. The default location of the CSV file will be in project root.
+      // Alternatively, please set the fileDirectory parameter in the constructor below.
       private readonly StoragePersistenceChangeDelegate _storagePersistenceChangeDelegate = new StoragePersistenceChangeDelegate();
+      
+      // Set to true to activate persistence 
+      private readonly bool _useLocalStoragePersistence = false;
 
 
       /// <summary>
@@ -109,15 +114,20 @@ namespace Ajuna.RestService
             c.CustomSchemaIds(type => type.ToString());
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ajuna.RestService", Version = "v1" });
          });
-
       }
 
       private List<IStorage> GetRuntimeStorages()
       {
+         var storageChangeDelegates = new List<IStorageChangeDelegate> {_storageChangeDelegate,};
+          
+         // If true, add local storage persistence
+         if(_useLocalStoragePersistence)
+            storageChangeDelegates.Add(_storagePersistenceChangeDelegate);
+      
          return Assembly.GetExecutingAssembly()
             .GetTypes()
             .Where(anyType => anyType.IsClass && typeof(IStorage).IsAssignableFrom(anyType))
-            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageDataProvider, new List<IStorageChangeDelegate>{_storageChangeDelegate, _storagePersistenceChangeDelegate} }))
+            .Select(storageType => (IStorage)Activator.CreateInstance(storageType, new object[] { _storageDataProvider, storageChangeDelegates }))
             .ToList();
       }
 
