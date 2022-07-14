@@ -1,5 +1,6 @@
 ﻿using Ajuna.NetApi.Model.Types;
 using Serilog;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Ajuna.ServiceLayer.Storage
@@ -9,7 +10,11 @@ namespace Ajuna.ServiceLayer.Storage
       internal string Identifier { get; private set; }
       public T Store { get; private set; }
       public IStorageDataProvider DataProvider { get; private set; }
-      public IStorageChangeDelegate ChangeDelegate { get; private set; }
+      
+      /// <summary>
+      /// A ChangeDelegate can be added in order to act upon any Storage Changes
+      /// </summary>
+      public List<IStorageChangeDelegate> ChangeDelegates { get; private set; }
 
       public TypedStorage(string identifier, IStorageDataProvider dataProvider)
       {
@@ -17,11 +22,11 @@ namespace Ajuna.ServiceLayer.Storage
          DataProvider = dataProvider;
       }
 
-      public TypedStorage(string identifier, IStorageDataProvider dataProvider, IStorageChangeDelegate changeDelegate)
+      public TypedStorage(string identifier, IStorageDataProvider dataProvider, List<IStorageChangeDelegate>  changeDelegates)
       {
          Identifier = identifier;
          DataProvider = dataProvider;
-         ChangeDelegate = changeDelegate;
+         ChangeDelegates = changeDelegates;
       }
 
       public async Task InitializeAsync(string module, string moduleItem)
@@ -49,7 +54,7 @@ namespace Ajuna.ServiceLayer.Storage
             Store = iType;
             Log.Debug($"[{Identifier}] item was updated.");
 
-            ChangeDelegate?.OnUpdate(Identifier, string.Empty, data);
+            ChangeDelegates?.ForEach(x=>x.OnUpdate(Identifier, string.Empty, data));
          }
       }
    }
