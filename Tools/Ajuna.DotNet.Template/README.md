@@ -23,11 +23,14 @@ This template comes with some arguments to specify template parameters.
 
 To list all available template parameters, simply run the command `dotnet new ajuna --help`, which prints all the available parameters.
 
-| Parameter | Description |
-|---|---|
-| --sdk_version | This parameter specifies the used Ajuna SDK version. Defaults to the latest version. |
-| --api_version | This parameter specifies the used Ajuna .NET API version. Defaults to the latest version. |
-| --metadata_websocket | This parameter tells the generator where to pull the substrate metadata from. Default is localhost `ws://127.0.0.1:9944`. |
-| -net_api | This parameter controls how to name the generated type extension library. Default is `Ajuna.NetApiExt`. |
-| -rest_service | This parameter controls how to name the generated rest service. Default is `Ajuna.RestService`. |
-| -rest_client | This parameter controls how to name the generated rest client, tests and mockup project. Default is `Ajuna.RestClient`. |
+| Parameter                       | Description                                                                                                               |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| --sdk_version                   | This parameter specifies the used Ajuna SDK version. Defaults to the latest version.                                      |
+| --api_version                   | This parameter specifies the used Ajuna .NET API version. Defaults to the latest version.                                 |
+| --metadata_websocket            | This parameter tells the generator where to pull the substrate metadata from. Default is localhost `ws://127.0.0.1:9944`. |
+| --net_api                        | This parameter controls how to name the generated type extension library. Default is `Ajuna.NetApiExt`.                   |
+| --rest_service                   | This parameter controls how to name the generated rest service. Default is `Ajuna.RestService`.                           |
+| --rest_client                    | This parameter controls how to name the generated rest client, tests and mockup project. Default is `Ajuna.RestClient`.   |
+| --generate_openapi_documentation | This parameter Activates or deactivates the OpenApi Document Generation in the generated rest service. Default is `true`. |
+
+
