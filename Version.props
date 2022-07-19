@@ -6,7 +6,7 @@
       <VersionMinor>1</VersionMinor>
       <VersionPatch>15</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
-      <AjunaPackageVersion>0.1.15</AjunaPackageVersion>
+      <AjunaPackageVersion>0.1.16</AjunaPackageVersion>
 
       <!-- Variables -->
       <AjunaVersion>$(AssemblyVersion)</AjunaVersion>
@@ -18,7 +18,7 @@
       <AjunaCopyright>Copyright © BloGa Tech AG, Switzerland. All rights reserved.</AjunaCopyright>
 
       <!-- Default supported frameworks -->
-      <AjunaDefaultFrameworks>netstandard2.0;net5.0;net6.0</AjunaDefaultFrameworks>
+      <AjunaDefaultFrameworks>netstandard2.0;net6.0</AjunaDefaultFrameworks>
 
       <!-- Code Style -->
       <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
