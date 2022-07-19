@@ -4,7 +4,7 @@
       <OutputType>Exe</OutputType>
       <AssemblyTitle>Ajuna.DotNet</AssemblyTitle>
       <AssemblyName>Ajuna.DotNet</AssemblyName>
-      <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+      <TargetFramework>net6.0</TargetFramework>
       
       <!-- HINT: Use dotnet pack instead. -->
       <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
