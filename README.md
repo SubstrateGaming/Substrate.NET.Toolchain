@@ -59,6 +59,7 @@ dotnet new ajuna \
    --net_api AjunaExample.NetApi \
    --rest_client AjunaExample.RestClient \
    --metadata_websocket ws://127.0.0.1:9944 \
+   --generate_openapi_documentation true \
    --force \
    --allow-scripts yes
 ```
