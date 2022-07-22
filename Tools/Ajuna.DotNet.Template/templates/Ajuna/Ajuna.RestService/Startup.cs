@@ -84,7 +84,7 @@ namespace Ajuna.RestService
          if (!string.IsNullOrEmpty(useMockupProvider) && useMockupProvider.Equals("true", StringComparison.InvariantCultureIgnoreCase))
          {
             // Configure mockup data provider
-            _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText("..\\.ajuna\\metadata.txt"));
+            _storageDataProvider = new AjunaMockupDataProvider(File.ReadAllText(Path.Combine("..",".ajuna","metadata.txt")));
          }
          else
          {
