@@ -54,7 +54,7 @@ Using a terminal of your choice, create a new directory for your project and exe
 ```sh
 dotnet new sln
 dotnet new ajuna \
-   --sdk_version 0.1.16 \
+   --sdk_version 0.1.17 \
    --rest_service AjunaExample.RestService \
    --net_api AjunaExample.NetApi \
    --rest_client AjunaExample.RestClient \
