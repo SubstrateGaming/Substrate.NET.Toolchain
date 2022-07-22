@@ -335,16 +335,16 @@ namespace Ajuna.DotNet.Service.Node
                   TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
                };
 
+               if (typeDef.Variants != null) {
+                  foreach (TypeVariant variant in typeDef.Variants)
+                  {
+                     var enumField = new CodeMemberField(ClassName, variant.Name);
 
-               foreach (TypeVariant variant in typeDef.Variants)
-               {
-                  var enumField = new CodeMemberField(ClassName, variant.Name);
+                     // add comment to field if exists
+                     enumField.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
 
-                  // add comment to field if exists
-                  enumField.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
-
-                  targetClass.Members.Add(enumField);
-               }
+                     targetClass.Members.Add(enumField);
+                  } }
 
                typeNamespace.Types.Add(targetClass);
             }

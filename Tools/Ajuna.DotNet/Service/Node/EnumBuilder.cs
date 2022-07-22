@@ -64,7 +64,7 @@ namespace Ajuna.DotNet.Service.Node
             {
                var codeTypeRef = new CodeTypeReference("BaseEnumExt");
                codeTypeRef.TypeArguments.Add(new CodeTypeReference(enumName));
-               if (typeDef.Variants.Length < 10)
+               if (typeDef.Variants.Length < 29)
                {
                   for (int i = 0; i < typeDef.Variants.Length; i++)
                   {

@@ -12,14 +12,14 @@
    "symbols": {
       "sdk_version": {
          "datatype": "string",
-         "defaultValue": "0.1.16",
+         "defaultValue": "0.1.17",
          "description": "Uses the given Ajuna SDK version.",
          "replaces": "AJUNA_SDK_VERSION",
          "type": "parameter"
       },
       "api_version": {
          "datatype": "string",
-         "defaultValue": "0.1.14",
+         "defaultValue": "0.1.16",
          "description": "Uses the given Ajuna .NET API version.",
          "replaces": "AJUNA_NETAPI_VERSION",
          "type": "parameter"
