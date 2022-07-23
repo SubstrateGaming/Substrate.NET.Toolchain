@@ -130,6 +130,19 @@ namespace Ajuna.DotNet.Service.Generators.Base
                         break;
                      }
                   case TypeDefEnum.BitSequence:
+                     {
+                        var type = nodeType as NodeTypeBitSequence;
+                        if (typeDict.TryGetValue(type.TypeIdStore, out (string, List<string>) fullItemStore)
+                         && typeDict.TryGetValue(type.TypeIdOrder, out (string, List<string>) fullItemOrder))
+                        {
+                           string typeName = $"BaseBitSeq<{fullItemStore.Item1},{fullItemOrder.Item1}>";
+                           var list = new List<string>();
+                           list.AddRange(fullItemStore.Item2);
+                           list.AddRange(fullItemOrder.Item2);
+                           typeDict.Add(type.Id, (typeName, list));
+                        }
+                        break;
+                     }
                   default:
                      throw new NotImplementedException($"Unimplemented enumeration of node type {nodeType.TypeDef}");
                }

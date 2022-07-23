@@ -12,7 +12,7 @@ namespace Ajuna.DotNet.Service.Node.Base
           : base(projectName, id, typeDict)
       {
          TypeDef = typeDef;
-         NamespaceName = typeDef.Path != null && typeDef.Path[0].Contains("_")
+         NamespaceName = typeDef.Path != null && typeDef.Path.Length > 1
              ? $"{ProjectName}.Generated.Model.{typeDef.Path[0].MakeMethod()}"
              : $"{ProjectName}.Generated.Model.Base";
       }
