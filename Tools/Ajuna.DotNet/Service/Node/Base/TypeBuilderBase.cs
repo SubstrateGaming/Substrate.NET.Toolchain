@@ -1,6 +1,8 @@
 ﻿using Ajuna.DotNet.Extensions;
 using Ajuna.NetApi.Model.Meta;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Ajuna.DotNet.Service.Node.Base
 {
@@ -12,9 +14,24 @@ namespace Ajuna.DotNet.Service.Node.Base
           : base(projectName, id, typeDict)
       {
          TypeDef = typeDef;
-         NamespaceName = typeDef.Path != null && typeDef.Path.Length > 1
-             ? $"{ProjectName}.Generated.Model.{typeDef.Path[0].MakeMethod()}"
-             : $"{ProjectName}.Generated.Model.Base";
+         NamespaceName = $"{ProjectName}.Generated.Model.{TypeNameSpace(typeDef.Path)}";
+      }
+
+      private string TypeNameSpace(string[] path)
+      {
+         if (path == null || path.Length < 2)
+         {
+            return "Base";
+         }
+
+         // heck if we have a versioned name space
+         IEnumerable<string> vWhere = path.Where(p => Regex.IsMatch(p, @"v[0-9]+"));
+         if (vWhere.Any())
+         {
+            return path[0].MakeMethod() + "." + vWhere.First().MakeMethod();
+         }
+
+         return path[0].MakeMethod();
       }
    }
 }
