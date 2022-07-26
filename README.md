@@ -56,7 +56,7 @@ dotnet new sln
 dotnet new ajuna \
    --sdk_version 0.1.21 \
    --rest_service AjunaExample.RestService \
-   --net_api AjunaExample.NetApi \
+   --net_api AjunaExample.NetApiExt \
    --rest_client AjunaExample.RestClient \
    --metadata_websocket ws://127.0.0.1:9944 \
    --force \
@@ -71,14 +71,48 @@ which generates a new solution and a couple of .NET projects in your project dir
 .
 ├─── .ajuna
 ├─── .config
-├─── AjunaExample.NetApi
+├─── AjunaExample.NetApiExt
 ├─── AjunaExample.RestClient
 ├─── AjunaExample.RestClient.Mockup
 ├─── AjunaExample.RestClient.Test
 ├─── AjunaExample.RestService
 ```
 
-This contains everything you need in order to get started making excellent substrate services and clients in .NET.
+### Role of the Generated Projects
+
+Before elaborating on each of the generated projects, let’s first talk about [Ajuna.NetApi](https://github.com/ajuna-network/Ajuna.NetApi/tree/master/Ajuna.NetApi) which is the basis that these projects are built upon.
+
+#### Ajuna.NetApi
+
+`Ajuna.NetApi` is the basic framework for accessing and handling JSON-RPC connections and handling all standard RPC calls exposed by the `rpc.methods()` of every substrate node. It additionally implements Rust primitives and Generics as a C# representation like [U8](https://github.com/ajuna-network/Ajuna.NetApi/blob/master/Ajuna.NetApi/Model/Types/Primitive/U8.cs), [BaseVec](https://github.com/ajuna-network/Ajuna.NetApi/blob/master/Ajuna.NetApi/Model/Types/Base/BaseVec.cs) (Vec<>), or [EnumExt](https://github.com/ajuna-network/Ajuna.NetApi/blob/master/Ajuna.NetApi/Model/Types/Base/BaseEnumExt.cs) (Rust-specific Enums). 
+
+
+#### Ajuna.NetApiExt
+
+Since `Ajuna.NetApi` has no other types than the ones previously described, accessing a node’s storage or sending extrinsic would involve manually creating the necessary types. This is where the generated `Ajuna.NetApiExt` comes into play since it extends `Ajuna.NetApi` by exposing all the node-specific types, storage access, extrinsic calls and more. 
+
+
+#### Ajuna.RestService
+
+This service:
+
+ - Connects to a node and subscribes to the global storage changes, which are then maintained in memory.
+ - Offers a REST service (poll) which exposes all the storage information as REST.
+ - Offers a subscription service (pub/sub) providing changes over a WebSocket. 
+
+The benefit of this approach is that this artifact is much more lightweight than the node itself and can therefore be scaled according to the needs of the consumers without putting any load on an RPC node except for one connection (per RestService instance) for the global storage subscription.
+
+
+#### Ajuna.RestClient
+
+This RestClient can be used in a C#, Unity, or any other application allowing it to access the information provided by the previously described RestService. Using the RestClient one could subscribe to the node storage changes using the WebSocket or access the storage directly through exposed REST service.
+
+
+
+
+As you can see, we could in principle launch any service or create any application on top of Substrate without any further knowledge except from the library usage.
+
+The generated projects contain everything you need in order to get started making excellent substrate services and clients in C# and the .NET framework.
 
 
 ## Documents
