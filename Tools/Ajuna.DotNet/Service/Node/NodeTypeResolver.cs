@@ -58,7 +58,7 @@ namespace Ajuna.DotNet.Service.Node
                   case NodeTypeNamespaceSource.Primitive:
                      return "Ajuna.NetApi.Model.Types.Primitive";
                   case NodeTypeNamespaceSource.Generated:
-                     return "AjunaExample.NetApi.Generated.Types.Base";
+                     return $"{Resolver.NetApiProjectName}.Generated.Types.Base";
                   default:
                      break;
                }
@@ -67,7 +67,7 @@ namespace Ajuna.DotNet.Service.Node
             }
 
             // TODO (svnscha) use configurable project name
-            return $"AjunaExample.NetApi.Generated.Model.{result}";
+            return $"{Resolver.NetApiProjectName}.Generated.Model.{result}";
          }
       }
 
@@ -125,10 +125,12 @@ namespace Ajuna.DotNet.Service.Node
       protected string NodeRuntime { get; private set; }
 
       public Dictionary<uint, NodeTypeResolved> TypeNames { get; private set; }
+      public string NetApiProjectName { get; private set; }
 
-      public NodeTypeResolver(string nodeRuntime, Dictionary<uint, NodeType> types)
+      public NodeTypeResolver(string nodeRuntime, string netApiProjectName, Dictionary<uint, NodeType> types)
       {
          NodeRuntime = nodeRuntime;
+         NetApiProjectName = netApiProjectName;
          TypeNames = Resolve(types);
       }
 

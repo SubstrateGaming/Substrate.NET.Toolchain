@@ -225,11 +225,6 @@ namespace Ajuna.DotNet.Extensions
             Attributes = MemberAttributes.Public,
          };
 
-         if (method.Name == "SetNextExternal")
-         {
-            System.Diagnostics.Debugger.Break();
-         }
-
          IReflectedEndpointRequest request = endpoint.GetRequest();
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)

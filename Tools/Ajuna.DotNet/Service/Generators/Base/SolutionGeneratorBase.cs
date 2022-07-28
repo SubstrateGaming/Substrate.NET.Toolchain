@@ -46,7 +46,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
 
       protected NodeTypeResolver GenerateTypes(Dictionary<uint, NodeType> nodeTypes, string basePath, bool write)
       {
-         var resolver = new NodeTypeResolver(NodeRuntime, nodeTypes);
+         var resolver = new NodeTypeResolver(NodeRuntime, ProjectName, nodeTypes);
 
          foreach (KeyValuePair<uint, NodeTypeResolved> kvp in resolver.TypeNames)
          {
