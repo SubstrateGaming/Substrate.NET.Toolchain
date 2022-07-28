@@ -17,7 +17,7 @@ set AJUNA_ROOT=D:\Ajuna.SDK
 set LOCAL_NUGET_ROOT=D:\NuGet
 set LOCAL_NUGET_CACHE=%SYSTEMDRIVE%\Users\%USERNAME%\.nuget\packages
 set LOCAL_NUGET_BINARY=nuget.exe
-set AJUNA_VERSION=0.1.21
+set AJUNA_VERSION=0.1.22
 
 cd %AJUNA_ROOT%
 dotnet build --configuration Release

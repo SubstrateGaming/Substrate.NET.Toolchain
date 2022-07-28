@@ -26,7 +26,7 @@ namespace Ajuna.DotNet.Service.Generators
 
          // Generate types as if we were generating them for Types project but just keep them in memory
          // so we can reference these types and we don't output all the types while generating the rest service.
-         Dictionary<uint, (string, List<string>)> typeDict = GenerateTypes(metadata.NodeMetadata.Types, string.Empty, write: false);
+         NodeTypeResolver typeDict = GenerateTypes(metadata.NodeMetadata.Types, string.Empty, write: false);
 
          foreach (PalletModule module in metadata.NodeMetadata.Modules.Values)
          {

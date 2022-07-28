@@ -4,6 +4,7 @@ using Ajuna.NetApi.Model.Types;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -11,12 +12,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class EnumBuilder : TypeBuilderBase
    {
-      private EnumBuilder(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      private EnumBuilder(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
       }
 
-      public static EnumBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static EnumBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
       {
          return new EnumBuilder(projectName, id, typeDef, typeDict);
       }
@@ -28,6 +29,7 @@ namespace Ajuna.DotNet.Service.Node
          string enumName = $"{typeDef.Path.Last()}";
 
          ClassName = $"Enum{enumName}";
+         
          ReferenzName = $"{NamespaceName}.{ClassName}";
          CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
@@ -78,8 +80,8 @@ namespace Ajuna.DotNet.Service.Node
                      {
                         if (variant.TypeFields.Length == 1)
                         {
-                           (string, List<string>) fullItem = GetFullItemPath(variant.TypeFields[0].TypeId);
-                           codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
+                           NodeTypeResolved item = GetFullItemPath(variant.TypeFields[0].TypeId);
+                           codeTypeRef.TypeArguments.Add(new CodeTypeReference(item.ToString()));
                         }
                         else
                         {
@@ -87,8 +89,8 @@ namespace Ajuna.DotNet.Service.Node
 
                            foreach (NodeTypeField field in variant.TypeFields)
                            {
-                              (string, List<string>) fullItem = GetFullItemPath(field.TypeId);
-                              baseTuple.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
+                              NodeTypeResolved item = GetFullItemPath(field.TypeId);
+                              baseTuple.TypeArguments.Add(new CodeTypeReference(item.ToString()));
                            }
                            codeTypeRef.TypeArguments.Add(baseTuple);
                         }
@@ -128,7 +130,6 @@ namespace Ajuna.DotNet.Service.Node
       private CodeTypeMemberCollection GetEnumEra()
       {
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Primitive"));
 

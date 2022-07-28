@@ -11,12 +11,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class RestServiceStorageModuleBuilder : ModuleBuilderBase
    {
-      private RestServiceStorageModuleBuilder(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+      private RestServiceStorageModuleBuilder(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(projectName, id, module, typeDict, nodeTypes)
       {
       }
 
-      public static RestServiceStorageModuleBuilder Init(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static RestServiceStorageModuleBuilder Init(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
          return new RestServiceStorageModuleBuilder(projectName, id, module, typeDict, nodeTypes);
       }
@@ -106,9 +106,9 @@ namespace Ajuna.DotNet.Service.Node
                CodeExpression[] updateExpression, tryGetExpression;
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  (string, List<string>) fullItem = GetFullItemPath(entry.TypeMap.Item1);
-                  baseReturnType = new CodeTypeReference(fullItem.Item1);
-                  returnType = new CodeTypeReference($"TypedStorage<{fullItem.Item1}>");
+                  NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  baseReturnType = new CodeTypeReference(fullItem.ToString());
+                  returnType = new CodeTypeReference($"TypedStorage<{fullItem.ToString()}>");
 
                   updateExpression = new CodeExpression[] {
                                             new CodeVariableReferenceExpression(dataParamter.Name)};
@@ -118,10 +118,10 @@ namespace Ajuna.DotNet.Service.Node
                {
                   TypeMap typeMap = entry.TypeMap.Item2;
                   Storage.Hasher[] hashers = typeMap.Hashers;
-                  (string, List<string>) key = GetFullItemPath(typeMap.Key);
-                  (string, List<string>) value = GetFullItemPath(typeMap.Value);
-                  baseReturnType = new CodeTypeReference(value.Item1);
-                  returnType = new CodeTypeReference($"TypedMapStorage<{value.Item1}>");
+                  NodeTypeResolved key = GetFullItemPath(typeMap.Key);
+                  NodeTypeResolved value = GetFullItemPath(typeMap.Value);
+                  baseReturnType = new CodeTypeReference(value.ToString());
+                  returnType = new CodeTypeReference($"TypedMapStorage<{value.ToString()}>");
 
                   updateExpression = new CodeExpression[] {
                                 new CodeVariableReferenceExpression(keyParamter.Name),

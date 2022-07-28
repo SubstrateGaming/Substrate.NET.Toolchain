@@ -10,12 +10,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class EventModuleBuilder : ModulesBuilderBase
    {
-      private EventModuleBuilder(string projectName, uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+      private EventModuleBuilder(string projectName, uint id, PalletModule[] modules, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(projectName, id, modules, typeDict, nodeTypes)
       {
       }
 
-      public static EventModuleBuilder Init(string projectName, uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static EventModuleBuilder Init(string projectName, uint id, PalletModule[] modules, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
          return new EventModuleBuilder(projectName, id, modules, typeDict, nodeTypes);
       }
@@ -68,8 +68,8 @@ namespace Ajuna.DotNet.Service.Node
                      {
                         foreach (NodeTypeField field in variant.TypeFields)
                         {
-                           (string, List<string>) fullItem = GetFullItemPath(field.TypeId);
-                           codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
+                           NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
+                           codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.ToString()));
                         }
                      }
                      eventClass.BaseTypes.Add(codeTypeRef);

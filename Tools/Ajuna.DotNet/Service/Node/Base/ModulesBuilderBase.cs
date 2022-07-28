@@ -9,7 +9,7 @@ namespace Ajuna.DotNet.Service.Node.Base
 
       public PalletModule[] Modules { get; private set; }
 
-      public ModulesBuilderBase(string projectName, uint id, PalletModule[] modules, Dictionary<uint, (string, List<string>)> typeDict,
+      public ModulesBuilderBase(string projectName, uint id, PalletModule[] modules, NodeTypeResolver typeDict,
           Dictionary<uint, NodeType> nodeTypes)
           : base(projectName, id, typeDict)
       {
