@@ -79,10 +79,13 @@ namespace Ajuna.DotNet.Service.Node
 
       internal static NodeTypeName Array(NodeTypeResolver nodeTypeResolver, NodeTypeName nodeTypeName, uint length)
       {
-         var result = new NodeTypeName(nodeTypeResolver, NodeTypeNamespaceSource.Generated, nodeTypeName.BaseName, nodeTypeName.Arguments)
+
+
+         var result = new NodeTypeName(nodeTypeResolver, NodeTypeNamespaceSource.Generated, nodeTypeName.BaseName, null)
          {
             BaseNamePrefix = $"Arr{length}"
          };
+
          return result;
       }
 

@@ -187,9 +187,9 @@ namespace Ajuna.DotNet.Service.Node
       private CodeTypeMemberCollection GetEnumData()
       {
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"System"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Primitive"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Types.Base"));
 
          var result = new CodeTypeMemberCollection();
 
