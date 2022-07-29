@@ -13,12 +13,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class ModuleGenBuilder : ModuleBuilderBase
    {
-      private ModuleGenBuilder(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+      private ModuleGenBuilder(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(projectName, id, module, typeDict, nodeTypes)
       {
       }
 
-      public static ModuleGenBuilder Init(string projectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static ModuleGenBuilder Init(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
          return new ModuleGenBuilder(projectName, id, module, typeDict, nodeTypes);
       }
@@ -33,7 +33,8 @@ namespace Ajuna.DotNet.Service.Node
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Ajuna.NetApi.Model.Extrinsics"));
 
          FileName = "Main" + Module.Name;
-         ReferenzName = $"{ProjectName}.Model.{Module.Name}";
+         NamespaceName = $"{ProjectName}.Generated.Storage";
+         ReferenzName = NamespaceName;
 
          CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
@@ -116,12 +117,12 @@ namespace Ajuna.DotNet.Service.Node
 
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  (string, List<string>) fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
 
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
                       ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
 
-                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem.Item1}>");
+                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem.ToString()}>");
 
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
@@ -133,26 +134,26 @@ namespace Ajuna.DotNet.Service.Node
 
                   storageMethod.Statements.Add(variableDeclaration);
 
-                  storageMethod.Statements.Add(new CodeMethodReturnStatement(new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.Item1))));
+                  storageMethod.Statements.Add(new CodeMethodReturnStatement(new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.ToString()))));
 
                   // add storage key mapping in constructor
                   constructor.Statements.Add(
-                      ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString("", fullItem.Item1, storage.Prefix, entry.Name), "_client.StorageKeyDict"));
+                      ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString("", fullItem.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
 
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
                   TypeMap typeMap = entry.TypeMap.Item2;
                   Storage.Hasher[] hashers = typeMap.Hashers;
-                  (string, List<string>) key = GetFullItemPath(typeMap.Key);
-                  (string, List<string>) value = GetFullItemPath(typeMap.Value);
+                  NodeTypeResolved key = GetFullItemPath(typeMap.Key);
+                  NodeTypeResolved value = GetFullItemPath(typeMap.Value);
 
-                  parameterMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.Item1, "key"));
+                  parameterMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
                       ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
 
-                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{value.Item1}>");
-                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.Item1, "key"));
+                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{value.ToString()}>");
+                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
                   CodeMethodInvokeExpression methodInvoke = new(new CodeTypeReferenceExpression(targetClass.Name), parameterMethod.Name,
@@ -162,10 +163,10 @@ namespace Ajuna.DotNet.Service.Node
 
                   storageMethod.Statements.Add(
                       new CodeMethodReturnStatement(
-                          new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.Item1))));
+                          new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.ToString()))));
 
                   // add storage key mapping in constructor
-                  constructor.Statements.Add(ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString(key.Item1, value.Item1, storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
+                  constructor.Statements.Add(ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString(key.ToString(), value.ToString(), storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
                }
                else
                {
@@ -217,11 +218,11 @@ namespace Ajuna.DotNet.Service.Node
                      {
                         foreach (NodeTypeField field in variant.TypeFields)
                         {
-                           (string, List<string>) fullItem = GetFullItemPath(field.TypeId);
+                           NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
 
                            CodeParameterDeclarationExpression param = new()
                            {
-                              Type = new CodeTypeReference(fullItem.Item1),
+                              Type = new CodeTypeReference(fullItem.ToString()),
                               Name = field.Name
                            };
                            callMethod.Parameters.Add(param);

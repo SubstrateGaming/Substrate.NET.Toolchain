@@ -1,4 +1,5 @@
 ﻿using Ajuna.DotNet.Client.Interfaces;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Net;
@@ -29,6 +30,10 @@ namespace Ajuna.DotNet.Extensions
          // Ensure we are importing all model items.
          // Not actually required since we use fully qualified items but we want to get rid of that later.
          currentNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
+         foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
+         {
+            currentNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
+         }
 
          return new CodeTypeReference(typeof(Task<>).MakeGenericType(new[] { defaultReturnType.Type }));
       }

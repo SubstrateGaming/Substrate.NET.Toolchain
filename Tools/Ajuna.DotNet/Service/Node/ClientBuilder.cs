@@ -11,12 +11,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class ClientBuilder : ClientBuilderBase
    {
-      private ClientBuilder(string projectName, uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict) :
+      private ClientBuilder(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict) :
           base(projectName, id, moduleNames, typeDict)
       {
       }
 
-      public static ClientBuilder Init(string projectName, uint id, List<(string, List<string>)> moduleNames, Dictionary<uint, (string, List<string>)> typeDict)
+      public static ClientBuilder Init(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict)
       {
          return new ClientBuilder(projectName, id, moduleNames, typeDict);
       }
@@ -78,28 +78,25 @@ namespace Ajuna.DotNet.Service.Node
          //        new CodeVariableReferenceExpression(eventKeyField.Name),
          //        new CodeObjectCreateExpression(eventKeyField.Type, new CodeExpression[] { })));
 
-         foreach ((string, List<string>) tuple in ModuleNames)
+         foreach (string moduleName in ModuleNames)
          {
             string[] pallets = new string[] { "Storage" }; // , "Call"};
 
             foreach (string pallet in pallets)
             {
-               string name = tuple.Item1.Split('.').Last() + pallet;
-               string referenceName = tuple.Item2[0] + "." + name;
-
                CodeMemberField clientField = new()
                {
                   Attributes = MemberAttributes.Public,
-                  Name = name,
-                  Type = new CodeTypeReference(referenceName)
+                  Name = moduleName,
+                  Type = new CodeTypeReference(moduleName)
                };
-               clientField.Comments.AddRange(GetComments(new string[] { $"{name} storage calls." }, null, null));
+               clientField.Comments.AddRange(GetComments(new string[] { $"{moduleName} storage calls." }, null, null));
                targetClass.Members.Add(clientField);
 
                CodeFieldReferenceExpression fieldReference =
-                   new(new CodeThisReferenceExpression(), name);
+                   new(new CodeThisReferenceExpression(), moduleName);
 
-               var createPallet = new CodeObjectCreateExpression(referenceName);
+               var createPallet = new CodeObjectCreateExpression(moduleName);
                createPallet.Parameters.Add(new CodeThisReferenceExpression());
                constructor.Statements.Add(new CodeAssignStatement(fieldReference, createPallet));
             }

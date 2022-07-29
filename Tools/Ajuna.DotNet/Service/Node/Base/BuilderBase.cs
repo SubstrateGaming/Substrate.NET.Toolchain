@@ -13,8 +13,8 @@ namespace Ajuna.DotNet.Service.Node.Base
       public static readonly List<string> Files = new();
 
       public uint Id { get; }
-
-      public Dictionary<uint, (string, List<string>)> TypeDict { get; }
+      
+      NodeTypeResolver Resolver { get; }
 
       public bool Success { get; set; }
 
@@ -34,11 +34,11 @@ namespace Ajuna.DotNet.Service.Node.Base
 
       public abstract BuilderBase Create();
 
-      public BuilderBase(string projectName, uint id, Dictionary<uint, (string, List<string>)> typeDict)
+      public BuilderBase(string projectName, uint id, NodeTypeResolver resolver)
       {
          ProjectName = projectName;
          Id = id;
-         TypeDict = typeDict;
+         Resolver = resolver;
          ImportsNamespace = new()
          {
             Imports = {
@@ -52,16 +52,12 @@ namespace Ajuna.DotNet.Service.Node.Base
          Success = true;
       }
 
-      public (string, List<string>) GetFullItemPath(uint typeId)
+      public NodeTypeResolved GetFullItemPath(uint typeId)
       {
-         if (!TypeDict.TryGetValue(typeId, out (string, List<string>) fullItem))
+         if (!Resolver.TypeNames.TryGetValue(typeId, out NodeTypeResolved fullItem))
          {
             Success = false;
-            fullItem = ("Unknown", new List<string>() { "Unknown" });
-         }
-         else
-         {
-            fullItem.Item2.ForEach(p => ImportsNamespace.Imports.Add(new CodeNamespaceImport(p)));
+            return null;
          }
 
          return fullItem;
@@ -70,8 +66,10 @@ namespace Ajuna.DotNet.Service.Node.Base
       public static CodeCommentStatementCollection GetComments(string[] docs, NodeType typeDef = null,
           string typeName = null)
       {
-         CodeCommentStatementCollection comments = new();
-         comments.Add(new CodeCommentStatement("<summary>", true));
+         CodeCommentStatementCollection comments = new()
+         {
+            new CodeCommentStatement("<summary>", true)
+         };
 
          if (typeDef != null)
          {
@@ -117,7 +115,7 @@ namespace Ajuna.DotNet.Service.Node.Base
          return nameMethod;
       }
 
-      public virtual (string, List<string>) Build(bool write, out bool success, string basePath = null)
+      public virtual void Build(bool write, out bool success, string basePath = null)
       {
          success = Success;
          if (write && Success)
@@ -147,10 +145,7 @@ namespace Ajuna.DotNet.Service.Node.Base
             provider.GenerateCodeFromCompileUnit(
                 TargetUnit, sourceWriter, options);
          }
-
-         return (ReferenzName, new List<string>() { NamespaceName });
       }
-
 
       private string GetPath(string basePath)
       {
