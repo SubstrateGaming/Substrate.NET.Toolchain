@@ -38,10 +38,25 @@ namespace Ajuna.DotNet.Service.Node
    {
       public NodeTypeResolver Resolver { get; private set; }
       public NodeTypeNamespaceSource NamespaceSource { get; private set; }
-      public string BaseName { get; private set; }
-      public string ClassName => BaseName.Split('.').Last();
-      public string BaseNamePrefix { get; private set; }
+      private string BaseName { get; set; }
+      public string ClassName => $"{ClassNamePrefix}{BaseName.Split('.').Last()}";
+      public string ClassNamePrefix { get; private set; }
       public NodeTypeName[]? Arguments { get; private set; }
+
+      public string ClassNameWithModule
+      {
+         get
+         {
+            string className = ClassName;
+            int idx = BaseName.LastIndexOf('.');
+            if (idx >= 0)
+            {
+               string moduleName = BaseName.Substring(0, idx);
+               return $"{moduleName}.{className}";
+            }
+            return className;
+         }
+      }
 
       public string Namespace
       {
@@ -79,11 +94,9 @@ namespace Ajuna.DotNet.Service.Node
 
       internal static NodeTypeName Array(NodeTypeResolver nodeTypeResolver, NodeTypeName nodeTypeName, uint length)
       {
-
-
-         var result = new NodeTypeName(nodeTypeResolver, NodeTypeNamespaceSource.Generated, nodeTypeName.BaseName, null)
+         var result = new NodeTypeName(nodeTypeResolver, NodeTypeNamespaceSource.Generated, nodeTypeName.ClassNameWithModule, null)
          {
-            BaseNamePrefix = $"Arr{length}"
+            ClassNamePrefix = $"Arr{length}"
          };
 
          return result;
@@ -95,20 +108,20 @@ namespace Ajuna.DotNet.Service.Node
          NamespaceSource = namespaceType;
          BaseName = baseName;
          Arguments = arguments;
-         BaseNamePrefix = string.Empty;
+         ClassNamePrefix = string.Empty;
       }
 
       public override string ToString()
       {
          string baseQualified;
 
-         if (string.IsNullOrEmpty(BaseNamePrefix))
+         if (string.IsNullOrEmpty(ClassNamePrefix))
          {
             baseQualified = $"{Namespace}.{ClassName}";
          }
          else
          {
-            baseQualified = $"{Namespace}.{BaseNamePrefix}{ClassName}";
+            baseQualified = $"{Namespace}.{ClassName}";
          }
 
          if (Arguments == null)
@@ -225,8 +238,6 @@ namespace Ajuna.DotNet.Service.Node
          {
             case "Option":
                return NodeTypeName.Base(this, "BaseOpt", new NodeTypeName[] { ResolveTypeName(nodeTypeVariant.Variants[1].TypeFields[0].TypeId, types) });
-            case "Result":
-               return NodeTypeName.Base(this, "BaseTuple<BaseTuple, EnumDispatchError>");
             case "Void":
                return NodeTypeName.Base(this, "BaseVoid");
             default:
@@ -236,33 +247,12 @@ namespace Ajuna.DotNet.Service.Node
          return NodeTypeName.Generated(this, ResolvePath(nodeTypeVariant.Path, variantType));
       }
 
-      private string GetVariantType(string path)
+      public static string GetVariantType(string path)
       {
          if (path == "Option")
          {
             return path;
          }
-         else if (path == "Result")
-         {
-            return path;
-         }
-         else if ((path.Contains("pallet_") || path.Contains(".pallet.")) && path.Contains(".Call"))
-         {
-            return "Call";
-         }
-         else if ((path.Contains("pallet_") || path.Contains(".pallet.")) &&
-                  (path.Contains(".Event") || path.Contains(".RawEvent")))
-         {
-            return "Event";
-         }
-         else if ((path.Contains("pallet_") || path.Contains(".pallet.")) && path.Contains(".Error"))
-         {
-            return "Error";
-         }
-         //else if (path.Contains($"{NodeRuntime}.Event") || path.Contains($"{NodeRuntime}.Call"))
-         //{
-         //   return "Runtime";
-         //}
          else if (path.Contains(".Void"))
          {
             return "Void";

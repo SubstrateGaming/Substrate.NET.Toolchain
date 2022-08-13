@@ -72,7 +72,7 @@ namespace Ajuna.DotNet.Service.Generators.Base
                case TypeDefEnum.Variant:
                   {
                      var type = nodeType as NodeTypeVariant;
-                     string variantType = GetVariantType(NodeRuntime, string.Join('.', nodeType.Path));
+                     string variantType = NodeTypeResolver.GetVariantType(string.Join('.', nodeType.Path));
                      CallVariant(variantType, type, ref resolver, write, basePath);
                      break;
                   }
@@ -96,43 +96,6 @@ namespace Ajuna.DotNet.Service.Generators.Base
          }
 
          return resolver;
-      }
-
-      private static string GetVariantType(string nodeRunetime, string path)
-      {
-         if (path == "Option")
-         {
-            return path;
-         }
-         else if (path == "Result")
-         {
-            return path;
-         }
-         else if ((path.Contains("pallet_") || path.Contains(".pallet.")) && path.Contains(".Call"))
-         {
-            return "Call";
-         }
-         else if ((path.Contains("pallet_") || path.Contains(".pallet.")) &&
-                  (path.Contains(".Event") || path.Contains(".RawEvent")))
-         {
-            return "Event";
-         }
-         else if ((path.Contains("pallet_") || path.Contains(".pallet.")) && path.Contains(".Error"))
-         {
-            return "Error";
-         }
-         else if (path.Contains($"{nodeRunetime}.Event") || path.Contains($"{nodeRunetime}.Call"))
-         {
-            return "Runtime";
-         }
-         else if (path.Contains(".Void"))
-         {
-            return "Void";
-         }
-         else
-         {
-            return "Enum";
-         }
       }
 
       private void CallVariant(string variantType, NodeTypeVariant nodeType, ref NodeTypeResolver typeDict, bool write, string basePath = null)
