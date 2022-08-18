@@ -10,7 +10,7 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class StructBuilder : TypeBuilderBase
    {
-      private StructBuilder(string projectName, uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      private StructBuilder(string projectName, uint id, NodeTypeComposite typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
       }
@@ -71,9 +71,9 @@ namespace Ajuna.DotNet.Service.Node
                NodeTypeField typeField = typeFields[i];
 
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
-               (string, List<string>) fullItem = GetFullItemPath(typeField.TypeId);
+               NodeTypeResolved fullItem = GetFullItemPath(typeField.TypeId);
 
-               decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()} = new {fullItem.Item1}()"));
+               decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()} = new {fullItem.ToString()}()"));
                decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()}.Decode(byteArray, ref p)"));
             }
          }
@@ -107,7 +107,7 @@ namespace Ajuna.DotNet.Service.Node
          return encodeMethod;
       }
 
-      public static BuilderBase Init(string projectName, uint id, NodeTypeComposite typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static BuilderBase Init(string projectName, uint id, NodeTypeComposite typeDef, NodeTypeResolver typeDict)
       {
          return new StructBuilder(projectName, id, typeDef, typeDict);
       }
@@ -147,9 +147,9 @@ namespace Ajuna.DotNet.Service.Node
                NodeTypeField typeField = typeDef.TypeFields[i];
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
 
-               (string, List<string>) fullItem = GetFullItemPath(typeField.TypeId);
+               NodeTypeResolved fullItem = GetFullItemPath(typeField.TypeId);
 
-               CodeMemberField field = StructBuilder.GetPropertyField(fieldName, fullItem.Item1);
+               CodeMemberField field = StructBuilder.GetPropertyField(fieldName, fullItem.ToString());
 
                // add comment to field if exists
                field.Comments.AddRange(GetComments(typeField.Docs, null, fieldName));

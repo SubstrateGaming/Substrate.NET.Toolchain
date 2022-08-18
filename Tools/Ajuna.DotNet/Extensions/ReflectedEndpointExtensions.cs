@@ -76,6 +76,10 @@ namespace Ajuna.DotNet.Extensions
             // Ensure we are importing all model items.
             // Not actually required since we use fully qualified items but we want to get rid of that later.
             currentNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
+            foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
+            {
+               currentNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
+            }
             method.Parameters.Add(new CodeParameterDeclarationExpression(defaultReturnType.Type, "value"));
          }
 
@@ -222,13 +226,16 @@ namespace Ajuna.DotNet.Extensions
          };
 
          IReflectedEndpointRequest request = endpoint.GetRequest();
-
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)
          {
             // Ensure we are importing all model items.
             // Not actually required since we use fully qualified items but we want to get rid of that later.
             clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
+            foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
+            { 
+               clientNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
+            }
             method.Parameters.Add(new CodeParameterDeclarationExpression(defaultReturnType.Type, "value"));
          }
 
@@ -313,6 +320,10 @@ namespace Ajuna.DotNet.Extensions
             // Ensure we are importing all model items.
             // Not actually required since we use fully qualified items but we want to get rid of that later.
             clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
+            foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
+            {
+               clientNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
+            }
 
             GenerateMockupValueStatement(currentMembers, method, defaultReturnType.Type);
          }

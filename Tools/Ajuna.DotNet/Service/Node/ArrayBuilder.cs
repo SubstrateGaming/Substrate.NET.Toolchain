@@ -11,7 +11,7 @@ namespace Ajuna.DotNet.Service.Node
    public class ArrayBuilder : TypeBuilderBase
    {
       public static int Counter = 0;
-      private ArrayBuilder(string projectName, uint id, NodeTypeArray typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      private ArrayBuilder(string projectName, uint id, NodeTypeArray typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
       }
@@ -64,7 +64,7 @@ namespace Ajuna.DotNet.Service.Node
          return encodeMethod;
       }
 
-      public static ArrayBuilder Create(string projectName, uint id, NodeTypeArray nodeType, Dictionary<uint, (string, List<string>)> typeDict)
+      public static ArrayBuilder Create(string projectName, uint id, NodeTypeArray nodeType, NodeTypeResolver typeDict)
       {
          return new ArrayBuilder(projectName, id, nodeType, typeDict);
       }
@@ -73,9 +73,10 @@ namespace Ajuna.DotNet.Service.Node
       {
          var typeDef = TypeDef as NodeTypeArray;
 
-         (string, List<string>) fullItem = GetFullItemPath(typeDef.TypeId);
+         NodeTypeResolved fullItem = GetFullItemPath(typeDef.TypeId);
 
-         ClassName = $"Arr{typeDef.Length}{fullItem.Item1.Split('.').Last()}";
+         ClassName = $"Arr{typeDef.Length}{fullItem.ClassName}";
+
          CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
@@ -107,7 +108,8 @@ namespace Ajuna.DotNet.Service.Node
             Name = "TypeName",
             ReturnType = new CodeTypeReference(typeof(string))
          };
-         var methodRef1 = new CodeMethodReferenceExpression(new CodeObjectCreateExpression(fullItem.Item1, Array.Empty<CodeExpression>()), "TypeName()");
+         
+         var methodRef1 = new CodeMethodReferenceExpression(new CodeObjectCreateExpression(fullItem.ToString(), Array.Empty<CodeExpression>()), "TypeName()");
          var methodRef2 = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "TypeSize");
 
          // Declaring a return statement for method ToString.
@@ -136,7 +138,7 @@ namespace Ajuna.DotNet.Service.Node
          CodeMemberMethod encodeMethod = ArrayBuilder.GetEncode();
          targetClass.Members.Add(encodeMethod);
 
-         CodeMemberMethod decodeMethod = ArrayBuilder.GetDecode(fullItem.Item1);
+         CodeMemberMethod decodeMethod = ArrayBuilder.GetDecode(fullItem.ToString());
          targetClass.Members.Add(decodeMethod);
 
 
@@ -144,7 +146,7 @@ namespace Ajuna.DotNet.Service.Node
          {
             Attributes = MemberAttributes.Private,
             Name = "_value",
-            Type = new CodeTypeReference($"{fullItem.Item1}[]")
+            Type = new CodeTypeReference($"{fullItem}[]")
          };
          targetClass.Members.Add(valueField);
          CodeMemberProperty valueProperty = new()
@@ -153,7 +155,7 @@ namespace Ajuna.DotNet.Service.Node
             Name = "Value",
             HasGet = true,
             HasSet = true,
-            Type = new CodeTypeReference($"{fullItem.Item1}[]")
+            Type = new CodeTypeReference($"{fullItem}[]")
          };
          valueProperty.GetStatements.Add(new CodeMethodReturnStatement(
              new CodeFieldReferenceExpression(
@@ -171,7 +173,7 @@ namespace Ajuna.DotNet.Service.Node
          };
          createMethod.Parameters.Add(new()
          {
-            Type = new CodeTypeReference($"{fullItem.Item1}[]"),
+            Type = new CodeTypeReference($"{fullItem.ToString()}[]"),
             Name = "array"
          });
          createMethod.Statements.Add(new CodeSnippetExpression("Value = array"));

@@ -12,13 +12,13 @@ namespace Ajuna.DotNet.Service.Node
    {
       private string NetApiProjectName { get; }
 
-      private RestServiceControllerModuleBuilder(string projectName, string netApiProjectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes) :
+      private RestServiceControllerModuleBuilder(string projectName, string netApiProjectName, uint id, PalletModule module, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes) :
           base(projectName, id, module, typeDict, nodeTypes)
       {
          NetApiProjectName = netApiProjectName;
       }
 
-      public static RestServiceControllerModuleBuilder Init(string projectName, string netApiProjectName, uint id, PalletModule module, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes)
+      public static RestServiceControllerModuleBuilder Init(string projectName, string netApiProjectName, uint id, PalletModule module, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes)
       {
          return new RestServiceControllerModuleBuilder(projectName, netApiProjectName, id, module, typeDict, nodeTypes);
       }
@@ -105,8 +105,8 @@ namespace Ajuna.DotNet.Service.Node
                CodeExpression[] codeExpressions;
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  (string, List<string>) fullItem = GetFullItemPath(entry.TypeMap.Item1);
-                  baseReturnType = new CodeTypeReference(fullItem.Item1);
+                  NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  baseReturnType = new CodeTypeReference(fullItem.ToString());
                   parameterDeclaration = null;
                   codeExpressions = Array.Empty<CodeExpression>();
                }
@@ -114,9 +114,8 @@ namespace Ajuna.DotNet.Service.Node
                {
                   TypeMap typeMap = entry.TypeMap.Item2;
                   Storage.Hasher[] hashers = typeMap.Hashers;
-                  (string, List<string>) key = GetFullItemPath(typeMap.Key);
-                  (string, List<string>) value = GetFullItemPath(typeMap.Value);
-                  baseReturnType = new CodeTypeReference(value.Item1);
+                  NodeTypeResolved value = GetFullItemPath(typeMap.Value);
+                  baseReturnType = new CodeTypeReference(value.ToString());
                   parameterDeclaration = new CodeParameterDeclarationExpression(typeof(string), "key");
                   codeExpressions = new CodeExpression[] {
                                 new CodeVariableReferenceExpression(parameterDeclaration.Name)
@@ -155,7 +154,7 @@ namespace Ajuna.DotNet.Service.Node
                   getStorageMethod.CustomAttributes.Add(
                       new CodeAttributeDeclaration("StorageKeyBuilder",
                       new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Model.{prefixName}{Module.Name}.{Module.Name}Storage")),
+                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Storage.{Module.Name}Storage")),
                                 new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params"))
                       }));
                }
@@ -166,9 +165,9 @@ namespace Ajuna.DotNet.Service.Node
                   getStorageMethod.CustomAttributes.Add(
                       new CodeAttributeDeclaration("StorageKeyBuilder",
                       new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Model.{prefixName}{Module.Name}.{Module.Name}Storage")),
+                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Storage.{Module.Name}Storage")),
                                 new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params")),
-                                new CodeAttributeArgument(new CodeTypeOfExpression(GetFullItemPath(entry.TypeMap.Item2.Key).Item1))
+                                new CodeAttributeArgument(new CodeTypeOfExpression(GetFullItemPath(entry.TypeMap.Item2.Key).ToString()))
                       }));
                }
                else

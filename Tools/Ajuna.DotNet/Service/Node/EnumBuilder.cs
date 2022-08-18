@@ -4,6 +4,7 @@ using Ajuna.NetApi.Model.Types;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -11,12 +12,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class EnumBuilder : TypeBuilderBase
    {
-      private EnumBuilder(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      private EnumBuilder(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
       }
 
-      public static EnumBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static EnumBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
       {
          return new EnumBuilder(projectName, id, typeDef, typeDict);
       }
@@ -46,81 +47,78 @@ namespace Ajuna.DotNet.Service.Node
          }
          typeNamespace.Types.Add(TargetType);
 
-         if (typeDef.Variants != null)
+         var targetClass = new CodeTypeDeclaration(ClassName)
          {
-            var targetClass = new CodeTypeDeclaration(ClassName)
-            {
-               IsClass = true,
-               TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-            };
-            targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
+            IsClass = true,
+            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+         };
+         targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
 
-            if (typeDef.Variants.All(p => p.TypeFields == null))
+         if (typeDef.Variants == null || typeDef.Variants.All(p => p.TypeFields == null))
+         {
+            targetClass.BaseTypes.Add(new CodeTypeReference($"BaseEnum<{enumName}>"));
+            typeNamespace.Types.Add(targetClass);
+         }
+         else
+         {
+            var codeTypeRef = new CodeTypeReference("BaseEnumExt");
+            codeTypeRef.TypeArguments.Add(new CodeTypeReference(enumName));
+            if (typeDef.Variants.Length < 29)
             {
-               targetClass.BaseTypes.Add(new CodeTypeReference($"BaseEnum<{enumName}>"));
-               typeNamespace.Types.Add(targetClass);
-            }
-            else
-            {
-               var codeTypeRef = new CodeTypeReference("BaseEnumExt");
-               codeTypeRef.TypeArguments.Add(new CodeTypeReference(enumName));
-               if (typeDef.Variants.Length < 29)
+               for (int i = 0; i < typeDef.Variants.Length; i++)
                {
-                  for (int i = 0; i < typeDef.Variants.Length; i++)
+                  TypeVariant variant = typeDef.Variants[i];
+                  if (variant.TypeFields == null)
                   {
-                     TypeVariant variant = typeDef.Variants[i];
-                     if (variant.TypeFields == null)
+                     // add void type
+                     codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));
+                  }
+                  else
+                  {
+                     if (variant.TypeFields.Length == 1)
                      {
-                        // add void type
-                        codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));
+                        NodeTypeResolved item = GetFullItemPath(variant.TypeFields[0].TypeId);
+                        codeTypeRef.TypeArguments.Add(new CodeTypeReference(item.ToString()));
                      }
                      else
                      {
-                        if (variant.TypeFields.Length == 1)
-                        {
-                           (string, List<string>) fullItem = GetFullItemPath(variant.TypeFields[0].TypeId);
-                           codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
-                        }
-                        else
-                        {
-                           var baseTuple = new CodeTypeReference("BaseTuple");
+                        var baseTuple = new CodeTypeReference("BaseTuple");
 
-                           foreach (NodeTypeField field in variant.TypeFields)
-                           {
-                              (string, List<string>) fullItem = GetFullItemPath(field.TypeId);
-                              baseTuple.TypeArguments.Add(new CodeTypeReference(fullItem.Item1));
-                           }
-                           codeTypeRef.TypeArguments.Add(baseTuple);
+                        foreach (NodeTypeField field in variant.TypeFields)
+                        {
+                           NodeTypeResolved item = GetFullItemPath(field.TypeId);
+                           baseTuple.TypeArguments.Add(new CodeTypeReference(item.ToString()));
                         }
+                        codeTypeRef.TypeArguments.Add(baseTuple);
                      }
                   }
                }
-               // Unhandled enumerations are manually done
-               else
-               {
-                  codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));
-
-                  switch (enumName)
-                  {
-                     case "Era":
-                        targetClass.Members.AddRange(GetEnumEra());
-                        break;
-                     case "Data":
-                        targetClass.Members.AddRange(GetEnumData());
-                        break;
-                     // TODO (svnscha): Why is this not supported yet?
-                     case "Event":
-                     case "DispatchError":
-                     case "Call":
-                        break;
-                     default:
-                        throw new NotImplementedException("Enum extension can't handle such big sized typed rust enumeration, please create a manual fix for it.");
-                  }
-               }
-
-               targetClass.BaseTypes.Add(codeTypeRef);
-               typeNamespace.Types.Add(targetClass);
             }
+            // Unhandled enumerations are manually done
+            else
+            {
+               codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));
+
+               switch (enumName)
+               {
+                  case "Era":
+                     targetClass.Members.AddRange(GetEnumEra());
+                     break;
+                  case "Data":
+                     targetClass.Members.AddRange(GetEnumData());
+                     break;
+                  // TODO (svnscha): Why is this not supported yet?
+                  case "Event":
+                  case "DispatchError":
+                  case "Call":
+                     break;
+                  default:
+                     throw new NotImplementedException("Enum extension can't handle such big sized typed rust enumeration, please create a manual fix for it.");
+               }
+            }
+
+            targetClass.BaseTypes.Add(codeTypeRef);
+            typeNamespace.Types.Add(targetClass);
          }
          return this;
       }
@@ -128,7 +126,6 @@ namespace Ajuna.DotNet.Service.Node
       private CodeTypeMemberCollection GetEnumEra()
       {
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Primitive"));
 
@@ -186,9 +183,9 @@ namespace Ajuna.DotNet.Service.Node
       private CodeTypeMemberCollection GetEnumData()
       {
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"System"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Model.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Types.Primitive"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Types.Base"));
 
          var result = new CodeTypeMemberCollection();
 

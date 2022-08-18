@@ -22,34 +22,34 @@ namespace Ajuna.DotNet.Service.Generators
       {
          // dirty workaround for generics.
          // TODO (svnscha) Why dirty workaround?
-         SolutionGeneratorBase.GetGenericStructs(metadata.NodeMetadata.Types);
+         GetGenericStructs(metadata.NodeMetadata.Types);
 
          // generate types
-         Dictionary<uint, (string, List<string>)> typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);
+         NodeTypeResolver typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);
 
          // generate modules
          GenerateModules(ProjectName, metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory);
 
          // generate base event handler
          // TODO (svnscha) Why disabled?
-         //GenerateBaseEvents(metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types);
+         // GenerateBaseEvents(metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types);
       }
 
-      private static void GenerateModules(string projectName, Dictionary<uint, PalletModule> modules, Dictionary<uint, (string, List<string>)> typeDict, Dictionary<uint, NodeType> nodeTypes, string basePath)
+      private static void GenerateModules(string projectName, Dictionary<uint, PalletModule> modules, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes, string basePath)
       {
-         List<(string, List<string>)> moduleNames = new();
+         List<string> modulesResolved = new();
          foreach (PalletModule module in modules.Values)
          {
-            (string, List<string>) moduleNameTuple = ModuleGenBuilder
+            ModuleGenBuilder
                 .Init(projectName, module.Index, module, typeDict, nodeTypes)
                 .Create()
                 .Build(write: true, out bool _, basePath);
 
-            moduleNames.Add(moduleNameTuple);
+            modulesResolved.Add($"{module.Name}Storage");
          }
 
          ClientBuilder
-             .Init(projectName, 0, moduleNames, typeDict).Create()
+             .Init(projectName, 0, modulesResolved, typeDict).Create()
              .Build(write: true, out bool _, basePath);
       }
    }

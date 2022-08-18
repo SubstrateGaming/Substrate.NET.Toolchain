@@ -9,12 +9,12 @@ namespace Ajuna.DotNet.Service.Node
 {
    public class RunetimeBuilder : TypeBuilderBase
    {
-      private RunetimeBuilder(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      private RunetimeBuilder(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
       }
 
-      public static RunetimeBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, Dictionary<uint, (string, List<string>)> typeDict)
+      public static RunetimeBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
       {
          return new RunetimeBuilder(projectName, id, typeDef, typeDict);
       }
@@ -24,7 +24,7 @@ namespace Ajuna.DotNet.Service.Node
          var typeDef = TypeDef as NodeTypeVariant;
 
          string runtimeType = $"{typeDef.Path.Last()}";
-         string enumName = $"Node{runtimeType}";
+         string enumName = runtimeType;
 
          ClassName = $"Enum{enumName}";
          ReferenzName = $"{NamespaceName}.{ClassName}";
