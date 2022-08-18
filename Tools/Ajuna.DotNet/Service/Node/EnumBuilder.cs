@@ -40,9 +40,12 @@ namespace Ajuna.DotNet.Service.Node
 
          if (typeDef.Variants != null)
          {
-            foreach (string enumFieldName in typeDef.Variants.Select(p => p.Name))
+            foreach (TypeVariant variant in typeDef.Variants)
             {
-               TargetType.Members.Add(new CodeMemberField(ClassName, enumFieldName));
+               TargetType.Members.Add(new CodeMemberField(ClassName, variant.Name)
+               {
+                  InitExpression = new CodePrimitiveExpression(variant.Index)
+               });
             }
          }
          typeNamespace.Types.Add(TargetType);
@@ -63,12 +66,14 @@ namespace Ajuna.DotNet.Service.Node
          {
             var codeTypeRef = new CodeTypeReference("BaseEnumExt");
             codeTypeRef.TypeArguments.Add(new CodeTypeReference(enumName));
-            if (typeDef.Variants.Length < 29)
+            int highIndex = typeDef.Variants.Max(p => p.Index);
+            if (highIndex < 55)
             {
-               for (int i = 0; i < typeDef.Variants.Length; i++)
+               for (int i = 0; i < highIndex + 1; i++)
                {
-                  TypeVariant variant = typeDef.Variants[i];
-                  if (variant.TypeFields == null)
+                  TypeVariant variant = typeDef.Variants.Where(p => p.Index == i).FirstOrDefault();
+                  //TypeVariant variant = typeDef.Variants[i];
+                  if (variant == null || variant.TypeFields == null)
                   {
                      // add void type
                      codeTypeRef.TypeArguments.Add(new CodeTypeReference("BaseVoid"));
