@@ -4,10 +4,10 @@
       <!-- Configuration -->
       <VersionMajor>0</VersionMajor>
       <VersionMinor>1</VersionMinor>
-      <VersionPatch>23</VersionPatch>
+      <VersionPatch>24</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-      <AjunaPackageVersion>0.1.23</AjunaPackageVersion>
+      <AjunaPackageVersion>0.1.24</AjunaPackageVersion>
 
       <!-- Variables -->
       <AjunaVersion>$(AssemblyVersion)</AjunaVersion>
