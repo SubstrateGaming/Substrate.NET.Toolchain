@@ -67,7 +67,7 @@ namespace Ajuna.DotNet.Service.Node
             var codeTypeRef = new CodeTypeReference("BaseEnumExt");
             codeTypeRef.TypeArguments.Add(new CodeTypeReference(enumName));
             int highIndex = typeDef.Variants.Max(p => p.Index);
-            if (highIndex < 55)
+            if (highIndex < 101)
             {
                for (int i = 0; i < highIndex + 1; i++)
                {
@@ -109,14 +109,14 @@ namespace Ajuna.DotNet.Service.Node
                   case "Era":
                      targetClass.Members.AddRange(GetEnumEra());
                      break;
-                  case "Data":
-                     targetClass.Members.AddRange(GetEnumData());
-                     break;
+                  //case "Data":
+                  //   targetClass.Members.AddRange(GetEnumData());
+                  //   break;
                   // TODO (svnscha): Why is this not supported yet?
-                  case "Event":
-                  case "DispatchError":
-                  case "Call":
-                     break;
+                  //case "Event":
+                  //case "DispatchError":
+                  //case "Call":
+                  //   break;
                   default:
                      throw new NotImplementedException("Enum extension can't handle such big sized typed rust enumeration, please create a manual fix for it.");
                }

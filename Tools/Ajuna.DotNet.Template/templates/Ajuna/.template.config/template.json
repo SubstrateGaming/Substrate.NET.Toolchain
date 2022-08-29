@@ -12,14 +12,14 @@
    "symbols": {
       "sdk_version": {
          "datatype": "string",
-         "defaultValue": "0.1.24",
+         "defaultValue": "0.1.25",
          "description": "Uses the given Ajuna SDK version.",
          "replaces": "AJUNA_SDK_VERSION",
          "type": "parameter"
       },
       "api_version": {
          "datatype": "string",
-         "defaultValue": "0.1.20",
+         "defaultValue": "0.2.2",
          "description": "Uses the given Ajuna .NET API version.",
          "replaces": "AJUNA_NETAPI_VERSION",
          "type": "parameter"
@@ -61,7 +61,7 @@
       { "path": "Ajuna.NetApiExt/Ajuna.NetApiExt.csproj" },
       { "path": "Ajuna.RestClient/Ajuna.RestClient.csproj" },
       { "path": "Ajuna.RestClient.Mockup/Ajuna.RestClient.Mockup.csproj" },
-      { "path": "Ajuna.RestClient.Test/Ajuna.RestClient.Test.csproj" },
+      { "path": "Ajuna.RestClient.Test/Ajuna.RestClient.Test.csproj" }
    ],
    "postActions": [
       {
@@ -135,6 +135,6 @@
          ],
          "continueOnError": false,
          "description": "Scaffold services and clients."
-      },
+      }
    ]
 }
