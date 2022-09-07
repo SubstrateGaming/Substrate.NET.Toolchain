@@ -16,6 +16,10 @@ namespace Ajuna.AspNetCore.Extensions
          {
 
             // Initialize the storage service layer..
+            // 1. A connection to the server is established
+            // 2. Subscribe to all Storage Changes
+            // 3. Gather all storage info from metadata and laod all Storage specific Delegates
+            // 4. Start Processing Changes  
             await ajunaSubstrateService.InitializeAsync(configuration);
 
             // Save the reference for later use.

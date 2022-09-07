@@ -8,6 +8,13 @@ namespace Ajuna.ServiceLayer
    {
       private readonly AjunaSubstrateStorage _ajunaSubstrateStorage = new AjunaSubstrateStorage();
 
+      /// <summary>
+      /// 1. A connection to the server is established
+      /// 2. Subscribe to all Storage Changes
+      /// 3. Gather all storage info from metadata and laod all Storage specific Delegates
+      /// 4. Start Processing Changes  
+      /// </summary>
+      /// <param name="configuration"></param>
       public async Task InitializeAsync(AjunaStorageServiceConfiguration configuration)
       {
          Log.Information("initialize Ajuna substrate service");
@@ -26,7 +33,7 @@ namespace Ajuna.ServiceLayer
          // wait to be processed after the initialization is complete.
          await configuration.DataProvider.SubscribeStorageAsync(_ajunaSubstrateStorage.OnStorageUpdate);
 
-         // Load storages we are interested in.
+         // Load storages we are interested in and register all Storage specific Delegates
          await _ajunaSubstrateStorage.InitializeAsync(configuration.DataProvider, configuration.Storages);
 
          // Start processing subscriptions.
