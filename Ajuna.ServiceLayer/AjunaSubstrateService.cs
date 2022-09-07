@@ -6,7 +6,7 @@ namespace Ajuna.ServiceLayer
 {
    public class AjunaSubstrateService
    {
-      private readonly AjunaSubstrateStorage GameStorage = new AjunaSubstrateStorage();
+      private readonly AjunaSubstrateStorage _ajunaSubstrateStorage = new AjunaSubstrateStorage();
 
       public async Task InitializeAsync(AjunaStorageServiceConfiguration configuration)
       {
@@ -23,16 +23,16 @@ namespace Ajuna.ServiceLayer
          // all storages that this service is interested in.
          //
          // While we are loading storages any storage subscription notification will
-         // wait to be processed until the initialization is complete.
-         await configuration.DataProvider.SubscribeStorageAsync(GameStorage.OnStorageUpdate);
+         // wait to be processed after the initialization is complete.
+         await configuration.DataProvider.SubscribeStorageAsync(_ajunaSubstrateStorage.OnStorageUpdate);
 
          // Load storages we are interested in.
-         await GameStorage.InitializeAsync(configuration.DataProvider, configuration.Storages);
+         await _ajunaSubstrateStorage.InitializeAsync(configuration.DataProvider, configuration.Storages);
 
          // Start processing subscriptions.
-         GameStorage.StartProcessingChanges();
+         _ajunaSubstrateStorage.StartProcessingChanges();
       }
 
-      public IStorage GetStorage<T>() => GameStorage.GetStorage<T>();
+      public IStorage GetStorage<T>() => _ajunaSubstrateStorage.GetStorage<T>();
    }
 }
