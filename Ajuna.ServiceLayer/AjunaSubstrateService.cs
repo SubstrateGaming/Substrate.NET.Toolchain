@@ -19,16 +19,13 @@ namespace Ajuna.ServiceLayer
       {
          Log.Information("initialize Ajuna substrate service");
 
-         //
          // Initialize substrate client API
-         //
          await configuration.DataProvider.ConnectAsync(configuration.CancellationToken);
 
-         //
          // Initialize storage systems
          // Start by subscribing to any storage change and then start loading
          // all storages that this service is interested in.
-         //
+         
          // While we are loading storages any storage subscription notification will
          // wait to be processed after the initialization is complete.
          await configuration.DataProvider.SubscribeStorageAsync(_ajunaSubstrateStorage.OnStorageUpdate);
