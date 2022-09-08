@@ -31,7 +31,7 @@ namespace Ajuna.ServiceLayer
          await configuration.DataProvider.SubscribeStorageAsync(_ajunaSubstrateStorage.OnStorageUpdate);
 
          // Load storages we are interested in and register all Storage specific Delegates
-         await _ajunaSubstrateStorage.InitializeAsync(configuration.DataProvider, configuration.Storages);
+         await _ajunaSubstrateStorage.InitializeAsync(configuration.DataProvider, configuration.Storages, configuration.IsLazyLoadingEnabled);
 
          // Start processing subscriptions.
          _ajunaSubstrateStorage.StartProcessingChanges();

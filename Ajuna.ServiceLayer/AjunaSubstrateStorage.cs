@@ -49,7 +49,8 @@ namespace Ajuna.ServiceLayer
       /// </summary>
       /// <param name="dataProvider"></param>
       /// <param name="storages"></param>
-      internal async Task InitializeAsync(IStorageDataProvider dataProvider, List<IStorage> storages)
+      /// /// <param name="initialzeStorages"></param>
+      internal async Task InitializeAsync(IStorageDataProvider dataProvider, List<IStorage> storages, bool isLazyLoadingEnabled)
       {
          Storages = storages;
 
@@ -59,9 +60,14 @@ namespace Ajuna.ServiceLayer
          // Register all Storage specific Delegates
          InitializeStorageChangeListener();
 
-         foreach (IStorage storage in Storages)
+         
+         if (!isLazyLoadingEnabled)
          {
-            await storage.InitializeAsync(dataProvider);
+            // Initializes Storages fetching all their initial Values 
+            foreach (IStorage storage in Storages)
+            {
+               await storage.InitializeAsync(dataProvider);
+            }   
          }
       }
 
