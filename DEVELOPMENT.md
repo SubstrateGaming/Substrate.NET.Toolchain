@@ -10,7 +10,11 @@ Tools and services are implemented to support `net5.0` and `net6.0`.
 All NuGet packages here share a standard version number that is defined in [Version.props](./Version.props).
 
 ## Developing this toolchain locally
-To develop and debug toolchain changes locally, you must set up a local NuGet repository and maintain the libraries that are being compiled there. There are many different ways to achieve that. A straightforward approach is listed below for both Windows and Mac users. These simple batch files allow you to quickly clear existing local packages and re-build everything.
+To develop and debug toolchain changes locally, you must set up a local NuGet repository and maintain the libraries that are being compiled there. 
+There are many different ways to achieve that. 
+
+A straight-forward approach is listed below for both Windows and Mac users.
+These simple batch files allow you to quickly clear existing local packages, re-build everything and install the locally generated Ajuna.DotNet.Template.
 
 ### Windows
 
