@@ -10,34 +10,42 @@ Tools and services are implemented to support `net5.0` and `net6.0`.
 All NuGet packages here share a standard version number that is defined in [Version.props](./Version.props).
 
 ## Developing this toolchain locally
-To develop and debug toolchain changes locally, you must set up a local NuGet repository and maintain the libraries that are being compiled there. There are many different ways to achieve that. A straightforward approach is listed below, which gives a simple batch file for Windows to quickly clear existing local packages and re-build everything.
+To develop and debug toolchain changes locally, you must set up a local NuGet repository and maintain the libraries that are being compiled there. 
+There are many different ways to achieve that. 
+
+A straight-forward approach is listed below for both Windows and Mac users.
+These simple batch files allow you to quickly clear existing local packages, re-build everything and install the locally generated Ajuna.DotNet.Template.
+
+### Windows
 
 ```bat
 set AJUNA_ROOT=D:\Ajuna.SDK
 set LOCAL_NUGET_ROOT=D:\NuGet
 set LOCAL_NUGET_CACHE=%SYSTEMDRIVE%\Users\%USERNAME%\.nuget\packages
 set LOCAL_NUGET_BINARY=nuget.exe
-set AJUNA_VERSION=0.1.24
+set AJUNA_VERSION=0.1.25
 
 cd %AJUNA_ROOT%
-dotnet build --configuration Release
+dotnet build -p:Version=$AJUNA_VERSION --configuration Release
 
 cd %AJUNA_ROOT%\Tools\Ajuna.DotNet
-dotnet pack
+dotnet pack -p:Version=$AJUNA_VERSION
 
 rem Clear local NuGet cache
 rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.dotnet"
 rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.dotnet.template"
-rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.dotnet.servicelayer"
-rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.dotnet.servicelayer.model"
-rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.dotnet.aspnetcore"
+rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.servicelayer"
+rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.servicelayer.model"
+rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.aspnetcore"
+rmdir /S /Q "%LOCAL_NUGET_CACHE%\ajuna.dotnet.template"
 
 rem Clear NuGet packages from local feed
 rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.dotnet"
 rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.dotnet.template"
-rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.dotnet.servicelayer"
-rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.dotnet.servicelayer.model"
-rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.dotnet.aspnetcore"
+rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.servicelayer"
+rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.servicelayer.model"
+rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.aspnetcore"
+rmdir /S /Q "%LOCAL_NUGET_ROOT%\ajuna.dotnet.template"
 
 rem Add Ajuna.DotNet, Ajuna.DotNet.Template to NuGet
 %LOCAL_NUGET_BINARY% add %AJUNA_ROOT%\Tools\Ajuna.DotNet\nupkg\Ajuna.DotNet.%AJUNA_VERSION%.nupkg -Source %LOCAL_NUGET_ROOT%
@@ -54,7 +62,58 @@ rem Install .NET new template
 dotnet new --install Ajuna.DotNet.Template
 ```
 
-Using that script should get you started on Windows and give insights on other platforms on how to maintain the local NuGet packages.
+### Mac
+
+```sh
+export AJUNA_ROOT="/Documents/Development/Ajuna.SDK" 
+export LOCAL_NUGET_ROOT="/Documents/Development/_LocalNugetPackages"
+export LOCAL_NUGET_CACHE="/Users/{yourUserName}/.nuget/packages"
+export LOCAL_NUGET_BINARY=nuget
+export AJUNA_VERSION="0.1.25" # Using this variable, you override the one set in the project/solution settings
+
+set -m
+
+cd $AJUNA_ROOT
+dotnet build -p:Version=$AJUNA_VERSION --configuration Release  
+
+cd $AJUNA_ROOT/Tools/Ajuna.DotNet
+dotnet pack -p:Version=$AJUNA_VERSION 
+
+echo 'Clear local NuGet cache'
+rm -rf $LOCAL_NUGET_CACHE/ajuna.dotnet
+rm -rf $LOCAL_NUGET_CACHE/ajuna.dotnet.template
+rm -rf $LOCAL_NUGET_CACHE/ajuna.servicelayer
+rm -rf $LOCAL_NUGET_CACHE/ajuna.servicelayer.model
+rm -rf $LOCAL_NUGET_CACHE/ajuna.aspnetcore
+rm -rf $LOCAL_NUGET_CACHE/ajuna.dotnet.template
+
+echo "Clear NuGet packages from local feed"
+rm -rf $LOCAL_NUGET_ROOT/ajuna.dotnet
+rm -rf $LOCAL_NUGET_ROOT%/ajuna.dotnet.template
+rm -rf $LOCAL_NUGET_ROOT/ajuna.servicelayer
+rm -rf $LOCAL_NUGET_ROOT/ajuna.servicelayer.model
+rm -rf $LOCAL_NUGET_ROOT/ajuna.aspnetcore
+rm -rf $LOCAL_NUGET_ROOT/ajuna.dotnet.template
+
+echo "Add Ajuna.DotNet, Ajuna.DotNet.Template to NuGet"
+$LOCAL_NUGET_BINARY add $AJUNA_ROOT/Tools/Ajuna.DotNet/nupkg/Ajuna.DotNet.$AJUNA_VERSION.nupkg -Source $LOCAL_NUGET_ROOT
+$LOCAL_NUGET_BINARY add $AJUNA_ROOT/Tools/Ajuna.DotNet.Template/bin/Release/Ajuna.DotNet.Template.$AJUNA_VERSION.nupkg -Source $LOCAL_NUGET_ROOT
+
+echo "Add Ajuna.ServiceLayer, Ajuna.ServiceLayer.Model to NuGet"
+$LOCAL_NUGET_BINARY add $AJUNA_ROOT/Ajuna.ServiceLayer/bin/Release/Ajuna.ServiceLayer.$AJUNA_VERSION.nupkg -Source $LOCAL_NUGET_ROOT
+$LOCAL_NUGET_BINARY add $AJUNA_ROOT/Ajuna.ServiceLayer.Model/bin/Release/Ajuna.ServiceLayer.Model.$AJUNA_VERSION.nupkg -Source $LOCAL_NUGET_ROOT
+
+echo "Add Ajuna.AspNetCore to NuGet"
+$LOCAL_NUGET_BINARY add $AJUNA_ROOT/Ajuna.AspNetCore/bin/Release/Ajuna.AspNetCore.$AJUNA_VERSION.nupkg -Source $LOCAL_NUGET_ROOT
+
+echo "Install .NET new template"
+dotnet new --install Ajuna.DotNet.Template
+```
+Once you have created the sh file, do not forget to set the permissions accordingly in order to allow it to be executed.
+
+`chmod 755 file.sh`
+
+Using these scripts should get you started on both platforms on how to maintain the local NuGet packages.
 
 Having this installed, you can scaffold a new project as documented [here](./README.md).
 
