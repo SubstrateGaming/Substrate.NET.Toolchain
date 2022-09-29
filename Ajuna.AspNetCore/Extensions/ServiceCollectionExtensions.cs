@@ -10,22 +10,26 @@ namespace Ajuna.AspNetCore.Extensions
    {
       public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, AjunaStorageServiceConfiguration configuration)
       {
-         var game = new AjunaSubstrateService();
+         var ajunaSubstrateService = new AjunaSubstrateService();
 
          Task.Run(async () =>
          {
 
             // Initialize the storage service layer..
-            await game.InitializeAsync(configuration);
+            // 1. A connection to the server is established
+            // 2. Subscribe to all Storage Changes
+            // 3. Gather all storage info from metadata and laod all Storage specific Delegates
+            // 4. Start Processing Changes  
+            await ajunaSubstrateService.InitializeAsync(configuration);
 
             // Save the reference for later use.
-            AjunaRuntime.GameService = game;
+            AjunaRuntime.AjunaSubstrateService = ajunaSubstrateService;
 
 #pragma warning disable VSTHRD002
          }).Wait();
 #pragma warning restore VSTHRD002
 
-         if (AjunaRuntime.GameService == null)
+         if (AjunaRuntime.AjunaSubstrateService == null)
          {
             throw new Exception("Could not initialize game service runtime. Please confirm that your configuration is correct.");
          }

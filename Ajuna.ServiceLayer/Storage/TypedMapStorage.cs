@@ -27,6 +27,7 @@ namespace Ajuna.ServiceLayer.Storage
          Identifier = identifier;
          DataProvider = dataProvider;
          ChangeDelegates = changeDelegates;
+         Dictionary = new Dictionary<string, T>();
       }
 
       public async Task InitializeAsync(string module, string moduleItem)

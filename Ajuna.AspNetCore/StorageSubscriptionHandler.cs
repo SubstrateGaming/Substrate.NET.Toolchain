@@ -20,6 +20,13 @@ namespace Ajuna.AspNetCore
       {
       }
 
+      /// <summary>
+      ///  Called on every Websocket call coming from the client
+      /// </summary>
+      /// <param name="socket"></param>
+      /// <param name="socketId"></param>
+      /// <param name="result"></param>
+      /// <param name="buffer"></param>
       public override async Task ReceiveDelegateAsync(WebSocket socket, string socketId, WebSocketReceiveResult result, byte[] buffer)
       {
          if (!result.EndOfMessage || buffer == null || buffer.Length == 0)
