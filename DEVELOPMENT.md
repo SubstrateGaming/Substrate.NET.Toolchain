@@ -23,7 +23,7 @@ set AJUNA_ROOT=D:\Ajuna.SDK
 set LOCAL_NUGET_ROOT=D:\NuGet
 set LOCAL_NUGET_CACHE=%SYSTEMDRIVE%\Users\%USERNAME%\.nuget\packages
 set LOCAL_NUGET_BINARY=nuget.exe
-set AJUNA_VERSION=0.1.25
+set AJUNA_VERSION=0.1.26
 
 cd %AJUNA_ROOT%
 dotnet build -p:Version=$AJUNA_VERSION --configuration Release
@@ -69,7 +69,7 @@ export AJUNA_ROOT="/Documents/Development/Ajuna.SDK"
 export LOCAL_NUGET_ROOT="/Documents/Development/_LocalNugetPackages"
 export LOCAL_NUGET_CACHE="/Users/{yourUserName}/.nuget/packages"
 export LOCAL_NUGET_BINARY=nuget
-export AJUNA_VERSION="0.1.25" # Using this variable, you override the one set in the project/solution settings
+export AJUNA_VERSION="0.1.26" # Using this variable, you override the one set in the project/solution settings
 
 set -m
 

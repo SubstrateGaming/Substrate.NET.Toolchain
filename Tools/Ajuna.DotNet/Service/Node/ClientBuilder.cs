@@ -1,5 +1,6 @@
 ﻿using Ajuna.DotNet.Service.Node.Base;
 using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using System;
 using System.CodeDom;
@@ -48,6 +49,12 @@ namespace Ajuna.DotNet.Service.Node
          constructor.Parameters.Add(
              new CodeParameterDeclarationExpression(typeof(Uri), "uri"));
          constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression("uri"));
+
+         constructor.Parameters.Add(
+            new CodeParameterDeclarationExpression(typeof(ChargeType), "chargeType"));
+         constructor.BaseConstructorArgs.Add(
+            new CodeVariableReferenceExpression("chargeType"));
+
          targetClass.Members.Add(constructor);
 
          CodeMemberField storageKeyField = new()
