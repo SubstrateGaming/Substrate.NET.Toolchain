@@ -1,4 +1,5 @@
 ﻿using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Rpc;
 using Ajuna.NetApi.Model.Types;
@@ -17,7 +18,7 @@ namespace Ajuna.ServiceLayer
 
       public AjunaSubstrateDataProvider(string endpoint)
       {
-         Client = new SubstrateClient(new Uri(endpoint));
+         Client = new SubstrateClient(new Uri(endpoint), ChargeTransactionPayment.Default());
       }
 
       public async Task<T> GetStorageAsync<T>(string module, string storageName) where T : IType, new()
