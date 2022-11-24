@@ -54,7 +54,7 @@ Using a terminal of your choice, create a new directory for your project and exe
 ```sh
 dotnet new sln
 dotnet new ajuna \
-   --sdk_version 0.1.26 \
+   --sdk_version 0.1.27 \
    --rest_service AjunaExample.RestService \
    --net_api AjunaExample.NetApiExt \
    --rest_client AjunaExample.RestClient \
@@ -107,12 +107,18 @@ The benefit of this approach is that this artifact is much more lightweight than
 
 This RestClient can be used in a C#, Unity, or any other application allowing it to access the information provided by the previously described RestService. Using the RestClient one could subscribe to the node storage changes using the WebSocket or access the storage directly through exposed REST service.
 
-
-
-
 As you can see, we could in principle launch any service or create any application on top of Substrate without any further knowledge except from the library usage.
 
 The generated projects contain everything you need in order to get started making excellent substrate services and clients in C# and the .NET framework.
+
+
+### Video Tutorial
+
+You can also watch our short step-by-step tutorial that guides you through the entire process.
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/27k8vxCrXcY/0.jpg)](https://www.youtube.com/watch?v=27k8vxCrXcY)
+
+
 
 
 ## Documents

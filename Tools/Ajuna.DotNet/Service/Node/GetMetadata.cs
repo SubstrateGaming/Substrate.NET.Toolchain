@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types.Metadata;
 using Serilog;
@@ -67,7 +68,7 @@ namespace Ajuna.DotNet.Service.Node
 
          try
          {
-            using var client = new SubstrateClient(new Uri(serviceArgument));
+            using var client = new SubstrateClient(new Uri(serviceArgument), ChargeTransactionPayment.Default());
             await client.ConnectAsync(true, cancellationToken);
             return await client.State.GetMetaDataAsync(cancellationToken);
          }
@@ -85,7 +86,7 @@ namespace Ajuna.DotNet.Service.Node
 
          try
          {
-            using var client = new SubstrateClient(new Uri(serviceArgument));
+            using var client = new SubstrateClient(new Uri(serviceArgument), ChargeTransactionPayment.Default());
             await client.ConnectAsync(true, cancellationToken);
             return $"{client.RuntimeVersion.SpecName}_runtime";
          }
