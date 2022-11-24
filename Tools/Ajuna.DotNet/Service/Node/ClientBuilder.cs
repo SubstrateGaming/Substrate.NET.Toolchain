@@ -1,10 +1,10 @@
 ﻿using Ajuna.DotNet.Service.Node.Base;
 using Ajuna.NetApi;
+using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Ajuna.DotNet.Service.Node
@@ -30,6 +30,7 @@ namespace Ajuna.DotNet.Service.Node
          TargetUnit.Namespaces.Add(typeNamespace);
 
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Meta"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Ajuna.NetApi.Model.Extrinsics"));
 
          var targetClass = new CodeTypeDeclaration(ClassName)
          {
@@ -47,7 +48,12 @@ namespace Ajuna.DotNet.Service.Node
          // Add parameters.
          constructor.Parameters.Add(
              new CodeParameterDeclarationExpression(typeof(Uri), "uri"));
+         constructor.Parameters.Add(
+            new CodeParameterDeclarationExpression(typeof(ChargeType), "chargeType"));
+
          constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression("uri"));
+         constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression("chargeType"));
+
          targetClass.Members.Add(constructor);
 
          CodeMemberField storageKeyField = new()
