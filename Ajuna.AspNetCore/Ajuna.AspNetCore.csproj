@@ -4,7 +4,7 @@
 		<PackageId>Ajuna.AspNetCore</PackageId>
 		<AssemblyTitle>Ajuna.AspNetCore</AssemblyTitle>
 		<AssemblyName>Ajuna.AspNetCore</AssemblyName>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageDescription>Ajuna ASP .NET Core Extensions to easily implement RESTful services using Substrate storages.</PackageDescription>
 	</PropertyGroup>
