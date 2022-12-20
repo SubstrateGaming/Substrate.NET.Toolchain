@@ -40,10 +40,8 @@ namespace Ajuna.AspNetCore.Persistence
          if (!File.Exists(_csvFilePath))
          {
             // Create a file to write to.
-            using (StreamWriter sw = File.CreateText(_csvFilePath))
-            {
-               sw.WriteLine("Key,Identifier,Action,Data,UpdateDate");
-            }
+            using StreamWriter sw = File.CreateText(_csvFilePath);
+            sw.WriteLine("Key,Identifier,Action,Data,UpdateDate");
          }
 
          // This text is always added, making the file longer over time
