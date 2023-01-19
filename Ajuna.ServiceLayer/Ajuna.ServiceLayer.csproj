@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ajuna.NetApi" Version="0.3.1" />
+		<PackageReference Include="Ajuna.NetApi" Version="0.3.3" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
 		<PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
 	</ItemGroup>

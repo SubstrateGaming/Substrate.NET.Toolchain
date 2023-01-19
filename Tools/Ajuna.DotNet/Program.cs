@@ -153,6 +153,11 @@ namespace Ajuna.DotNet
             return false;
          }
 
+         // write metadata
+         string metadataJsonFilePath = ResolveMetadataJsonFilePath();
+         Log.Information("Using MetadataJson = {metadataJsonFilePath}", metadataJsonFilePath);
+         File.WriteAllText(metadataJsonFilePath, JsonConvert.SerializeObject(metadata, Formatting.Indented));
+
          configuration.Metadata.Runtime = GetMetadata.GetRuntimeFromFile(Log.Logger, runtimeFilePath);
          if (string.IsNullOrEmpty(configuration.Metadata.Runtime))
          {
@@ -314,6 +319,11 @@ namespace Ajuna.DotNet
       /// Returns the file path to .ajuna/metadata.txt
       /// </summary>
       private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.txt");
+
+      /// <summary>
+      /// Returns the file path to .ajuna/metadata.json
+      /// </summary>
+      private static string ResolveMetadataJsonFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.json");
 
       /// <summary>
       /// Returns the file path to .ajuna/runtime.txt

@@ -1,5 +1,6 @@
 ﻿using Ajuna.DotNet.Extensions;
 using Ajuna.DotNet.Service.Node.Base;
+using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types;
@@ -114,7 +115,6 @@ namespace Ajuna.DotNet.Service.Node
 
                targetClass.Members.Add(storageMethod);
 
-
                if (entry.StorageType == Storage.Type.Plain)
                {
                   NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
@@ -122,7 +122,7 @@ namespace Ajuna.DotNet.Service.Node
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
                       ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
 
-                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem.ToString()}>");
+                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem}>");
 
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
@@ -130,16 +130,37 @@ namespace Ajuna.DotNet.Service.Node
                       new CodeTypeReferenceExpression(targetClass.Name),
                       parameterMethod.Name, Array.Empty<CodeExpression>());
 
-                  CodeVariableDeclarationStatement variableDeclaration = new(typeof(string), "parameters", methodInvoke);
+                  CodeVariableDeclarationStatement variableDeclaration1 = new(typeof(string), "parameters", methodInvoke);
+                  storageMethod.Statements.Add(variableDeclaration1);
 
-                  storageMethod.Statements.Add(variableDeclaration);
+                  // create result
+                  var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.ToString()));
+                  CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
+                  storageMethod.Statements.Add(variableDeclaration2);
 
-                  storageMethod.Statements.Add(new CodeMethodReturnStatement(new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.ToString()))));
+                  // default handling
+                  if (entry.Default != null || entry.Default.Length != 0)
+                  {
+                     var conditionalStatement = new CodeConditionStatement(
+                      new CodeBinaryOperatorExpression(
+                        new CodeVariableReferenceExpression("result"),
+                        CodeBinaryOperatorType.ValueEquality,
+                        new CodePrimitiveExpression(null)),
+                      new CodeStatement[] {new CodeExpressionStatement(
+                         new CodeMethodInvokeExpression(
+                           new CodeVariableReferenceExpression("result"), "Create",
+                           new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
+                     storageMethod.Statements.Add(conditionalStatement);
+                  }
+
+                  // return statement
+                  storageMethod.Statements.Add(
+                     new CodeMethodReturnStatement(
+                        new CodeVariableReferenceExpression("result")));
 
                   // add storage key mapping in constructor
                   constructor.Statements.Add(
                       ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString("", fullItem.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
-
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
@@ -152,7 +173,7 @@ namespace Ajuna.DotNet.Service.Node
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
                       ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
 
-                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{value.ToString()}>");
+                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{value}>");
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
@@ -161,9 +182,30 @@ namespace Ajuna.DotNet.Service.Node
                   CodeVariableDeclarationStatement variableDeclaration = new(typeof(string), "parameters", methodInvoke);
                   storageMethod.Statements.Add(variableDeclaration);
 
+                  // create result
+                  var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.ToString()));
+                  CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
+                  storageMethod.Statements.Add(variableDeclaration2);
+
+                  // default handling
+                  if (entry.Default != null || entry.Default.Length != 0)
+                  {
+                      var conditionalStatement = new CodeConditionStatement(
+                      new CodeBinaryOperatorExpression(
+                        new CodeVariableReferenceExpression("result"),
+                        CodeBinaryOperatorType.ValueEquality,
+                        new CodePrimitiveExpression(null)),
+                      new CodeStatement[] {new CodeExpressionStatement(
+                         new CodeMethodInvokeExpression(
+                           new CodeVariableReferenceExpression("result"), "Create",
+                           new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
+                     storageMethod.Statements.Add(conditionalStatement);
+                  }
+
+                  // return statement
                   storageMethod.Statements.Add(
                       new CodeMethodReturnStatement(
-                          new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.ToString()))));
+                          new CodeVariableReferenceExpression("result")));
 
                   // add storage key mapping in constructor
                   constructor.Statements.Add(ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString(key.ToString(), value.ToString(), storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
@@ -336,7 +378,8 @@ namespace Ajuna.DotNet.Service.Node
                   TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
                };
 
-               if (typeDef.Variants != null) {
+               if (typeDef.Variants != null)
+               {
                   foreach (TypeVariant variant in typeDef.Variants)
                   {
                      var enumField = new CodeMemberField(ClassName, variant.Name);
@@ -345,7 +388,8 @@ namespace Ajuna.DotNet.Service.Node
                      enumField.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
 
                      targetClass.Members.Add(enumField);
-                  } }
+                  }
+               }
 
                typeNamespace.Types.Add(targetClass);
             }
@@ -359,7 +403,6 @@ namespace Ajuna.DotNet.Service.Node
 
       private static CodeMethodInvokeExpression GetStorageString(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
       {
-
          var codeExpressions =
              new CodeExpression[] {
                         new CodePrimitiveExpression(module),
@@ -424,7 +467,6 @@ namespace Ajuna.DotNet.Service.Node
                             hashers.Select(p => new CodePropertyReferenceExpression(
                                 new CodeTypeReferenceExpression(typeof(Storage.Hasher)), p.ToString())).ToArray());
             var typeofType = new CodeTypeOfExpression(keyType);
-
 
             result = new CodeExpression[] {
                             new CodeObjectCreateExpression(

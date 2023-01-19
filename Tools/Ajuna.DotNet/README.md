@@ -63,3 +63,8 @@ Running `dotnet ajuna upgrade` here will perform the following changes in your w
 - Generate `AjunaExample.RestClient.Mockup/Interfaces/*.cs` classes.
 
 Using `dotnet ajuna update` skips the first task (downloading metadata) and only generates the respective code.
+
+## Debuging
+
+You can run the Generator, with F5 and the argument "update"
+After you initially have executed the generation once.
