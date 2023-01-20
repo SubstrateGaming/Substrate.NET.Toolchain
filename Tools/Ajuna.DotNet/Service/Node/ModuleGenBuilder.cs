@@ -4,6 +4,7 @@ using Ajuna.NetApi;
 using Ajuna.NetApi.Model.Extrinsics;
 using Ajuna.NetApi.Model.Meta;
 using Ajuna.NetApi.Model.Types;
+using Newtonsoft.Json.Linq;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -146,10 +147,12 @@ namespace Ajuna.DotNet.Service.Node
                         new CodeVariableReferenceExpression("result"),
                         CodeBinaryOperatorType.ValueEquality,
                         new CodePrimitiveExpression(null)),
-                      new CodeStatement[] {new CodeExpressionStatement(
-                         new CodeMethodInvokeExpression(
-                           new CodeVariableReferenceExpression("result"), "Create",
-                           new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
+                      new CodeStatement[] {
+                        new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( fullItem.ToString(), Array.Empty<CodeExpression>() )),
+                        new CodeExpressionStatement(
+                            new CodeMethodInvokeExpression(
+                              new CodeVariableReferenceExpression("result"), "Create",
+                              new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
                      storageMethod.Statements.Add(conditionalStatement);
                   }
 
@@ -190,15 +193,17 @@ namespace Ajuna.DotNet.Service.Node
                   // default handling
                   if (entry.Default != null || entry.Default.Length != 0)
                   {
-                      var conditionalStatement = new CodeConditionStatement(
+                     var conditionalStatement = new CodeConditionStatement(
                       new CodeBinaryOperatorExpression(
                         new CodeVariableReferenceExpression("result"),
                         CodeBinaryOperatorType.ValueEquality,
                         new CodePrimitiveExpression(null)),
-                      new CodeStatement[] {new CodeExpressionStatement(
-                         new CodeMethodInvokeExpression(
-                           new CodeVariableReferenceExpression("result"), "Create",
-                           new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
+                      new CodeStatement[] {
+                        new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( value.ToString(), Array.Empty<CodeExpression>() )),
+                        new CodeExpressionStatement(
+                            new CodeMethodInvokeExpression(
+                              new CodeVariableReferenceExpression("result"), "Create",
+                              new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
                      storageMethod.Statements.Add(conditionalStatement);
                   }
 
