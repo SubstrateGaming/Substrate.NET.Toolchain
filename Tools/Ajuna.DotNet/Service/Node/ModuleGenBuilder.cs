@@ -105,6 +105,24 @@ namespace Ajuna.DotNet.Service.Node
                parameterMethod.Comments.AddRange(GetComments(entry.Docs, null, storageParams));
                targetClass.Members.Add(parameterMethod);
 
+               // default function
+               if (entry.Default != null || entry.Default.Length != 0)
+               {
+                  string storageDefault = entry.Name + "Default";
+                  CodeMemberMethod defaultMethod = new()
+                  {
+                     Attributes = MemberAttributes.Static | MemberAttributes.Public | MemberAttributes.Final,
+                     Name = storageDefault,
+                     ReturnType = new CodeTypeReference(typeof(string))
+                  };
+                  // add comment to class if exists
+                  defaultMethod.Comments.AddRange(GetComments(new string[] { "Default value as hex string" }, null, storageDefault));
+                  targetClass.Members.Add(defaultMethod);
+                  // add return statement
+                  defaultMethod.Statements.Add(new CodeMethodReturnStatement(
+                     new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty))));
+               }
+
                // async Task<object>
                CodeMemberMethod storageMethod = new()
                {
@@ -138,23 +156,6 @@ namespace Ajuna.DotNet.Service.Node
                   var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.ToString()));
                   CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
                   storageMethod.Statements.Add(variableDeclaration2);
-
-                  // default handling
-                  if (entry.Default != null || entry.Default.Length != 0)
-                  {
-                     var conditionalStatement = new CodeConditionStatement(
-                      new CodeBinaryOperatorExpression(
-                        new CodeVariableReferenceExpression("result"),
-                        CodeBinaryOperatorType.ValueEquality,
-                        new CodePrimitiveExpression(null)),
-                      new CodeStatement[] {
-                        new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( fullItem.ToString(), Array.Empty<CodeExpression>() )),
-                        new CodeExpressionStatement(
-                            new CodeMethodInvokeExpression(
-                              new CodeVariableReferenceExpression("result"), "Create",
-                              new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
-                     storageMethod.Statements.Add(conditionalStatement);
-                  }
 
                   // return statement
                   storageMethod.Statements.Add(
@@ -191,21 +192,21 @@ namespace Ajuna.DotNet.Service.Node
                   storageMethod.Statements.Add(variableDeclaration2);
 
                   // default handling
-                  if (entry.Default != null || entry.Default.Length != 0)
-                  {
-                     var conditionalStatement = new CodeConditionStatement(
-                      new CodeBinaryOperatorExpression(
-                        new CodeVariableReferenceExpression("result"),
-                        CodeBinaryOperatorType.ValueEquality,
-                        new CodePrimitiveExpression(null)),
-                      new CodeStatement[] {
-                        new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( value.ToString(), Array.Empty<CodeExpression>() )),
-                        new CodeExpressionStatement(
-                            new CodeMethodInvokeExpression(
-                              new CodeVariableReferenceExpression("result"), "Create",
-                              new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
-                     storageMethod.Statements.Add(conditionalStatement);
-                  }
+                  //if (entry.Default != null || entry.Default.Length != 0)
+                  //{
+                  //   var conditionalStatement = new CodeConditionStatement(
+                  //    new CodeBinaryOperatorExpression(
+                  //      new CodeVariableReferenceExpression("result"),
+                  //      CodeBinaryOperatorType.ValueEquality,
+                  //      new CodePrimitiveExpression(null)),
+                  //    new CodeStatement[] {
+                  //      new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( value.ToString(), Array.Empty<CodeExpression>() )),
+                  //      new CodeExpressionStatement(
+                  //          new CodeMethodInvokeExpression(
+                  //            new CodeVariableReferenceExpression("result"), "Create",
+                  //            new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
+                  //   storageMethod.Statements.Add(conditionalStatement);
+                  //}
 
                   // return statement
                   storageMethod.Statements.Add(
