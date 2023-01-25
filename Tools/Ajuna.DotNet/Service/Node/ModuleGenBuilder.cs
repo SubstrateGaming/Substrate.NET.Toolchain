@@ -51,7 +51,7 @@ namespace Ajuna.DotNet.Service.Node
          CreateCalls(typeNamespace);
 
          // CreateEvents(typeNamespace, constructor);
-         // CreateConstants(typeNamespace, constructor);
+         CreateConstants(typeNamespace, constructor);
 
          CreateErrors(typeNamespace);
          return this;
@@ -361,10 +361,58 @@ namespace Ajuna.DotNet.Service.Node
       //   }
       //}
 
-      //private void CreateConstants(CodeNamespace typeNamespace, CodeConstructor constructor)
-      //{
-      //   // TODO
-      //}
+      private void CreateConstants(CodeNamespace typeNamespace, CodeConstructor constructor)
+      {
+         ClassName = Module.Name + "Constants";
+
+         PalletConstant[] constants = Module.Constants;
+
+         var targetClass = new CodeTypeDeclaration(ClassName)
+         {
+            IsClass = true,
+            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+         };
+         typeNamespace.Types.Add(targetClass);
+
+         if (constants != null && constants.Any())
+         {
+            foreach(PalletConstant constant in constants)
+            {
+               // async Task<object>
+               CodeMemberMethod constantMethod = new()
+               {
+                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
+                  Name = constant.Name,
+               };
+               // add comment to class if exists
+               constantMethod.Comments.AddRange(GetComments(constant.Docs, null, constant.Name));
+
+               targetClass.Members.Add(constantMethod);
+
+               if (NodeTypes.TryGetValue(constant.TypeId, out NodeType nodeType))
+               {
+                  NodeTypeResolved nodeTypeResolved = GetFullItemPath(nodeType.Id);
+                  constantMethod.ReturnType = new CodeTypeReference(nodeTypeResolved.ToString());
+
+                  // assign new result object
+                  CodeVariableDeclarationStatement newStatement = new("var", "result", new CodeObjectCreateExpression(nodeTypeResolved.ToString(), Array.Empty<CodeExpression>()));
+                  constantMethod.Statements.Add(newStatement);
+
+                  // create with hex string object
+                  var createStatement = new CodeExpressionStatement(
+                            new CodeMethodInvokeExpression(
+                              new CodeVariableReferenceExpression("result"), "Create",
+                              new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(constant.Value).Replace("-", string.Empty)) }));
+                  constantMethod.Statements.Add(createStatement);
+
+                  // return statement
+                  constantMethod.Statements.Add(
+                      new CodeMethodReturnStatement(
+                          new CodeVariableReferenceExpression("result")));
+               }
+            }
+         }
+      }
 
       private void CreateErrors(CodeNamespace typeNamespace)
       {
