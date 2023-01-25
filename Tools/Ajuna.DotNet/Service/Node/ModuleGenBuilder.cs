@@ -304,56 +304,56 @@ namespace Ajuna.DotNet.Service.Node
 
          PalletEvents events = Module.Events;
 
-         if (events != null)
-         {
-            if (NodeTypes.TryGetValue(events.TypeId, out NodeType nodeType))
-            {
-               var typeDef = nodeType as NodeTypeVariant;
+         //if (events != null)
+         //{
+         //   if (NodeTypes.TryGetValue(events.TypeId, out NodeType nodeType))
+         //   {
+         //      var typeDef = nodeType as NodeTypeVariant;
 
-               if (typeDef.Variants != null)
-               {
-                  foreach (TypeVariant variant in typeDef.Variants)
-                  {
-                     var eventClass = new CodeTypeDeclaration("Event" + variant.Name.MakeMethod())
-                     {
-                        IsClass = true,
-                        TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-                     };
+         //      if (typeDef.Variants != null)
+         //      {
+         //         foreach (TypeVariant variant in typeDef.Variants)
+         //         {
+         //            var eventClass = new CodeTypeDeclaration("Event" + variant.Name.MakeMethod())
+         //            {
+         //               IsClass = true,
+         //               TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+         //            };
 
-                     // add comment to variant if exists
-                     eventClass.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
+         //            // add comment to variant if exists
+         //            eventClass.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
 
-                     var codeTypeRef = new CodeTypeReference("BaseTuple");
-                     if (variant.TypeFields != null)
-                     {
-                        foreach (NodeTypeField field in variant.TypeFields)
-                        {
-                           NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
-                           codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.ToString()));
-                        }
-                     }
-                     eventClass.BaseTypes.Add(codeTypeRef);
+         //            var codeTypeRef = new CodeTypeReference("BaseTuple");
+         //            if (variant.TypeFields != null)
+         //            {
+         //               foreach (NodeTypeField field in variant.TypeFields)
+         //               {
+         //                  NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
+         //                  codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.ToString()));
+         //               }
+         //            }
+         //            eventClass.BaseTypes.Add(codeTypeRef);
 
-                     // add event key mapping in constructor
-                     // TODO (svnscha) What is with events?
-                     //Console.WriteLine($"case \"{Module.Index}-{variant.Index}\": return typeof({NamespaceName + "." + eventClass.Name});");
-                     //constructor.Statements.Add(
-                     //    AddPropertyValues(new CodeExpression[] {
-                     //     new CodeObjectCreateExpression(
-                     //        new CodeTypeReference(typeof(Tuple<int, int>)),
-                     //        new CodeExpression[] {
-                     //            new CodePrimitiveExpression((int) Module.Index),
-                     //            new CodePrimitiveExpression((int) variant.Index)
-                     //        }),
-                     //     new CodeTypeOfExpression(NameSpace + "." + eventClass.Name)
+         //            // add event key mapping in constructor
+         //            // TODO (svnscha) What is with events?
+         //            //Console.WriteLine($"case \"{Module.Index}-{variant.Index}\": return typeof({NamespaceName + "." + eventClass.Name});");
+         //            //constructor.Statements.Add(
+         //            //    AddPropertyValues(new CodeExpression[] {
+         //            //     new CodeObjectCreateExpression(
+         //            //        new CodeTypeReference(typeof(Tuple<int, int>)),
+         //            //        new CodeExpression[] {
+         //            //            new CodePrimitiveExpression((int) Module.Index),
+         //            //            new CodePrimitiveExpression((int) variant.Index)
+         //            //        }),
+         //            //     new CodeTypeOfExpression(NameSpace + "." + eventClass.Name)
 
-                     //    }, "SubstrateClientExt.EventKeyDict"));
+         //            //    }, "SubstrateClientExt.EventKeyDict"));
 
-                     typeNamespace.Types.Add(eventClass);
-                  }
-               }
-            }
-         }
+         //            typeNamespace.Types.Add(eventClass);
+         //         }
+         //      }
+         //   }
+         //}
       }
 
       private void CreateConstants(CodeNamespace typeNamespace)
