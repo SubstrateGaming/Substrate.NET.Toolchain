@@ -1,4 +1,4 @@
-# Generic Substrate SDK
+# Toolchain for Substrate
 
 # What is Ajuna.SDK ?
 [![license](https://img.shields.io/github/license/ajuna-network/Ajuna.SDK)](./LICENSE)
