@@ -1,5 +1,4 @@
-# Ajuna.SDK
-![ajuna-Header-1080p_with_logo](https://user-images.githubusercontent.com/17710198/136852531-d9eb47cd-efcd-4c88-bdbf-78dfcbffe287.png)
+# Generic Substrate SDK
 
 # What is Ajuna.SDK ?
 [![license](https://img.shields.io/github/license/ajuna-network/Ajuna.SDK)](./LICENSE)
@@ -8,10 +7,10 @@
 
 Ajuna SDK is a .NET toolchain featuring .NET framework extensions and code generation utilities to build substrate storage services and clients quickly. This toolchain ideally extends [Ajuna.NetApi](https://github.com/ajuna-network/Ajuna.NetApi) library, which provides raw access to substrate nodes.
 
-The project behind Ajuna.SDK is [Ajuna Network](https://ajuna.io/) and the flagship game [DOTMog](https://dotmog.com/), backed by the Swiss company [BloGa Tech AG](admin@bloga.tech).
+![image](https://user-images.githubusercontent.com/17710198/221981597-de89c308-8f33-4c08-a463-3270e68a5035.png)
 
 ## Important
-This toolchain is under heavy development, and things may change quickly. Please use it with caution until there is a stable release available.
+This toolchain is under development, and things may change quickly.
 
 ## Projects
 Below is a high-level technical overview of the libraries and tools available in Ajuna.SDK.
@@ -25,7 +24,7 @@ Below is a high-level technical overview of the libraries and tools available in
 
 ## Architecture
 
-![Ajuna Network Architecture - Lightpaper](https://user-images.githubusercontent.com/17710198/177153394-b9fc1e08-a61b-47c2-9797-482accb201e1.png)
+![image](https://user-images.githubusercontent.com/17710198/221981432-49c4c811-57a6-4ac9-abf0-936de42dd33e.png)
 
 ## Getting Started
 
@@ -136,3 +135,4 @@ You can also watch our short step-by-step tutorial that guides you through the e
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/447132563924844544/widget.png?style=banner2)](https://discord.gg/GXYmNWtPzQ)
 
+The project behind Ajuna.SDK is [Ajuna Network](https://ajuna.io/) and the flagship game [DOTMog](https://dotmog.com/), backed by the Swiss company [BloGa Tech AG](admin@bloga.tech).
