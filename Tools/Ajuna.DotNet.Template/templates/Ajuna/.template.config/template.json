@@ -3,7 +3,7 @@
    "author": "Sven Scharmentke",
    "classifications": [ "Common", "Console" ],
    "identity": "Ajuna",
-   "name": "Ajuna: Service and Client projects",
+   "name": "Ajuna: Service and Client Projects",
    "shortName": "ajuna",
    "tags": {
       "language": "C#",
@@ -53,6 +53,13 @@
          "defaultValue": "ws://127.0.0.1:9944",
          "description": "Uses the given websocket URL to query metadata.",
          "replaces": "ws://127.0.0.1:9944",
+         "type": "parameter"
+      },
+      "generate_openapi_documentation": {
+         "datatype": "bool",
+         "defaultValue": "true",
+         "description": "Activates/deactivates the OpenApi Document Generation",
+         "replaces": "OPENAPI_DOCUMENTATION_ENABLED",
          "type": "parameter"
       }
    },
