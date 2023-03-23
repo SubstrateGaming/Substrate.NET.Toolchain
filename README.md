@@ -1,6 +1,6 @@
-# Toolchain for Substrate
+# Toolchain generating a full-fledged Substrate .NET SDK
 
-# What is Ajuna.SDK ?
+# What is the Substrate .NET Toolchain ?
 [![license](https://img.shields.io/github/license/ajuna-network/Ajuna.SDK)](./LICENSE)
 [![contributors](https://img.shields.io/github/contributors/ajuna-network/Ajuna.SDK)](https://github.com/ajuna-network/Ajuna.SDK/graphs/contributors) 
 [![GitHub issues](https://img.shields.io/github/issues/ajuna-network/Ajuna.SDK.svg)](https://github.com/ajuna-network/Ajuna.SDK/issues)
