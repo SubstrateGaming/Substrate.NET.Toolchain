@@ -77,8 +77,11 @@ namespace Ajuna.DotNet.Service.Node
                decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()}.Decode(byteArray, ref p)"));
             }
          }
+         decodeMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
+         decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = bytesLength"));
+         decodeMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
+         decodeMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
 
-         decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = p - start"));
          return decodeMethod;
       }
 
