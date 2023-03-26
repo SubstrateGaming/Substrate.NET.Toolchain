@@ -1,9 +1,12 @@
-# Toolchain generating a full-fledged Substrate .NET SDK
-![darkfriend77_substrate_gaming](https://user-images.githubusercontent.com/17710198/227789154-e8ecaaf9-ce68-4f2a-ad2e-5711e3c9fca0.png)
-# What is the Substrate .NET Toolchain ?
+# Substrate .NET Toolchain
+[![GitHub issues](https://img.shields.io/github/issues/SubstrateGaming/Substrate.NET.Toolchain.svg)](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/issues) 
 [![license](https://img.shields.io/github/license/SubstrateGaming/Substrate.NET.Toolchain)](./LICENSE)
-[![contributors](https://img.shields.io/github/contributors/SubstrateGaming/Substrate.NET.Toolchain)](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/graphs/contributors) 
-[![GitHub issues](https://img.shields.io/github/issues/SubstrateGaming/Substrate.NET.Toolchain.svg)](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/issues)
+[![contributors](https://img.shields.io/github/contributors/SubstrateGaming/Substrate.NET.Toolchain)](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/graphs/contributors)  
+  
+**Substrate .NET Toolchain model-driven SDK generator for substrate-based nodes** 
+![darkfriend77_substrate_gaming](https://user-images.githubusercontent.com/17710198/227789154-e8ecaaf9-ce68-4f2a-ad2e-5711e3c9fca0.png)
+
+# What is the Substrate .NET Toolchain ?
 
 Ajuna SDK is a .NET toolchain featuring .NET framework extensions and code generation utilities to build substrate storage services and clients quickly. This toolchain ideally extends [Ajuna.NetApi](https://github.com/ajuna-network/Ajuna.NetApi) library, which provides raw access to substrate nodes.
 
