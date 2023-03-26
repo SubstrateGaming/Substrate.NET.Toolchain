@@ -8,7 +8,7 @@ namespace Substrate.AspNetCore.Extensions
 {
    public static class ServiceCollectionExtension
    {
-      public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, SubstrateStorageServiceConfiguration configuration)
+      public static IServiceCollection AddSubstrateStorageService(this IServiceCollection services, SubstrateStorageServiceConfiguration configuration)
       {
          var substrateService = new SubstrateService();
 
