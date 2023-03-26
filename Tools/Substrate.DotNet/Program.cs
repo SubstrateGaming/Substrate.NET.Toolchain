@@ -39,7 +39,7 @@ namespace Substrate.DotNet
                   // Handles dotnet substrate update
                   case "update":
                      {
-                        if (!await UpdateAjunaEnvironmentAsync(CancellationToken.None))
+                        if (!await UpdateSubstrateEnvironmentAsync(CancellationToken.None))
                         {
                            Log.Error("Updating project did not complete successfully.");
                            Environment.Exit(-1);
@@ -50,7 +50,7 @@ namespace Substrate.DotNet
                   // Handles dotnet substrate upgrade
                   case "upgrade":
                      {
-                        if (!await UpgradeAjunaEnvironmentAsync(CancellationToken.None))
+                        if (!await UpgradeSubstrateEnvironmentAsync(CancellationToken.None))
                         {
                            Log.Error("Upgrading project did not complete successfully.");
                            Environment.Exit(-1);
@@ -81,36 +81,36 @@ namespace Substrate.DotNet
       /// This command parses the substrate project configuration and generates code for all given projects.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
-      private static async Task<bool> UpdateAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(fetchMetadata: false, token);
+      private static async Task<bool> UpdateSubstrateEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateSubstrateEnvironmentAsync(fetchMetadata: false, token);
 
       /// <summary>
       /// Invoked with dotnet substrate upgrade.
       /// This command first updates the metadata file and then generates all classes again.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
-      private static async Task<bool> UpgradeAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(fetchMetadata: true, token);
+      private static async Task<bool> UpgradeSubstrateEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateSubstrateEnvironmentAsync(fetchMetadata: true, token);
 
       /// <summary>
       /// Handles the implementation to update or upgrade an substrate environment
-      /// Upgrading first fetches the metadata and stores it in .ajuna configuration directory.
+      /// Upgrading first fetches the metadata and stores it in .substrate configuration directory.
       /// Then a normal update command is invoked to generate code for all given projects.
       /// </summary>
       /// <param name="token">Cancellation</param>
       /// <param name="fetchMetadata">Controls whether to fetch the metadata (upgrade) or not (update).</param>
       /// <returns>Returns true on success, otherwise false.</returns>
-      private static async Task<bool> UpgradeOrUpdateAjunaEnvironmentAsync(bool fetchMetadata, CancellationToken token)
+      private static async Task<bool> UpgradeOrUpdateSubstrateEnvironmentAsync(bool fetchMetadata, CancellationToken token)
       {
          // Update an existing substrate project tree by reading the required configuration file
-         // in the current directory in subdirectory .ajuna.
+         // in the current directory in subdirectory .substrate.
          string configurationFile = ResolveConfigurationFilePath();
          if (!File.Exists(configurationFile))
          {
-            Log.Error("The configuration file {file} does not exist! Please create a configuration file so this toolchain can produce correct outputs. You can scaffold the configuration file by creating a new service project with `dotnet new ajuna-service`.");
+            Log.Error("The configuration file {file} does not exist! Please create a configuration file so this toolchain can produce correct outputs. You can scaffold the configuration file by creating a new service project with `dotnet new substrate-service`.");
             return false;
          }
 
-         // Read ajuna-config.json
-         AjunaConfiguration configuration = JsonConvert.DeserializeObject<AjunaConfiguration>(File.ReadAllText(configurationFile));
+         // Read substrate-config.json
+         SubstrateConfiguration configuration = JsonConvert.DeserializeObject<SubstrateConfiguration>(File.ReadAllText(configurationFile));
          if (configuration == null)
          {
             Log.Error("Could not parse the configuration file {file}! Please ensure that the configuration file format is correct.", configurationFile);
@@ -177,7 +177,7 @@ namespace Substrate.DotNet
       }
 
       /// <summary>
-      /// Fetches and generates .ajuna/metadata.txt
+      /// Fetches and generates .substrate/metadata.txt
       /// </summary>
       /// <param name="websocket">The websocket to connect to</param>
       /// <param name="token">Cancellation token.</param>
@@ -208,7 +208,7 @@ namespace Substrate.DotNet
       }
 
       /// <summary>
-      /// Fetches and generates .ajuna/runtime.txt
+      /// Fetches and generates .substrate/runtime.txt
       /// </summary>
       /// <param name="websocket">The websocket to connect to</param>
       /// <param name="token">Cancellation token.</param>
@@ -241,13 +241,13 @@ namespace Substrate.DotNet
       /// <summary>
       /// Generates all classes for the RestService project
       /// </summary>
-      private static void GenerateRestServiceClasses(MetaData metadata, AjunaConfiguration configuration)
+      private static void GenerateRestServiceClasses(MetaData metadata, SubstrateConfiguration configuration)
       {
          var generator = new RestServiceGenerator(Log.Logger, configuration.Metadata.Runtime, configuration.Projects.NetApi, new ProjectSettings(configuration.Projects.RestService));
          generator.Generate(metadata);
       }
 
-      private static void GenerateRestClientClasses(AjunaConfiguration configuration)
+      private static void GenerateRestClientClasses(SubstrateConfiguration configuration)
       {
          string filePath = ResolveRestServiceAssembly(configuration);
          if (string.IsNullOrEmpty(filePath))
@@ -299,38 +299,38 @@ namespace Substrate.DotNet
       /// <summary>
       /// Generates all classes for the NetApi project
       /// </summary>
-      private static void GenerateNetApiClasses(MetaData metadata, AjunaConfiguration configuration)
+      private static void GenerateNetApiClasses(MetaData metadata, SubstrateConfiguration configuration)
       {
          var generator = new NetApiGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.NetApi));
          generator.Generate(metadata);
       }
 
       /// <summary>
-      /// Returns the directory path to .ajuna directory
+      /// Returns the directory path to .substrate directory
       /// </summary>
-      private static string ResolveConfigurationDirectory() => Path.Join(Environment.CurrentDirectory, ".ajuna");
+      private static string ResolveConfigurationDirectory() => Path.Join(Environment.CurrentDirectory, ".substrate");
 
       /// <summary>
-      /// Returns the file path to .ajuna/ajuna-config.json
+      /// Returns the file path to .substrate/substrate-config.json
       /// </summary>
-      private static string ResolveConfigurationFilePath() => Path.Join(ResolveConfigurationDirectory(), "ajuna-config.json");
+      private static string ResolveConfigurationFilePath() => Path.Join(ResolveConfigurationDirectory(), "substrate-config.json");
 
       /// <summary>
-      /// Returns the file path to .ajuna/metadata.txt
+      /// Returns the file path to .substrate/metadata.txt
       /// </summary>
       private static string ResolveMetadataFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.txt");
 
       /// <summary>
-      /// Returns the file path to .ajuna/metadata.json
+      /// Returns the file path to .substrate/metadata.json
       /// </summary>
       private static string ResolveMetadataJsonFilePath() => Path.Join(ResolveConfigurationDirectory(), "metadata.json");
 
       /// <summary>
-      /// Returns the file path to .ajuna/runtime.txt
+      /// Returns the file path to .substrate/runtime.txt
       /// </summary>
       private static string ResolveRuntimeFilePath() => Path.Join(ResolveConfigurationDirectory(), "runtime.txt");
 
-      private static string ResolveRestServiceAssembly(AjunaConfiguration configuration)
+      private static string ResolveRestServiceAssembly(SubstrateConfiguration configuration)
       {
          if (File.Exists(configuration.RestClientSettings.ServiceAssembly))
          {

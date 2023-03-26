@@ -153,7 +153,7 @@ namespace Substrate.DotNet.Service.Node.Base
 
          space.Add((FileName is null ? ClassName : FileName) + ".cs");
 
-         // Remove the first two parts of the namespace to avoid the files being created in the Ajuna/NetApi sub folder. 
+         // Remove the first two parts of the namespace to avoid the files being created in the Substrate/NetApi sub folder. 
          space = space.TakeLast(space.Count - 2).ToList();
 
          // Add base path at the beginning of the paths list
@@ -173,7 +173,7 @@ namespace Substrate.DotNet.Service.Node.Base
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Types.Metadata.V14"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi.Attributes"));
 
-         targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("AjunaNodeType"), new CodeAttributeArgument(
+         targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("SubstrateNodeType"), new CodeAttributeArgument(
             new CodeSnippetExpression($"TypeDefEnum.{typeDef.TypeDef}")
          )));
 

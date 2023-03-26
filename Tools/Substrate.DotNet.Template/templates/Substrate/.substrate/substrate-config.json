@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "net_api": "Substrate.NetApiExt",
+    "rest_service": "Substrate.RestService",
+    "rest_client": "Substrate.RestClient"
+  },
+   "metadata": {
+      "websocket": "ws://127.0.0.1:9944"
+   },
+  "rest_client_settings": {
+    "service_assembly": "Substrate.RestService.dll"
+  }
+}
