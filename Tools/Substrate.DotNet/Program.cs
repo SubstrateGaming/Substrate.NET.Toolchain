@@ -16,10 +16,10 @@ namespace Substrate.DotNet
    partial class Program
    {
       /// <summary>
-      /// Command line utility to easily maintain and scaffold Ajuna SDK related projects.
+      /// Command line utility to easily maintain and scaffold Substrate .NET Toolchain related projects.
       /// 
       /// Usage
-      /// dotnet ajuna update
+      /// dotnet substrate update
       /// 
       /// </summary>
       static async Task Main(string[] args)
@@ -36,7 +36,7 @@ namespace Substrate.DotNet
             {
                switch (args[i])
                {
-                  // Handles dotnet ajuna update
+                  // Handles dotnet substrate update
                   case "update":
                      {
                         if (!await UpdateAjunaEnvironmentAsync(CancellationToken.None))
@@ -47,7 +47,7 @@ namespace Substrate.DotNet
                      }
                      break;
 
-                  // Handles dotnet ajuna upgrade
+                  // Handles dotnet substrate upgrade
                   case "upgrade":
                      {
                         if (!await UpgradeAjunaEnvironmentAsync(CancellationToken.None))
@@ -77,21 +77,21 @@ namespace Substrate.DotNet
       }
 
       /// <summary>
-      /// Invoked with dotnet ajuna update
-      /// This command parses the ajuna project configuration and generates code for all given projects.
+      /// Invoked with dotnet substrate update
+      /// This command parses the substrate project configuration and generates code for all given projects.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
       private static async Task<bool> UpdateAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(fetchMetadata: false, token);
 
       /// <summary>
-      /// Invoked with dotnet ajuna upgrade.
+      /// Invoked with dotnet substrate upgrade.
       /// This command first updates the metadata file and then generates all classes again.
       /// </summary>
       /// <returns>Returns true on success, otherwise false.</returns>
       private static async Task<bool> UpgradeAjunaEnvironmentAsync(CancellationToken token) => await UpgradeOrUpdateAjunaEnvironmentAsync(fetchMetadata: true, token);
 
       /// <summary>
-      /// Handles the implementation to update or upgrade an ajuna environment
+      /// Handles the implementation to update or upgrade an substrate environment
       /// Upgrading first fetches the metadata and stores it in .ajuna configuration directory.
       /// Then a normal update command is invoked to generate code for all given projects.
       /// </summary>
@@ -100,7 +100,7 @@ namespace Substrate.DotNet
       /// <returns>Returns true on success, otherwise false.</returns>
       private static async Task<bool> UpgradeOrUpdateAjunaEnvironmentAsync(bool fetchMetadata, CancellationToken token)
       {
-         // Update an existing Ajuna project tree by reading the required configuration file
+         // Update an existing substrate project tree by reading the required configuration file
          // in the current directory in subdirectory .ajuna.
          string configurationFile = ResolveConfigurationFilePath();
          if (!File.Exists(configurationFile))

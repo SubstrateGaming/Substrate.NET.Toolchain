@@ -1,9 +1,9 @@
-using Ajuna.AspNetCore;
-using Ajuna.AspNetCore.Persistence;
-using Ajuna.AspNetCore.Extensions;
+using Substrate.AspNetCore;
+using Substrate.AspNetCore.Persistence;
+using Substrate.AspNetCore.Extensions;
 using Ajuna.RestService.Formatters;
-using Ajuna.ServiceLayer;
-using Ajuna.ServiceLayer.Storage;
+using Substrate.ServiceLayer;
+using Substrate.ServiceLayer.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

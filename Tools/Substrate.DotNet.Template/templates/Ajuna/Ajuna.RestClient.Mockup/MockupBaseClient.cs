@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Ajuna.ServiceLayer.Model;
+using Substrate.ServiceLayer.Model;
 using System;
-using Ajuna.NetApi.Model.Types.Base;
+using Substrate.NetApi.Model.Types.Base;
 
 namespace Ajuna.RestClient.Mockup
 {

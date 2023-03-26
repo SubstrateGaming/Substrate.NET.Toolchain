@@ -1,5 +1,5 @@
-﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Types;
+﻿using Substrate.NetApi;
+using Substrate.NetApi.Model.Types;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;

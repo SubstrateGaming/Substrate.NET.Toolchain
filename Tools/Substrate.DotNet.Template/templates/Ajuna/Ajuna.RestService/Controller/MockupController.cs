@@ -1,8 +1,8 @@
-﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Rpc;
-using Ajuna.ServiceLayer.Model;
-using Ajuna.ServiceLayer.Storage;
-using Ajuna.ServiceLayer.Attributes;
+﻿using Substrate.NetApi;
+using Substrate.NetApi.Model.Rpc;
+using Substrate.ServiceLayer.Model;
+using Substrate.ServiceLayer.Storage;
+using Substrate.ServiceLayer.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Microsoft.AspNetCore.Hosting;

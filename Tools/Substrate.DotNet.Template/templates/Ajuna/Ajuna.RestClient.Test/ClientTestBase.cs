@@ -1,5 +1,5 @@
-﻿using Ajuna.NetApi.Model.Types.Base;
-using Ajuna.NetApi.Model.Types.Primitive;
+﻿using Substrate.NetApi.Model.Types.Base;
+using Substrate.NetApi.Model.Types.Primitive;
 using System;
 using System.Net.Http;
 using System.Net.WebSockets;

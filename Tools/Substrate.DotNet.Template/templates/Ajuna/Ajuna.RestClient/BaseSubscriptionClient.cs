@@ -1,4 +1,4 @@
-﻿using Ajuna.ServiceLayer.Model;
+﻿using Substrate.ServiceLayer.Model;
 using Newtonsoft.Json;
 using System;
 using System.Net;

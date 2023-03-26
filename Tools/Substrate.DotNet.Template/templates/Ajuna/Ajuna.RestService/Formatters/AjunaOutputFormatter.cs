@@ -1,5 +1,5 @@
-﻿using Ajuna.NetApi;
-using Ajuna.NetApi.Model.Types;
+﻿using Substrate.NetApi;
+using Substrate.NetApi.Model.Types;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
