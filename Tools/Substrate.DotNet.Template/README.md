@@ -1,6 +1,5 @@
 # Substrate.DotNet.Template
-![ajuna-Header-1080p_with_logo](https://user-images.githubusercontent.com/17710198/136852531-d9eb47cd-efcd-4c88-bdbf-78dfcbffe287.png)
-
+![darkfriend77_substrate_gaming](https://user-images.githubusercontent.com/17710198/227789214-29702bbc-f2f6-4c66-83ed-8f1deada5d5c.png)
 # What is Substrate.DotNet.Template ?
 [![license](https://img.shields.io/github/license/SubstrateGaming/Substrate.NET.Toolchain)](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/blob/origin/LICENSE)
 
