@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <AssemblyTitle>Substrate.DotNet</AssemblyTitle>
+      <AssemblyName>Substrate.DotNet</AssemblyName>
+      <TargetFramework>net6.0</TargetFramework>
+      
+      <!-- HINT: Use dotnet pack instead. -->
+      <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+      <!-- 
+         .NET 6 removed runtime configuration. 
+         This is required for resolving assemblies (having local NuGet feeds) when reflection hits this service. 
+      -->
+      <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+
+      <Description>Substrate .NET toolchain to generate code.</Description>
+      <PackAsTool>true</PackAsTool>
+      <ToolCommandName>substrate</ToolCommandName>
+      <PackageOutputPath>./nupkg</PackageOutputPath>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App"></FrameworkReference>
+   </ItemGroup>
+   
+   <ItemGroup>
+     <Compile Remove="nupkg\**" />
+     <EmbeddedResource Remove="nupkg\**" />
+     <None Remove="nupkg\**" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <None Include="..\..\LICENSE">
+         <Pack>True</Pack>
+         <PackagePath></PackagePath>
+      </None>
+   </ItemGroup>
+
+   <ItemGroup>
+      <PackageReference Include="Substrate.NET.API" Version="0.9.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+      <PackageReference Include="System.CodeDom" Version="6.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <ProjectReference Include="..\..\Substrate.ServiceLayer\Substrate.ServiceLayer.csproj" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <Folder Include="Properties\" />
+   </ItemGroup>
+</Project>
