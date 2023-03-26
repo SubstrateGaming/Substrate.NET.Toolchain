@@ -1,5 +1,5 @@
 # Toolchain generating a full-fledged Substrate .NET SDK
-
+![darkfriend77_substrate_gaming](https://user-images.githubusercontent.com/17710198/227789154-e8ecaaf9-ce68-4f2a-ad2e-5711e3c9fca0.png)
 # What is the Substrate .NET Toolchain ?
 [![license](https://img.shields.io/github/license/SubstrateGaming/Substrate.NET.Toolchain)](./LICENSE)
 [![contributors](https://img.shields.io/github/contributors/SubstrateGaming/Substrate.NET.Toolchain)](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/graphs/contributors) 
