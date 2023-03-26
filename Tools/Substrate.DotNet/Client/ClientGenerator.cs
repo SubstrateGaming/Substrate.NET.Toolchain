@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Substrate.DotNet.Client
 {
    /// <summary>
-   /// The ClientGenerator class handles the actual code generation to build REST API clients for a given Ajuna RestService assembly.
+   /// The ClientGenerator class handles the actual code generation to build REST API clients for a given Substrate RestService assembly.
    /// </summary>
    public class ClientGenerator
    {

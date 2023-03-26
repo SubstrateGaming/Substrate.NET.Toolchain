@@ -64,18 +64,18 @@ dotnet new ajuna \
 ```
 
 which generates a new solution and a couple of .NET projects in your project directory. 
-(A description for all command parameters can be found [here](Tools/Ajuna.DotNet.Template/README.md))
+(A description for all command parameters can be found [here](Tools/Substrate.DotNet.Template/README.md))
     
 
 ```txt
 .
-├─── .ajuna
+├─── .substrate
 ├─── .config
-├─── AjunaExample.NetApiExt
-├─── AjunaExample.RestClient
-├─── AjunaExample.RestClient.Mockup
-├─── AjunaExample.RestClient.Test
-├─── AjunaExample.RestService
+├─── Substrate.NetApiExt
+├─── Substrate.RestClient
+├─── Substrate.RestClient.Mockup
+├─── Substrate.RestClient.Test
+├─── Substrate.RestService
 ```
 
 ### Role of the Generated Projects

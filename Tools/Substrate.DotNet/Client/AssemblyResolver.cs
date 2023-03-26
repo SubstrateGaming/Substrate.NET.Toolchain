@@ -10,7 +10,7 @@ using System.Runtime.Loader;
 namespace Substrate.DotNet.Client
 {
    /// <summary>
-   /// Utility to make sure we can load Ajuna.RestService.dll with its dependencies.
+   /// Utility to make sure we can load Substrate.RestService.dll with its dependencies.
    /// Reference: https://github.com/dotnet/runtime/issues/1050
    /// </summary>
    internal sealed class AssemblyResolver : IDisposable

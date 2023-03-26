@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+      <TargetFramework>netstandard2.1</TargetFramework>
+   </PropertyGroup>
+   <!--Set this to true if you want to generate all necessary/dependent DLLs in order to use them in Unity Project for example-->
+   <PropertyGroup>
+      <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+   </PropertyGroup>
+   <ItemGroup>
+      <PackageReference Include="Substrate.ServiceLayer.Model" Version="SUBSTRATE_TOOLCHAIN_VERSION" />
+   </ItemGroup>
+   <ItemGroup>
+      <ProjectReference Include="..\Substrate.NetApiExt\Substrate.NetApiExt.csproj" />
+   </ItemGroup>
+</Project>

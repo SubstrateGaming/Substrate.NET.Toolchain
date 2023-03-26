@@ -28,7 +28,7 @@ namespace Substrate.DotNet.Client
       /// <summary>
       /// Basic namespace to generate output for.
       /// </summary>
-      public string BaseNamespace { get; set; } = "Ajuna.RestClient";
+      public string BaseNamespace { get; set; } = "Substrate.RestClient";
 
       /// <summary>
       /// Code generation options.

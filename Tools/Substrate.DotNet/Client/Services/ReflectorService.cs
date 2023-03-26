@@ -30,7 +30,7 @@ namespace Substrate.DotNet.Client.Services
          return assembly
             .GetTypes()
             .Where(type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(baseType))
-            .Where(type => !type.CustomAttributes.Any(x => x.AttributeType == typeof(AjunaControllerIgnoreAttribute)))
+            .Where(type => !type.CustomAttributes.Any(x => x.AttributeType == typeof(SubstrateControllerIgnoreAttribute)))
             .Select(controllerType => new ReflectedController(controllerType) { })
             .ToList();
       }

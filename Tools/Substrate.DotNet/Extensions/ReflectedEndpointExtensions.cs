@@ -494,7 +494,7 @@ namespace Substrate.DotNet.Extensions
             return true;
          }
 
-         AjunaNodeTypeAttribute attribute = type.GetCustomAttribute<AjunaNodeTypeAttribute>(false);
+         SubstrateNodeTypeAttribute attribute = type.GetCustomAttribute<SubstrateNodeTypeAttribute>(false);
          if (attribute == null)
          {
             return false;

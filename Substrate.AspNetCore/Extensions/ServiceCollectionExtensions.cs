@@ -8,9 +8,9 @@ namespace Substrate.AspNetCore.Extensions
 {
    public static class ServiceCollectionExtension
    {
-      public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, AjunaStorageServiceConfiguration configuration)
+      public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, SubstrateStorageServiceConfiguration configuration)
       {
-         var ajunaSubstrateService = new AjunaSubstrateService();
+         var ajunaSubstrateService = new SubstrateService();
 
          Task.Run(async () =>
          {
@@ -23,15 +23,15 @@ namespace Substrate.AspNetCore.Extensions
             await ajunaSubstrateService.InitializeAsync(configuration);
 
             // Save the reference for later use.
-            AjunaRuntime.AjunaSubstrateService = ajunaSubstrateService;
+            SubstrateRuntime.SubstrateService = ajunaSubstrateService;
 
 #pragma warning disable VSTHRD002
          }).Wait();
 #pragma warning restore VSTHRD002
 
-         if (AjunaRuntime.AjunaSubstrateService == null)
+         if (SubstrateRuntime.SubstrateService == null)
          {
-            throw new Exception("Could not initialize game service runtime. Please confirm that your configuration is correct.");
+            throw new NotSupportedException("Could not initialize game service runtime. Please confirm that your configuration is correct.");
          }
 
          // Register storages for dependency injection..
