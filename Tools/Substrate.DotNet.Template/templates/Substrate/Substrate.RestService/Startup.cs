@@ -89,7 +89,7 @@ namespace Substrate.RestService
          else
          {
             // Configure regular data provider
-            _storageDataProvider = new SubstrateSubstrateDataProvider(Environment.GetEnvironmentVariable("SUBSTRATE_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
+            _storageDataProvider = new SubstrateDataProvider(Environment.GetEnvironmentVariable("SUBSTRATE_WEBSOCKET_ENDPOINT") ?? "ws://127.0.0.1:9944");
          }
 
          // Configure web sockets to allow clients to subscribe to storage changes.
