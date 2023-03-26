@@ -10,7 +10,7 @@ namespace Substrate.AspNetCore.Extensions
    {
       public static IServiceCollection AddAjunaStorageService(this IServiceCollection services, SubstrateStorageServiceConfiguration configuration)
       {
-         var ajunaSubstrateService = new SubstrateService();
+         var substrateService = new SubstrateService();
 
          Task.Run(async () =>
          {
@@ -20,10 +20,10 @@ namespace Substrate.AspNetCore.Extensions
             // 2. Subscribe to all Storage Changes
             // 3. Gather all storage info from metadata and laod all Storage specific Delegates
             // 4. Start Processing Changes  
-            await ajunaSubstrateService.InitializeAsync(configuration);
+            await substrateService.InitializeAsync(configuration);
 
             // Save the reference for later use.
-            SubstrateRuntime.SubstrateService = ajunaSubstrateService;
+            SubstrateRuntime.SubstrateService = substrateService;
 
 #pragma warning disable VSTHRD002
          }).Wait();
@@ -47,7 +47,7 @@ namespace Substrate.AspNetCore.Extensions
          return services;
       }
 
-      public static IServiceCollection AddAjunaSubscriptionHandler(this IServiceCollection services)
+      public static IServiceCollection AddSubstrateSubscriptionHandler(this IServiceCollection services)
       {
          services.AddTransient<SubscriptionManager>();
          services.AddSingleton<StorageSubscriptionHandler>();
