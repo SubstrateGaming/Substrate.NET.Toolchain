@@ -129,14 +129,14 @@ You can also watch our short step-by-step tutorial that guides you through the e
 - [Contributing](./CONTRIBUTING.md)
 - [Development](./DEVELOPMENT.md)
 - [Examples](./EXAMPLES.md)
-- `dotnet substrate` toolchain with [Ajuna.DotNet](/Tools/Substrate.DotNet/README.md)
+- `dotnet substrate` toolchain with [Substrate.DotNet](/Tools/Substrate.DotNet/README.md)
 - `dotnet new substrate` template with [Substrate.DotNet.Template](/Tools/Substrate.DotNet.Template/README.md)
 
-
-## Community
-
+## SUBSTRATE GAMING COMMUNITIES
 [![Discord Banner 1](https://discordapp.com/api/guilds/849331368558198803/widget.png?style=banner2)](https://discord.gg/cE72GYcFgY)
 
-[![Discord Banner 2](https://discordapp.com/api/guilds/447132563924844544/widget.png?style=banner2)](https://discord.gg/GXYmNWtPzQ)
-
-The project behind Ajuna.SDK is [Ajuna Network](https://ajuna.io/) and the flagship game [DOTMog](https://dotmog.com/), backed by the Swiss company [BloGa Tech AG](admin@bloga.tech).
+## Projects using Substrate .NET Toolchain
+- [If you intend or are using Substrate .NET Toolchain, please add your project here](https://github.com/SubstrateGaming/Substrate.NET.Toolchain/edit/master/README.md)    
+  
+**In alphabetical order**  
+- [Ajuna Network](https://github.com/ajuna-network/Ajuna)  
