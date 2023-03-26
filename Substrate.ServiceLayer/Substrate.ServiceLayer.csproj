@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+	<PropertyGroup>
+		<PackageId>Substrate.ServiceLayer</PackageId>
+		<AssemblyTitle>Substrate.ServiceLayer</AssemblyTitle>
+		<AssemblyName>Substrate.ServiceLayer</AssemblyName>
+		<CheckEolTargetFramework>False</CheckEolTargetFramework>
+		<TargetFrameworks>$(AjunaDefaultFrameworks)</TargetFrameworks>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageDescription>Substrate ASP .NET Core Extensions to easily implement RESTful services using Substrate storages.</PackageDescription>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Substrate.NET.API" Version="0.9.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+		<PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Substrate.ServiceLayer.Model\Substrate.ServiceLayer.Model.csproj" />
+	</ItemGroup>
+
+</Project>

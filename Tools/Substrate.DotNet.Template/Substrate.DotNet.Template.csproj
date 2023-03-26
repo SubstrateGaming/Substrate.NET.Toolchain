@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <PropertyGroup>
+      <PackageType>Template</PackageType>
+      <PackageId>Substrate.DotNet.Template</PackageId>
+      <AssemblyTitle>Substrate.DotNet.Template</AssemblyTitle>
+      <AssemblyName>Substrate.DotNet.Template</AssemblyName>
+      <Title>Substrate.DotNet.Template</Title>
+      <Description>Substrate .NET template toolchain to generate service and client projects.</Description>
+      <PackageTags>dotnet-new;templates;substrate-service;substrate-client</PackageTags>
+      <TargetFramework>netstandard2.1</TargetFramework>
+      <IncludeContentInPack>true</IncludeContentInPack>
+      <IncludeBuildOutput>false</IncludeBuildOutput>
+      <ContentTargetFolders>content</ContentTargetFolders>
+      <NoWarn>$(NoWarn);NU5128</NoWarn>
+      <NoDefaultExcludes>true</NoDefaultExcludes>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+      <Compile Remove="**\*" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <None Include="..\..\LICENSE">
+         <Pack>True</Pack>
+         <PackagePath></PackagePath>
+      </None>
+   </ItemGroup>
+
+</Project>

@@ -3,20 +3,20 @@
 
       <!-- Configuration -->
       <VersionMajor>0</VersionMajor>
-      <VersionMinor>2</VersionMinor>
-      <VersionPatch>3</VersionPatch>
+      <VersionMinor>3</VersionMinor>
+      <VersionPatch>0</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-      <AjunaPackageVersion>0.2.3</AjunaPackageVersion>
+      <AjunaPackageVersion>0.3.0</AjunaPackageVersion>
 
       <!-- Variables -->
       <AjunaVersion>$(AssemblyVersion)</AjunaVersion>
-      <AjunaCompany>BloGa Tech AG</AjunaCompany>
+      <AjunaCompany>Substrate Gaming</AjunaCompany>
       <AjunaAuthors>Cedric Decoster</AjunaAuthors>
-      <AjunaRepository>https://github.com/ajuna-network/Ajuna.SDK</AjunaRepository>
-      <AjunaWebsite>https://ajuna.io</AjunaWebsite>
+      <AjunaRepository>https://github.com/SubstrateGaming/Substrate.NET.Toolchain</AjunaRepository>
+      <AjunaWebsite>https://github.com/SubstrateGaming</AjunaWebsite>
       <AjunaLicenseFile>LICENSE</AjunaLicenseFile>
-      <AjunaCopyright>Copyright © BloGa Tech AG, Switzerland. All rights reserved.</AjunaCopyright>
+      <AjunaCopyright>Copyright © Substrate Gaming, Switzerland. All rights reserved.</AjunaCopyright>
 
       <!-- Default supported frameworks -->
       <AjunaDefaultFrameworks>netstandard2.1;net6.0</AjunaDefaultFrameworks>
