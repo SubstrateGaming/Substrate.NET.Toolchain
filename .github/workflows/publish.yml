@@ -45,54 +45,54 @@ jobs:
 
       ##
       # Publishing
-      # Publish all NuGet packages from Ajuna.SDK.
+      # Publish all NuGet packages from Substrate .NET Toolchain
       ##
-      - name: Publish Ajuna.AspNetCore
+      - name: Publish Substrate.AspNetCore
         id: publish_nuget_1
         uses: alirezanet/publish-nuget@v3.0.4
         with:
-          PROJECT_FILE_PATH: Ajuna.AspNetCore/Ajuna.AspNetCore.csproj
+          PROJECT_FILE_PATH: Substrate.AspNetCore/Substrate.AspNetCore.csproj
           VERSION_FILE_PATH: Version.props
           VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
-          PACKAGE_NAME: Ajuna.AspNetCore
+          PACKAGE_NAME: Substrate.AspNetCore
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
-      - name: Publish Ajuna.ServiceLayer
+      - name: Publish Substrate.ServiceLayer
         id: publish_nuget_2
         uses: alirezanet/publish-nuget@v3.0.4
         with:
-          PROJECT_FILE_PATH: Ajuna.ServiceLayer/Ajuna.ServiceLayer.csproj
+          PROJECT_FILE_PATH: Substrate.ServiceLayer/Substrate.ServiceLayer.csproj
           VERSION_FILE_PATH: Version.props
           VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
-          PACKAGE_NAME: Ajuna.ServiceLayer
+          PACKAGE_NAME: Substrate.ServiceLayer
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
-      - name: Publish Ajuna.ServiceLayer.Model
+      - name: Publish Substrate.ServiceLayer.Model
         id: publish_nuget_3
         uses: alirezanet/publish-nuget@v3.0.4
         with:
-          PROJECT_FILE_PATH: Ajuna.ServiceLayer.Model/Ajuna.ServiceLayer.Model.csproj
+          PROJECT_FILE_PATH: Substrate.ServiceLayer.Model/Substrate.ServiceLayer.Model.csproj
           VERSION_FILE_PATH: Version.props
           VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
-          PACKAGE_NAME: Ajuna.ServiceLayer.Model
+          PACKAGE_NAME: Substrate.ServiceLayer.Model
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
-      - name: Publish Tools/Ajuna.DotNet
+      - name: Publish Tools/Substrate.DotNet
         id: publish_nuget_4
         uses: alirezanet/publish-nuget@v3.0.4
         with:
-          PROJECT_FILE_PATH: Tools/Ajuna.DotNet/Ajuna.DotNet.csproj
+          PROJECT_FILE_PATH: Tools/Substrate.DotNet/Substrate.DotNet.csproj
           VERSION_FILE_PATH: Version.props
           VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
-          PACKAGE_NAME: Ajuna.DotNet
+          PACKAGE_NAME: Substrate.DotNet
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
-      - name: Publish Tools/Ajuna.DotNet.Template
+      - name: Publish Tools/Substrate.DotNet.Template
         id: publish_nuget_5
         uses: alirezanet/publish-nuget@v3.0.4
         with:
-          PROJECT_FILE_PATH: Tools/Ajuna.DotNet.Template/Ajuna.DotNet.Template.csproj
+          PROJECT_FILE_PATH: Tools/Substrate.DotNet.Template/Substrate.DotNet.Template.csproj
           VERSION_FILE_PATH: Version.props
           VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
-          PACKAGE_NAME: Ajuna.DotNet.Template
+          PACKAGE_NAME: Substrate.DotNet.Template
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
