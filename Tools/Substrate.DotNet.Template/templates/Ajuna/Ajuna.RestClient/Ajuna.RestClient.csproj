@@ -7,7 +7,7 @@
       <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
    </PropertyGroup>
    <ItemGroup>
-      <PackageReference Include="Ajuna.ServiceLayer.Model" Version="AJUNA_SDK_VERSION" />
+      <PackageReference Include="Substrate.ServiceLayer.Model" Version="SUBSTRATE_TOOLCHAIN_VERSION" />
    </ItemGroup>
    <ItemGroup>
       <ProjectReference Include="..\Ajuna.NetApiExt\Ajuna.NetApiExt.csproj" />

@@ -4,35 +4,35 @@
       <!-- Configuration -->
       <VersionMajor>0</VersionMajor>
       <VersionMinor>3</VersionMinor>
-      <VersionPatch>0</VersionPatch>
+      <VersionPatch>1</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-      <AjunaPackageVersion>0.3.0</AjunaPackageVersion>
+      <SubstratePackageVersion>0.3.1</SubstratePackageVersion>
 
       <!-- Variables -->
-      <AjunaVersion>$(AssemblyVersion)</AjunaVersion>
-      <AjunaCompany>Substrate Gaming</AjunaCompany>
-      <AjunaAuthors>Cedric Decoster</AjunaAuthors>
-      <AjunaRepository>https://github.com/SubstrateGaming/Substrate.NET.Toolchain</AjunaRepository>
-      <AjunaWebsite>https://github.com/SubstrateGaming</AjunaWebsite>
-      <AjunaLicenseFile>LICENSE</AjunaLicenseFile>
-      <AjunaCopyright>Copyright © Substrate Gaming, Switzerland. All rights reserved.</AjunaCopyright>
+      <SubstrateVersion>$(AssemblyVersion)</SubstrateVersion>
+      <SubstrateCompany>Substrate Gaming</SubstrateCompany>
+      <SubstrateAuthors>Cedric Decoster</SubstrateAuthors>
+      <SubstrateRepository>https://github.com/SubstrateGaming/Substrate.NET.Toolchain</SubstrateRepository>
+      <SubstrateWebsite>https://github.com/SubstrateGaming</SubstrateWebsite>
+      <SubstrateLicenseFile>LICENSE</SubstrateLicenseFile>
+      <SubstrateCopyright>Copyright © Substrate Gaming, Switzerland. All rights reserved.</SubstrateCopyright>
 
       <!-- Default supported frameworks -->
-      <AjunaDefaultFrameworks>netstandard2.1;net6.0</AjunaDefaultFrameworks>
+      <SubstrateDefaultFrameworks>netstandard2.1;net6.0</SubstrateDefaultFrameworks>
 
       <!-- Code Style -->
       <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
       <!-- Generic Project configuration -->
-      <Version>$(AjunaVersion)</Version>
-      <Company>$(AjunaCompany)</Company>
-      <Authors>$(AjunaAuthors)</Authors>
-      <Copyright>$(AjunaCopyright)</Copyright>
-      <RepositoryUrl>$(AjunaRepository)</RepositoryUrl>
+      <Version>$(SubstrateVersion)</Version>
+      <Company>$(SubstrateCompany)</Company>
+      <Authors>$(SubstrateAuthors)</Authors>
+      <Copyright>$(SubstrateCopyright)</Copyright>
+      <RepositoryUrl>$(SubstrateRepository)</RepositoryUrl>
       <RepositoryType>git</RepositoryType>
-      <PackageProjectUrl>$(AjunaWebsite)</PackageProjectUrl>
-      <PackageLicenseFile>$(AjunaLicenseFile)</PackageLicenseFile>
+      <PackageProjectUrl>$(SubstrateWebsite)</PackageProjectUrl>
+      <PackageLicenseFile>$(SubstrateLicenseFile)</PackageLicenseFile>
 
    </PropertyGroup>
 </Project>

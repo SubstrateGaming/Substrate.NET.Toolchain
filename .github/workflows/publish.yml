@@ -53,7 +53,7 @@ jobs:
         with:
           PROJECT_FILE_PATH: Substrate.AspNetCore/Substrate.AspNetCore.csproj
           VERSION_FILE_PATH: Version.props
-          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
+          VERSION_REGEX: ^\s*<SubstratePackageVersion>(.*)<\/SubstratePackageVersion>\s*$
           PACKAGE_NAME: Substrate.AspNetCore
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -63,7 +63,7 @@ jobs:
         with:
           PROJECT_FILE_PATH: Substrate.ServiceLayer/Substrate.ServiceLayer.csproj
           VERSION_FILE_PATH: Version.props
-          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
+          VERSION_REGEX: ^\s*<SubstratePackageVersion>(.*)<\/SubstratePackageVersion>\s*$
           PACKAGE_NAME: Substrate.ServiceLayer
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -73,7 +73,7 @@ jobs:
         with:
           PROJECT_FILE_PATH: Substrate.ServiceLayer.Model/Substrate.ServiceLayer.Model.csproj
           VERSION_FILE_PATH: Version.props
-          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
+          VERSION_REGEX: ^\s*<SubstratePackageVersion>(.*)<\/SubstratePackageVersion>\s*$
           PACKAGE_NAME: Substrate.ServiceLayer.Model
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -83,7 +83,7 @@ jobs:
         with:
           PROJECT_FILE_PATH: Tools/Substrate.DotNet/Substrate.DotNet.csproj
           VERSION_FILE_PATH: Version.props
-          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
+          VERSION_REGEX: ^\s*<SubstratePackageVersion>(.*)<\/SubstratePackageVersion>\s*$
           PACKAGE_NAME: Substrate.DotNet
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
@@ -93,6 +93,6 @@ jobs:
         with:
           PROJECT_FILE_PATH: Tools/Substrate.DotNet.Template/Substrate.DotNet.Template.csproj
           VERSION_FILE_PATH: Version.props
-          VERSION_REGEX: ^\s*<AjunaPackageVersion>(.*)<\/AjunaPackageVersion>\s*$
+          VERSION_REGEX: ^\s*<SubstratePackageVersion>(.*)<\/SubstratePackageVersion>\s*$
           PACKAGE_NAME: Substrate.DotNet.Template
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}

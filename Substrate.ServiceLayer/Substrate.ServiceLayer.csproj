@@ -5,7 +5,7 @@
 		<AssemblyTitle>Substrate.ServiceLayer</AssemblyTitle>
 		<AssemblyName>Substrate.ServiceLayer</AssemblyName>
 		<CheckEolTargetFramework>False</CheckEolTargetFramework>
-		<TargetFrameworks>$(AjunaDefaultFrameworks)</TargetFrameworks>
+		<TargetFrameworks>$(SubstrateDefaultFrameworks)</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageDescription>Substrate ASP .NET Core Extensions to easily implement RESTful services using Substrate storages.</PackageDescription>
 	</PropertyGroup>

@@ -5,7 +5,7 @@
 		<AssemblyTitle>Substrate.ServiceLayer.Model</AssemblyTitle>
 		<AssemblyName>Substrate.ServiceLayer.Model</AssemblyName>
 		<CheckEolTargetFramework>False</CheckEolTargetFramework>
-		<TargetFrameworks>$(AjunaDefaultFrameworks)</TargetFrameworks>
+		<TargetFrameworks>$(SubstrateDefaultFrameworks)</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageDescription>Substrate Service Layer model classes that are shared between services and clients.</PackageDescription>
 	</PropertyGroup>
