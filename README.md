@@ -132,7 +132,7 @@ You can also watch our short step-by-step tutorial that guides you through the e
 - `dotnet substrate` toolchain with [Substrate.DotNet](/Tools/Substrate.DotNet/README.md)
 - `dotnet new substrate` template with [Substrate.DotNet.Template](/Tools/Substrate.DotNet.Template/README.md)
 
-## SUBSTRATE GAMING COMMUNITIES
+## Gaming Communities
 [![Discord Banner 1](https://discordapp.com/api/guilds/849331368558198803/widget.png?style=banner2)](https://discord.gg/cE72GYcFgY)
 
 ## Projects using Substrate .NET Toolchain
