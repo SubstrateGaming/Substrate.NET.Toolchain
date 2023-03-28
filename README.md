@@ -121,8 +121,19 @@ You can also watch our short step-by-step tutorial that guides you through the e
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/27k8vxCrXcY/0.jpg)](https://www.youtube.com/watch?v=27k8vxCrXcY)
 
-
-
+### Examples
+ - AstarNET
+ ```sh
+   dotnet new substrate --sdk_version 0.3.5 \  
+      --rest_service AstarNET.RestService \  
+      --net_api AstarNET.NetApiExt \  
+      --rest_client AstarNET.RestClient \  
+      --metadata_websocket wss://rpc.astar.network \  
+      --generate_openapi_documentation false \  
+      --force \  
+      --allow-scripts yes
+ ```
+![astarNET](https://user-images.githubusercontent.com/17710198/228181453-b0cb6e15-8681-4cbe-b330-b265ecf00847.gif)
 
 ## Documents
 
