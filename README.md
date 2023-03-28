@@ -56,7 +56,7 @@ Using a terminal of your choice, create a new directory for your project and exe
 ```sh
 dotnet new sln
 dotnet new substrate \
-   --sdk_version 0.3.0 \
+   --sdk_version 0.3.5 \
    --rest_service PROJECTNAME.RestService \
    --net_api PROJECTNAME.NetApiExt \
    --rest_client PROJECTNAME.RestClient \
