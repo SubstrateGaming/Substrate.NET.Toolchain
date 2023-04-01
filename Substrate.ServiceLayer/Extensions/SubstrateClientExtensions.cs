@@ -7,14 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Substrate.ServiceLayer.Extensions
 {
    internal static class SubstrateClientExtensions
    {
       /// <summary>
-      /// 
+      ///
       /// </summary>
       /// <typeparam name="T"></typeparam>
       /// <param name="Client"></param>
@@ -99,7 +98,7 @@ namespace Substrate.ServiceLayer.Extensions
       }
 
       /// <summary>
-      /// 
+      ///
       /// </summary>
       /// <typeparam name="T"></typeparam>
       /// <param name="Client"></param>
@@ -119,7 +118,7 @@ namespace Substrate.ServiceLayer.Extensions
       }
 
       /// <summary>
-      /// 
+      ///
       /// </summary>
       /// <typeparam name="T"></typeparam>
       /// <param name="fullList"></param>

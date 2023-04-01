@@ -4,10 +4,10 @@
       <!-- Configuration -->
       <VersionMajor>0</VersionMajor>
       <VersionMinor>3</VersionMinor>
-      <VersionPatch>5</VersionPatch>
+      <VersionPatch>6</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-      <SubstratePackageVersion>0.3.5</SubstratePackageVersion>
+      <SubstratePackageVersion>0.3.6</SubstratePackageVersion>
 
       <!-- Variables -->
       <SubstrateVersion>$(AssemblyVersion)</SubstrateVersion>
