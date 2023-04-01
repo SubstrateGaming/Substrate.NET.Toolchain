@@ -27,7 +27,7 @@ Below is a high-level technical overview of the libraries and tools available in
 
 ## Architecture
 
-![image](https://user-images.githubusercontent.com/17710198/221981432-49c4c811-57a6-4ac9-abf0-936de42dd33e.png)
+![image](https://user-images.githubusercontent.com/17710198/229302672-da3d4ddf-b2fa-4f65-bdb2-2210d8daf1e9.png)
 
 ## Getting Started
 
