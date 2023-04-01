@@ -19,7 +19,7 @@
       <SubstrateCopyright>Copyright © Substrate Gaming, Switzerland. All rights reserved.</SubstrateCopyright>
 
       <!-- Default supported frameworks -->
-      <SubstrateDefaultFrameworks>netstandard2.1;net6.0</SubstrateDefaultFrameworks>
+      <SubstrateDefaultFrameworks>netstandard2.0;netstandard2.1;net6.0</SubstrateDefaultFrameworks>
 
       <!-- Code Style -->
       <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>

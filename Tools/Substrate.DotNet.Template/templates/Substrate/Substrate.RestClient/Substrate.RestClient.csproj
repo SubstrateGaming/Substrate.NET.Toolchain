@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
-      <TargetFramework>netstandard2.1</TargetFramework>
+      <TargetFramework>netstandard2.0;netstandard2.1</TargetFramework>
    </PropertyGroup>
    <!--Set this to true if you want to generate all necessary/dependent DLLs in order to use them in Unity Project for example-->
    <PropertyGroup>
