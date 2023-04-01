@@ -124,7 +124,7 @@ You can also watch our short step-by-step tutorial that guides you through the e
 ### Examples
  - AstarNET
  ```sh
-   dotnet new substrate --sdk_version 0.3.5 \  
+   dotnet new substrate --sdk_version 0.3.7 \  
       --rest_service AstarNET.RestService \  
       --net_api AstarNET.NetApiExt \  
       --rest_client AstarNET.RestClient \  
