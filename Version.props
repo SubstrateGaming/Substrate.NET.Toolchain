@@ -4,10 +4,10 @@
       <!-- Configuration -->
       <VersionMajor>0</VersionMajor>
       <VersionMinor>3</VersionMinor>
-      <VersionPatch>5</VersionPatch>
+      <VersionPatch>6</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-      <SubstratePackageVersion>0.3.5</SubstratePackageVersion>
+      <SubstratePackageVersion>0.3.6</SubstratePackageVersion>
 
       <!-- Variables -->
       <SubstrateVersion>$(AssemblyVersion)</SubstrateVersion>
@@ -19,7 +19,7 @@
       <SubstrateCopyright>Copyright © Substrate Gaming, Switzerland. All rights reserved.</SubstrateCopyright>
 
       <!-- Default supported frameworks -->
-      <SubstrateDefaultFrameworks>netstandard2.1;net6.0</SubstrateDefaultFrameworks>
+      <SubstrateDefaultFrameworks>netstandard2.0;netstandard2.1;net6.0</SubstrateDefaultFrameworks>
 
       <!-- Code Style -->
       <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
