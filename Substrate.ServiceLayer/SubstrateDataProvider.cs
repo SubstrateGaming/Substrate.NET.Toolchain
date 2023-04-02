@@ -1,4 +1,5 @@
-﻿using Substrate.NetApi;
+﻿using Newtonsoft.Json.Linq;
+using Substrate.NetApi;
 using Substrate.NetApi.Model.Extrinsics;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Rpc;
@@ -41,9 +42,9 @@ namespace Substrate.ServiceLayer
          await Client.ConnectAsync(cancellationToken);
       }
 
-      public async Task SubscribeStorageAsync(Action<string, StorageChangeSet> onStorageUpdate)
+      public async Task SubscribeStorageAsync(JArray keys, Action<string, StorageChangeSet> onStorageUpdate)
       {
-         await Client.State.SubscribeStorageAsync(null, onStorageUpdate);
+         await Client.State.SubscribeStorageAsync(keys, onStorageUpdate);
       }
 
       public void BroadcastLocalStorageChange(string id, StorageChangeSet changeSet)

@@ -1,9 +1,10 @@
-﻿using Substrate.NetApi;
+﻿using Newtonsoft.Json.Linq;
+using Serilog;
+using Substrate.NetApi;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Rpc;
 using Substrate.ServiceLayer.Attributes;
 using Substrate.ServiceLayer.Storage;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +18,15 @@ namespace Substrate.ServiceLayer
    {
       private readonly ManualResetEvent StorageStartProcessingEvent = new ManualResetEvent(false);
       private readonly object Lock = new object();
-      
-      // Dictionary holding the info for each Storage. The key here is the Storage Key in its HEX encoded form. 
+
+      // Dictionary holding the info for each Storage. The key here is the Storage Key in its HEX encoded form.
       private readonly Dictionary<string, ItemInfo> StorageModuleItemInfos = new Dictionary<string, ItemInfo>();
-      
+
       private readonly Dictionary<string, Tuple<object, MethodInfo>> StorageChangeDelegates = new Dictionary<string, Tuple<object, MethodInfo>>();
 
       private List<IStorage> Storages = new List<IStorage>();
 
-      struct ItemInfo
+      private struct ItemInfo
       {
          public string ModuleName { get; internal set; }
          public string StorageName { get; internal set; }
@@ -43,7 +44,28 @@ namespace Substrate.ServiceLayer
 
          throw new KeyNotFoundException($"Could not find storage {typeof(T).Name} in storage list.");
       }
-      
+
+      /// <summary>
+      ///
+      /// </summary>
+      /// <param name="dataProvider"></param>
+      /// <param name="onStorageUpdate"></param>
+      /// <returns></returns>
+      internal async Task SubscribeAsync(IStorageDataProvider dataProvider, Action<string, StorageChangeSet> onStorageUpdate)
+      {
+         // Gather all Storage Info from the Metadata
+         InitializeMetadataDisplayNames(dataProvider.GetMetadata());
+
+         var array = new JArray();
+         foreach (ItemInfo itemInfo in StorageModuleItemInfos.Values)
+         {
+            string key = Utils.Bytes2HexString(RequestGenerator.GetStorageKeyBytesHash(itemInfo.ModuleName, itemInfo.StorageName)).ToLower();
+            Log.Debug("Adding {key} for {module}.{method}", key, itemInfo.ModuleName, itemInfo.StorageName);
+            array.Add(key);
+         }
+         await dataProvider.SubscribeStorageAsync(array, onStorageUpdate);
+      }
+
       /// <summary>
       /// Gather all storage info from metadata and laod all Storage specific Delegates
       /// </summary>
@@ -54,20 +76,16 @@ namespace Substrate.ServiceLayer
       {
          Storages = storages;
 
-         // Gather all Storage Info from the Metadata
-         InitializeMetadataDisplayNames(dataProvider.GetMetadata());
-         
          // Register all Storage specific Delegates
          InitializeStorageChangeListener();
 
-         
-         if (!isLazyLoadingEnabled)
+          if (!isLazyLoadingEnabled)
          {
-            // Initializes Storages fetching all their initial Values 
+            // Initializes Storages fetching all their initial Values
             foreach (IStorage storage in Storages)
             {
                await storage.InitializeAsync(dataProvider);
-            }   
+            }
          }
       }
 
@@ -96,7 +114,7 @@ namespace Substrate.ServiceLayer
       /// <param name="metadata"></param>
       private void InitializeMetadataDisplayNames(MetaData metadata)
       {
-         // Iterate through all pallets 
+         // Iterate through all pallets
          foreach (PalletModule palletModule in metadata.NodeMetadata.Modules.Values)
          {
             string moduleName = palletModule.Name;
@@ -106,7 +124,7 @@ namespace Substrate.ServiceLayer
                continue;
             }
 
-            // For each storage that you find, get the Pallet/Module and Storage Name and add them to the 
+            // For each storage that you find, get the Pallet/Module and Storage Name and add them to the
             // Dictionary that has the Storage Hex key as a key
             foreach (Entry storage in palletModule.Storage.Entries)
             {
@@ -133,9 +151,8 @@ namespace Substrate.ServiceLayer
          Log.Information("loaded storage metadata modules {count}", StorageModuleItemInfos.Count);
       }
 
-      
       /// <summary>
-      /// Handles the incoming Storage Change 
+      /// Handles the incoming Storage Change
       /// </summary>
       /// <param name="id"></param>
       /// <param name="changes"></param>
@@ -168,16 +185,18 @@ namespace Substrate.ServiceLayer
                   continue;
                }
 
-               Log.Debug("OnStorageUpdate {module}.{storage}!", itemInfo.ModuleName, itemInfo.StorageName);
+               Log.Debug("OnStorageUpdate {module}.{storage}!)", itemInfo.ModuleName, itemInfo.StorageName);
 
-               if (key.Length == 66)
-               {
-                  ProcessStorageChange(itemInfo, Array.Empty<string>(), change[1]);
-               }
-               else
-               {
-                  ProcessStorageChange(itemInfo, new string[] { key }, change[1]);
-               }
+               //if (key.Length == 66)
+               //{
+               //   ProcessStorageChange(itemInfo, Array.Empty<string>(), change[1]);
+               //}
+               //else
+               //{
+               //   ProcessStorageChange(itemInfo, new string[] { key }, change[1]);
+               //}
+
+               ProcessStorageChange(itemInfo, new string[] { key }, change[1]);
             }
          }
       }
@@ -189,7 +208,7 @@ namespace Substrate.ServiceLayer
 
       /// <summary>
       /// Looks in the StorageChangeListeners to see
-      /// if a listener is already registered for the incoming change and triggers it. 
+      /// if a listener is already registered for the incoming change and triggers it.
       /// </summary>
       /// <param name="itemInfo"></param>
       /// <param name="storageItemKeys"></param>
@@ -203,15 +222,20 @@ namespace Substrate.ServiceLayer
          {
             Tuple<object, MethodInfo> listener = StorageChangeDelegates[key];
 
-            string[] parameters = new string[storageItemKeys.Length + 1];
+            int countParameters = listener.Item2.GetParameters().Length;
+
+            string[] parameters = new string[countParameters];
             parameters[parameters.Length - 1] = data;
-            switch (storageItemKeys.Length)
+            switch (parameters.Length)
             {
-               case 0:
-                  break;
                case 1:
+                  // no key
+                  break;
+
+               case 2:
                   parameters[0] = storageItemKeys[0];
                   break;
+
                default:
                   throw new NotImplementedException("Only one storage key accessed for generic service layer!");
             }

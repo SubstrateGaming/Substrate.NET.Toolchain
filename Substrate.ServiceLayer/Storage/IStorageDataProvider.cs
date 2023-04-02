@@ -1,4 +1,5 @@
-﻿using Substrate.NetApi.Model.Meta;
+﻿using Newtonsoft.Json.Linq;
+using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Rpc;
 using Substrate.NetApi.Model.Types;
 using System;
@@ -23,7 +24,7 @@ namespace Substrate.ServiceLayer.Storage
       /// </summary>
       /// <param name="onStorageUpdate">Delegate to be executed on every storage change</param>
       /// <returns></returns>
-      Task SubscribeStorageAsync(Action<string, StorageChangeSet> onStorageUpdate);
+      Task SubscribeStorageAsync(JArray keys, Action<string, StorageChangeSet> onStorageUpdate);
       void BroadcastLocalStorageChange(string id, StorageChangeSet changeSet);
    }
 }

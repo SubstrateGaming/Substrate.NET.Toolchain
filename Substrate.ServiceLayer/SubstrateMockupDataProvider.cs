@@ -1,4 +1,5 @@
-﻿using Substrate.NetApi.Model.Meta;
+﻿using Newtonsoft.Json.Linq;
+using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Rpc;
 using Substrate.NetApi.Model.Types;
 using Substrate.NetApi.Model.Types.Metadata;
@@ -43,7 +44,7 @@ namespace Substrate.ServiceLayer
          return Task.FromResult(new Dictionary<string, T>());
       }
 
-      public Task SubscribeStorageAsync(Action<string, StorageChangeSet> onStorageUpdate)
+      public Task SubscribeStorageAsync(JArray keys, Action<string, StorageChangeSet> onStorageUpdate)
       {
          _storageUpdate = onStorageUpdate;
          return Task.FromResult(0);

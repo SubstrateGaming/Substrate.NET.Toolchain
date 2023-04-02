@@ -3,11 +3,11 @@
 
       <!-- Configuration -->
       <VersionMajor>0</VersionMajor>
-      <VersionMinor>3</VersionMinor>
-      <VersionPatch>8</VersionPatch>
+      <VersionMinor>4</VersionMinor>
+      <VersionPatch>0</VersionPatch>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)</AssemblyVersion>
 
-      <SubstratePackageVersion>0.3.8</SubstratePackageVersion>
+      <SubstratePackageVersion>0.4.0</SubstratePackageVersion>
 
       <!-- Variables -->
       <SubstrateVersion>$(AssemblyVersion)</SubstrateVersion>
