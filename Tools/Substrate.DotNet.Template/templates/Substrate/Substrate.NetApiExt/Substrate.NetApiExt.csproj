@@ -1,7 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-      <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0</TargetFrameworks>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageId>Substrate.Generic.NET.Extension</PackageId>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0</TargetFrameworks>
+		<Version>0.0.1</Version>
+		<Company>Substrate Gaming</Company>
+		<Authors>Substrate Gaming</Authors>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Description>Substrate Generic .NET API Extension</Description>
+		<PackageProjectUrl>https://github.com/SubstrateGaming/Substrate.Chains.NET/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/SubstrateGaming/Substrate.Chains.NET/</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
 	<ItemGroup>
