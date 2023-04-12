@@ -42,7 +42,7 @@ Assuming your [substrate node is running locally](https://github.com/paritytech/
 Install our .NET template with the following command:
 
 ```sh
-dotnet new --install Substrate.DotNet.Template
+dotnet new install Substrate.DotNet.Template
 ```
 
 which makes `dotnet new substrate` available.
