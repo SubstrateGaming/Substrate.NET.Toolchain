@@ -10,6 +10,7 @@ using System.CodeDom.Compiler;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Substrate.DotNet.Service.Generators.Base;
 
 namespace Substrate.DotNet
 {
@@ -166,11 +167,22 @@ namespace Substrate.DotNet
 
          Log.Information("Using Runtime {runtime}", configuration.Metadata.Runtime);
 
-         // Service
+         if (configuration.Metadata.IsMetadataRefined)
+         {
+            Log.Information("MetaData refined option is activated");
+            SolutionGeneratorBase.RefinedUnnecessaryWrapper(metadata);
+         }
+
+         // NetApi
+         Log.Information("Generate {NetApi} classes", configuration.Projects.NetApi);
          GenerateNetApiClasses(metadata, configuration);
+
+         // Service
+         Log.Information("Generate {RestService} classes", configuration.Projects.RestService);
          GenerateRestServiceClasses(metadata, configuration);
 
          // Client
+         Log.Information("Generate {RestClient} classes", configuration.Projects.RestClient);
          GenerateRestClientClasses(configuration);
 
          return true;
