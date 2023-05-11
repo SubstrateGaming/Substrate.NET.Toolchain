@@ -67,7 +67,7 @@ namespace Substrate.DotNet.Service.Node
             var codeTypeRef = new CodeTypeReference("BaseEnumExt");
             codeTypeRef.TypeArguments.Add(new CodeTypeReference(enumName));
             int highIndex = typeDef.Variants.Max(p => p.Index);
-            if (highIndex < 101)
+            if (highIndex < 105)
             {
                for (int i = 0; i < highIndex + 1; i++)
                {
