@@ -12,7 +12,7 @@
    "symbols": {
       "sdk_version": {
          "datatype": "string",
-         "defaultValue": "0.4.3",
+         "defaultValue": "0.4.4",
          "description": "Uses the given Substrate .NET Toolchain version.",
          "replaces": "SUBSTRATE_TOOLCHAIN_VERSION",
          "type": "parameter"
