@@ -2,7 +2,6 @@
 using Substrate.NetApi.Model.Meta;
 using System;
 using System.CodeDom;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -11,6 +10,7 @@ namespace Substrate.DotNet.Service.Node
    public class ArrayBuilder : TypeBuilderBase
    {
       public static int Counter = 0;
+
       private ArrayBuilder(string projectName, uint id, NodeTypeArray typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
@@ -108,7 +108,7 @@ namespace Substrate.DotNet.Service.Node
             Name = "TypeName",
             ReturnType = new CodeTypeReference(typeof(string))
          };
-         
+
          var methodRef1 = new CodeMethodReferenceExpression(new CodeObjectCreateExpression(fullItem.ToString(), Array.Empty<CodeExpression>()), "TypeName()");
          var methodRef2 = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "TypeSize");
 
@@ -134,13 +134,11 @@ namespace Substrate.DotNet.Service.Node
          sizeProperty.GetStatements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression((int)typeDef.Length)));
          targetClass.Members.Add(sizeProperty);
 
-
          CodeMemberMethod encodeMethod = ArrayBuilder.GetEncode();
          targetClass.Members.Add(encodeMethod);
 
          CodeMemberMethod decodeMethod = ArrayBuilder.GetDecode(fullItem.ToString());
          targetClass.Members.Add(decodeMethod);
-
 
          CodeMemberField valueField = new()
          {
@@ -164,7 +162,6 @@ namespace Substrate.DotNet.Service.Node
              new CodeFieldReferenceExpression(
                  new CodeThisReferenceExpression(), valueField.Name),
                                  new CodePropertySetValueReferenceExpression()));
-
 
          CodeMemberMethod createMethod = new()
          {

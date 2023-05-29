@@ -7,14 +7,13 @@ using System.Linq;
 
 namespace Substrate.DotNet.Service.Node.Base
 {
-
    public abstract class BuilderBase
    {
       public static readonly List<string> Files = new();
 
       public uint Id { get; }
-      
-      NodeTypeResolver Resolver { get; }
+
+      private NodeTypeResolver Resolver { get; }
 
       public bool Success { get; set; }
 
@@ -153,7 +152,7 @@ namespace Substrate.DotNet.Service.Node.Base
 
          space.Add((FileName is null ? ClassName : FileName) + ".cs");
 
-         // Remove the first two parts of the namespace to avoid the files being created in the Substrate/NetApi sub folder. 
+         // Remove the first two parts of the namespace to avoid the files being created in the Substrate/NetApi sub folder.
          space = space.TakeLast(space.Count - 2).ToList();
 
          // Add base path at the beginning of the paths list
@@ -176,7 +175,6 @@ namespace Substrate.DotNet.Service.Node.Base
          targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("SubstrateNodeType"), new CodeAttributeArgument(
             new CodeSnippetExpression($"TypeDefEnum.{typeDef.TypeDef}")
          )));
-
       }
    }
 }

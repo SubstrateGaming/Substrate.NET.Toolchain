@@ -110,7 +110,5 @@ namespace Substrate.DotNet.Service.Node
 
          return this;
       }
-
    }
-
 }

@@ -2,7 +2,6 @@
 using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
 using System.CodeDom;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -146,7 +145,6 @@ namespace Substrate.DotNet.Service.Node
          {
             for (int i = 0; i < typeDef.TypeFields.Length; i++)
             {
-
                NodeTypeField typeField = typeDef.TypeFields[i];
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
 

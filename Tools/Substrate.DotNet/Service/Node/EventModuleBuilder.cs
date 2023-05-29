@@ -84,7 +84,6 @@ namespace Substrate.DotNet.Service.Node
                                         new CodePrimitiveExpression( variant.Index)
                                     }),
                                  new CodeTypeOfExpression(ReferenzName + "." + eventClass.Name)
-
                          }, "_client.EventKeyDict"));
 
                      typeNamespace.Types.Add(eventClass);

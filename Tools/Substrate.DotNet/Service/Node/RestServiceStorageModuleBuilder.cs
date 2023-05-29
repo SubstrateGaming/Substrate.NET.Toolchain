@@ -23,7 +23,6 @@ namespace Substrate.DotNet.Service.Node
 
       public override RestServiceStorageModuleBuilder Create()
       {
-
          if (Module.Storage == null)
          {
             Success = false;
@@ -53,12 +52,10 @@ namespace Substrate.DotNet.Service.Node
          var targetInterface = new CodeTypeDeclaration($"I{ClassName}")
          {
             IsInterface = true
-
          };
          targetInterface.Comments.AddRange(GetComments(new string[] { $"I{ClassName} interface definition." }));
          targetInterface.BaseTypes.Add(new CodeTypeReference("IStorage"));
          typeNamespace.Types.Add(targetInterface);
-
 
          var targetClass = new CodeTypeDeclaration(ClassName)
          {
@@ -87,7 +84,6 @@ namespace Substrate.DotNet.Service.Node
             Attributes = MemberAttributes.Public | MemberAttributes.Final,
             Name = $"InitializeAsync",
             ReturnType = new CodeTypeReference("async Task")
-
          };
          var clientParamter = new CodeParameterDeclarationExpression(typeof(IStorageDataProvider), "dataProvider");
          initializeAsyncMethod.Parameters.Add(clientParamter);
@@ -162,7 +158,6 @@ namespace Substrate.DotNet.Service.Node
                prop.SetStatements.Add(new CodeAssignStatement(
                    new CodeVariableReferenceExpression(field.Name),
                        new CodePropertySetValueReferenceExpression()));
-
 
                prop.Comments.AddRange(GetComments(new string[] { $"{field.Name} property" }));
                targetClass.Members.Add(prop);
@@ -251,8 +246,6 @@ namespace Substrate.DotNet.Service.Node
                }
 
                targetClass.Members.Add(getStorageMethod);
-
-
             }
          }
       }

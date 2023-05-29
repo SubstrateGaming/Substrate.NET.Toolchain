@@ -25,7 +25,6 @@ namespace Substrate.DotNet.Service.Node
 
       public override RestServiceControllerModuleBuilder Create()
       {
-
          if (Module.Storage == null)
          {
             Success = false;
@@ -56,11 +55,9 @@ namespace Substrate.DotNet.Service.Node
          {
             IsClass = true,
             TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-
          };
          targetClass.BaseTypes.Add(new CodeTypeReference("ControllerBase"));
          targetClass.Comments.AddRange(GetComments(new string[] { $"{ClassName} controller to access storages." }));
-
 
          typeNamespace.Types.Add(targetClass);
          targetClass.CustomAttributes.Add(
@@ -94,7 +91,6 @@ namespace Substrate.DotNet.Service.Node
          constructor.Statements.Add(new CodeAssignStatement(
              new CodeVariableReferenceExpression(field.Name),
              new CodeVariableReferenceExpression(fieldName.MakePublicField())));
-
 
          if (Module.Storage.Entries != null)
          {
@@ -175,7 +171,6 @@ namespace Substrate.DotNet.Service.Node
                   throw new NotImplementedException();
                }
 
-
                if (parameterDeclaration != null)
                {
                   getStorageMethod.Parameters.Add(parameterDeclaration);
@@ -193,8 +188,6 @@ namespace Substrate.DotNet.Service.Node
                        )));
 
                targetClass.Members.Add(getStorageMethod);
-
-
             }
          }
       }

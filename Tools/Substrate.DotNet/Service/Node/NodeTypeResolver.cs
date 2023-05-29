@@ -1,11 +1,11 @@
 ﻿#nullable enable
+
 using Substrate.DotNet.Extensions;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Types.Metadata.V14;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Substrate.DotNet.Service.Node
@@ -65,15 +65,17 @@ namespace Substrate.DotNet.Service.Node
             string[]? paths = BaseName.Split('.').ToArray();
             string[]? reduced = paths.Take(paths.Length - 1).ToArray();
             string? result = string.Join('.', reduced);
-            
+
             if (string.IsNullOrEmpty(result))
             {
                switch (NamespaceSource)
                {
                   case NodeTypeNamespaceSource.Primitive:
                      return "Substrate.NetApi.Model.Types.Primitive";
+
                   case NodeTypeNamespaceSource.Generated:
                      return $"{Resolver.NetApiProjectName}.Generated.Types.Base";
+
                   default:
                      break;
                }
@@ -87,9 +89,13 @@ namespace Substrate.DotNet.Service.Node
       }
 
       public static NodeTypeName Primitive(NodeTypeResolver resolver, string baseName) => new NodeTypeName(resolver, NodeTypeNamespaceSource.Primitive, baseName, null);
+
       public static NodeTypeName Base(NodeTypeResolver resolver, string baseName) => new NodeTypeName(resolver, NodeTypeNamespaceSource.Base, baseName, null);
+
       public static NodeTypeName Base(NodeTypeResolver resolver, string baseName, NodeTypeName[]? arguments) => new NodeTypeName(resolver, NodeTypeNamespaceSource.Base, baseName, arguments);
+
       public static NodeTypeName Generated(NodeTypeResolver resolver, string baseName) => new NodeTypeName(resolver, NodeTypeNamespaceSource.Generated, baseName, null);
+
       public static NodeTypeName Generated(NodeTypeResolver resolver, string baseName, NodeTypeName[]? arguments) => new NodeTypeName(resolver, NodeTypeNamespaceSource.Generated, baseName, arguments);
 
       internal static NodeTypeName Array(NodeTypeResolver nodeTypeResolver, NodeTypeName nodeTypeName, uint length)
@@ -238,8 +244,10 @@ namespace Substrate.DotNet.Service.Node
          {
             case "Option":
                return NodeTypeName.Base(this, "BaseOpt", new NodeTypeName[] { ResolveTypeName(nodeTypeVariant.Variants[1].TypeFields[0].TypeId, types) });
+
             case "Void":
                return NodeTypeName.Base(this, "BaseVoid");
+
             default:
                break;
          }
@@ -275,7 +283,6 @@ namespace Substrate.DotNet.Service.Node
          string[]? previousElements = path.Take(path.Length - 1).ToArray();
          return $"{ResolvePathInternal(previousElements, string.Empty)}.{prefix}{lastElement}";
       }
-
 
       private static void EnsureTypeIdsIsNotNull(uint[] typeIds)
       {

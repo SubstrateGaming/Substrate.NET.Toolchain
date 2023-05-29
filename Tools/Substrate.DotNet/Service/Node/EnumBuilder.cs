@@ -3,8 +3,6 @@ using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Types;
 using System;
 using System.CodeDom;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -130,7 +128,6 @@ namespace Substrate.DotNet.Service.Node
 
       private CodeTypeMemberCollection GetEnumEra()
       {
-
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Types"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Types.Primitive"));
 
