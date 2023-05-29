@@ -79,7 +79,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                case TypeDefEnum.Array:
                   {
                      var type = nodeType as NodeTypeArray;
-                     ArrayBuilder.Create(ProjectName, type.Id, type, resolver)
+                     ArrayBuilderRoslyn.Create(ProjectName, type.Id, type, resolver)
                          .Create()
                          .Build(write: write, out bool success, basePath);
 
