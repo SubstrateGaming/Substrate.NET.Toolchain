@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Substrate.NetApi.Model.Meta;
 using System;
 using Serilog;
+using System.Net.NetworkInformation;
 
 namespace Substrate.DotNet.Service.Node.Base
 {
@@ -47,6 +48,17 @@ namespace Substrate.DotNet.Service.Node.Base
                 SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Model.Types.Base")),
                 SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")));
          Success = true;
+      }
+
+      public static string EscapeIfKeyword(string parameterName)
+      {
+         if (SyntaxFacts.GetKeywordKind(parameterName) != SyntaxKind.None)
+         {
+            // If it is a keyword, create a verbatim identifier which adds '@' prefix
+            parameterName = "@" + parameterName;
+         }
+
+         return parameterName;
       }
 
       public NodeTypeResolved GetFullItemPath(uint typeId)

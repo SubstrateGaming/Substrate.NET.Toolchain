@@ -94,9 +94,6 @@ namespace Substrate.DotNet.Service.Generators.Base
                   break; // Handled by type resolver
             }
          }
-
-
-
          return resolver;
       }
 
@@ -104,18 +101,9 @@ namespace Substrate.DotNet.Service.Generators.Base
       {
          switch (variantType)
          {
-            case "Runtime":
-               {
-                  RunetimeBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
-                  if (!success)
-                  {
-                     Logger.Error($"Could not build type {nodeType.Id}!");
-                  }
-                  break;
-               }
             case "Enum":
                {
-                  EnumBuilderRoslyn.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (!success)
                   {
                      Logger.Error($"Could not build type {nodeType.Id}!");
@@ -123,8 +111,17 @@ namespace Substrate.DotNet.Service.Generators.Base
 
                   break;
                }
-            default:
+
+            case "Option":
+               // TODO (darkfriend77) ???
                break;
+
+            case "Void":
+               // TODO (darkfriend77) ???
+               break;
+
+            default:
+               throw new NotSupportedException($"Unknown variant type {variantType}");
          }
       }
       

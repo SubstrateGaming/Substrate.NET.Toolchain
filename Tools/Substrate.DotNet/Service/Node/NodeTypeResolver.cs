@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -165,14 +164,13 @@ namespace Substrate.DotNet.Service.Node
                dupeCountDict[key] = new List<uint>();
             }
             dupeCountDict[key].Add(typeId);
-
          }
 
          // adding an index ass classname suffix to avoid overwriting
-         foreach(List<uint> entries in dupeCountDict.Values.Where(p => p.Count > 1))
+         foreach (List<uint> entries in dupeCountDict.Values.Where(p => p.Count > 1))
          {
             int index = 0;
-            foreach(uint typeId in entries)
+            foreach (uint typeId in entries)
             {
                index++;
                NodeTypeResolved nodeTypeResolved = result[typeId];
@@ -183,7 +181,6 @@ namespace Substrate.DotNet.Service.Node
                   result[typeId] = nodeTypeResolved;
                }
             }
-
          }
 
          return result;
