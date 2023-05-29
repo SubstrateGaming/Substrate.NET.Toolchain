@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using Serilog;
 using Substrate.DotNet.Extensions;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Types.Metadata.V14;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -39,8 +41,9 @@ namespace Substrate.DotNet.Service.Node
       public NodeTypeResolver Resolver { get; private set; }
       public NodeTypeNamespaceSource NamespaceSource { get; private set; }
       private string BaseName { get; set; }
-      public string ClassName => $"{ClassNamePrefix}{BaseName.Split('.').Last()}";
+      public string ClassName => $"{ClassNamePrefix}{BaseName.Split('.').Last()}{ClassNameSufix}";
       public string ClassNamePrefix { get; private set; }
+      public string ClassNameSufix { get; set; }
       public NodeTypeName[]? Arguments { get; private set; }
 
       public string ClassNameWithModule
@@ -115,20 +118,12 @@ namespace Substrate.DotNet.Service.Node
          BaseName = baseName;
          Arguments = arguments;
          ClassNamePrefix = string.Empty;
+         ClassNameSufix = string.Empty;
       }
 
       public override string ToString()
       {
-         string baseQualified;
-
-         if (string.IsNullOrEmpty(ClassNamePrefix))
-         {
-            baseQualified = $"{Namespace}.{ClassName}";
-         }
-         else
-         {
-            baseQualified = $"{Namespace}.{ClassName}";
-         }
+         string baseQualified = $"{Namespace}.{ClassName}";
 
          if (Arguments == null)
          {
@@ -157,10 +152,38 @@ namespace Substrate.DotNet.Service.Node
       {
          var result = new Dictionary<uint, NodeTypeResolved>();
 
+         var dupeCountDict = new Dictionary<string, List<uint>>();
+
          foreach (uint typeId in types.Keys)
          {
             NodeTypeName name = ResolveTypeName(typeId, types);
             result.Add(typeId, new NodeTypeResolved(types[typeId], name));
+
+            string key = name.ToString();
+            if (!dupeCountDict.ContainsKey(key))
+            {
+               dupeCountDict[key] = new List<uint>();
+            }
+            dupeCountDict[key].Add(typeId);
+
+         }
+
+         // adding an index ass classname suffix to avoid overwriting
+         foreach(List<uint> entries in dupeCountDict.Values.Where(p => p.Count > 1))
+         {
+            int index = 0;
+            foreach(uint typeId in entries)
+            {
+               index++;
+               NodeTypeResolved nodeTypeResolved = result[typeId];
+               if (nodeTypeResolved.Name.NamespaceSource == NodeTypeNamespaceSource.Generated)
+               {
+                  Log.Debug("Renaming to {typeName}{index}", nodeTypeResolved.Name, index);
+                  nodeTypeResolved.Name.ClassNameSufix = index.ToString();
+                  result[typeId] = nodeTypeResolved;
+               }
+            }
+
          }
 
          return result;

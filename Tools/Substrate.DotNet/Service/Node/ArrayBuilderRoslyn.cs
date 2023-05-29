@@ -3,10 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
-using System;
-using System.CodeDom;
 using System.Linq;
-using System.Reflection;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -111,7 +108,6 @@ namespace Substrate.DotNet.Service.Node
                  SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
          targetClass = targetClass.AddMembers(valueProperty);
 
-
          ReturnStatementSyntax typeNameReturn = SyntaxFactory.ReturnStatement(
              SyntaxFactory.InvocationExpression(
                  SyntaxFactory.MemberAccessExpression(
@@ -135,7 +131,6 @@ namespace Substrate.DotNet.Service.Node
              .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.OverrideKeyword))
              .WithBody(SyntaxFactory.Block(typeNameReturn));
          targetClass = targetClass.AddMembers(nameMethod);
-
 
          targetClass = AddTargetClassCustomAttributesRoslyn(targetClass, typeDef);
          // add comment to class if exists
@@ -163,6 +158,5 @@ namespace Substrate.DotNet.Service.Node
 
          return this;
       }
-
    }
 }
