@@ -103,7 +103,7 @@ namespace Substrate.DotNet.Service.Generators.Base
          {
             case "Enum":
                {
-                  EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  EnumBuilderRoslyn.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (!success)
                   {
                      Logger.Error($"Could not build type {nodeType.Id}!");

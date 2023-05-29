@@ -54,7 +54,7 @@ namespace Substrate.DotNet.Service.Node
                   foreach (TypeVariant variant in typeDef.Variants)
                   {
                      targetType = targetType.AddMembers(
-                         SyntaxFactory.EnumMemberDeclaration(variant.Name)
+                         SyntaxFactory.EnumMemberDeclaration(EscapeIfKeyword(variant.Name))
                            .WithEqualsValue(SyntaxFactory.EqualsValueClause(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(variant.Index))))
                      );
                   }

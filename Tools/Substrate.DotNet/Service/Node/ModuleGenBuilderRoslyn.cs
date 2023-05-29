@@ -107,31 +107,33 @@ namespace Substrate.DotNet.Service.Node
                   .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, storageParams)); // Assuming GetComments() returns a string
 
                MethodDeclarationSyntax storageMethod;
-
-               string returnTypeStr = string.Empty;
+               ExpressionStatementSyntax methodInvoke;
+               NodeTypeResolved returnValueStr;
 
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  returnValueStr = GetFullItemPath(entry.TypeMap.Item1);
 
                   storageMethod = SyntaxFactory
-                     .MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<{fullItem}>"), entry.Name);
+                     .MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<{returnValueStr}>"), entry.Name);
 
                   parameterMethod = parameterMethod.AddBodyStatements(
                      SyntaxFactory.ReturnStatement(GetStorageStringRoslyn(storage.Prefix, entry.Name, entry.StorageType)));
 
+                  methodInvoke = SyntaxFactory.ExpressionStatement(SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName(parameterMethod.Identifier)));
+
                   // add storage key mapping in constructor
-                  constructor = constructor.AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn("", fullItem.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
+                  constructor = constructor.AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn("", returnValueStr.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
                   TypeMap typeMap = entry.TypeMap.Item2;
                   Storage.Hasher[] hashers = typeMap.Hashers;
                   NodeTypeResolved key = GetFullItemPath(typeMap.Key);
-                  NodeTypeResolved value = GetFullItemPath(typeMap.Value);
+                  returnValueStr = GetFullItemPath(typeMap.Value);
 
                   storageMethod = SyntaxFactory
-                     .MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<{value}>"), entry.Name);
+                     .MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<{returnValueStr}>"), entry.Name);
 
                   parameterMethod = parameterMethod
                      .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("key"))
@@ -142,8 +144,13 @@ namespace Substrate.DotNet.Service.Node
                      .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("key"))
                      .WithType(SyntaxFactory.ParseTypeName(key.ToString())));
 
+                  ArgumentListSyntax argumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(new[] { SyntaxFactory.Argument(SyntaxFactory.IdentifierName("key")) }));
+
+                  methodInvoke = SyntaxFactory.ExpressionStatement(
+                     SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName(parameterMethod.Identifier), argumentList));
+
                   // add storage key mapping in constructor
-                  constructor = constructor.AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn(key.ToString(), value.ToString(), storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
+                  constructor = constructor.AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn(key.ToString(), returnValueStr.ToString(), storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
                }
                else
                {
@@ -152,20 +159,18 @@ namespace Substrate.DotNet.Service.Node
 
                storageMethod = storageMethod
                   .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.AsyncKeyword)))
-                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name)); // Assuming GetComments() returns a string 
-
+                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name)); // Assuming GetComments() returns a string
 
                storageMethod = storageMethod
                   .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("token")).WithType(SyntaxFactory.ParseTypeName("CancellationToken")));
-
-               ExpressionStatementSyntax methodInvoke = SyntaxFactory.ExpressionStatement(SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName(parameterMethod.Identifier)));
 
                VariableDeclarationSyntax variableDeclaration1 = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("string"))
                    .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("parameters"), null, SyntaxFactory.EqualsValueClause(methodInvoke.Expression)));
 
                storageMethod = storageMethod.AddBodyStatements(SyntaxFactory.LocalDeclarationStatement(variableDeclaration1));
 
-               string resultString = GetInvoceString(returnTypeStr.Replace("Task<", "").Replace(">", ""));
+               string resultString = GetInvoceString(returnValueStr.ToString());
+
                VariableDeclarationSyntax variableDeclaration2 = SyntaxFactory
                   .VariableDeclaration(SyntaxFactory.IdentifierName("var"))
                   .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("result"), null, SyntaxFactory.EqualsValueClause(SyntaxFactory.IdentifierName(resultString))));
@@ -228,7 +233,7 @@ namespace Substrate.DotNet.Service.Node
                   {
                      MethodDeclarationSyntax callMethod = SyntaxFactory
                         .MethodDeclaration(SyntaxFactory.ParseTypeName(nameof(Method)), variant.Name.MakeMethod())
-                        .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))                       
+                        .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
                         .WithBody(SyntaxFactory.Block());
 
                      // add comment to class if exists
@@ -481,7 +486,7 @@ namespace Substrate.DotNet.Service.Node
          {
             ExpressionSyntax keyReference = SyntaxFactory.ArrayCreationExpression(
                 SyntaxFactory.ArrayType(
-                    SyntaxFactory.IdentifierName("IType"),
+                    SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Types.IType"),
                     SyntaxFactory.SingletonList(
                         SyntaxFactory.ArrayRankSpecifier(
                             SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
@@ -533,39 +538,39 @@ namespace Substrate.DotNet.Service.Node
          TypeOfExpressionSyntax typeofReturn = SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName(returnType));
 
          var result = new ExpressionSyntax[] {
-        SyntaxFactory.ObjectCreationExpression(
-            SyntaxFactory.IdentifierName("System.Tuple<string,string>"),
-            SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
-                new ArgumentSyntax[]
-                {
-                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(module))),
-                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(item)))
-                })),
-            null),
-        SyntaxFactory.ObjectCreationExpression(
-            SyntaxFactory.IdentifierName("System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>"),
-            SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
-                new ArgumentSyntax[]
-                {
-                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
-                    SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
-                    SyntaxFactory.Argument(typeofReturn)
-                })),
-            null)
-    };
+              SyntaxFactory.ObjectCreationExpression(
+                  SyntaxFactory.IdentifierName("System.Tuple<string,string>"),
+                  SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                      new ArgumentSyntax[]
+                      {
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(module))),
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(item)))
+                      })),
+                  null),
+              SyntaxFactory.ObjectCreationExpression(
+                  SyntaxFactory.IdentifierName("System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>"),
+                  SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                      new ArgumentSyntax[]
+                      {
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                          SyntaxFactory.Argument(typeofReturn)
+                      })),
+                  null)
+          };
 
          // if it is a map fill hashers and key
          if (hashers != null && hashers.Length > 0)
          {
             ArrayCreationExpressionSyntax arrayExpression = SyntaxFactory.ArrayCreationExpression(
-                SyntaxFactory.ArrayType(SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Meta.Storage.Hasher")),
+                SyntaxFactory.ArrayType(SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Meta.Storage.Hasher[]")),
                 SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression,
                     SyntaxFactory.SeparatedList(hashers.Select(p =>
                         SyntaxFactory.ParseExpression($"Substrate.NetApi.Model.Meta.Storage.Hasher.{p}")))));
 
             TypeOfExpressionSyntax typeofType = SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName(keyType));
 
-            result = 
+            result =
                new ExpressionSyntax[] {
                   SyntaxFactory.ObjectCreationExpression(
                       SyntaxFactory.IdentifierName("System.Tuple<string,string>"),
@@ -577,7 +582,7 @@ namespace Substrate.DotNet.Service.Node
                           })),
                       null),
                   SyntaxFactory.ObjectCreationExpression(
-                      SyntaxFactory.IdentifierName("System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], Type, Type>"),
+                      SyntaxFactory.IdentifierName("System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>"),
                       SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
                           new ArgumentSyntax[]
                           {
