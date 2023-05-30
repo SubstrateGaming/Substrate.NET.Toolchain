@@ -166,22 +166,23 @@ namespace Substrate.DotNet.Service.Node
             dupeCountDict[key].Add(typeId);
          }
 
+         // TODO major issue to be handled properly in NodeTypeResolver
          // adding an index ass classname suffix to avoid overwriting
-         foreach (List<uint> entries in dupeCountDict.Values.Where(p => p.Count > 1))
-         {
-            int index = 0;
-            foreach (uint typeId in entries)
-            {
-               index++;
-               NodeTypeResolved nodeTypeResolved = result[typeId];
-               if (nodeTypeResolved.Name.NamespaceSource == NodeTypeNamespaceSource.Generated)
-               {
-                  Log.Debug("Renaming to {typeName}{index}", nodeTypeResolved.Name, index);
-                  nodeTypeResolved.Name.ClassNameSufix = index.ToString();
-                  result[typeId] = nodeTypeResolved;
-               }
-            }
-         }
+         //foreach (List<uint> entries in dupeCountDict.Values.Where(p => p.Count > 1))
+         //{
+         //   int index = 0;
+         //   foreach (uint typeId in entries)
+         //   {
+         //      index++;
+         //      NodeTypeResolved nodeTypeResolved = result[typeId];
+         //      if (nodeTypeResolved.Name.NamespaceSource == NodeTypeNamespaceSource.Generated)
+         //      {
+         //         Log.Debug("Renaming to {typeName}{index}", nodeTypeResolved.Name, index);
+         //         nodeTypeResolved.Name.ClassNameSufix = index.ToString();
+         //         result[typeId] = nodeTypeResolved;
+         //      }
+         //   }
+         //}
 
          return result;
       }
