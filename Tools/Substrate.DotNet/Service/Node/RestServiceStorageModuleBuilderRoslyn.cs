@@ -107,8 +107,7 @@ namespace Substrate.DotNet.Service.Node
             var props = new List<PropertyDeclarationSyntax>();
 
             var interfaceMethods = new List<MethodDeclarationSyntax>();
-            var onUpdates = new List<MethodDeclarationSyntax>(); 
-            var getStorages = new List<MethodDeclarationSyntax>();
+            var methodOnAndGet = new List<MethodDeclarationSyntax>(); 
 
             foreach (Entry entry in Module.Storage.Entries)
             {
@@ -142,8 +141,13 @@ namespace Substrate.DotNet.Service.Node
 
                   tryGetExpression = SyntaxFactory.ArgumentList().AddArguments(
                       SyntaxFactory.Argument(SyntaxFactory.IdentifierName(keyParamter.Identifier)),
-                      SyntaxFactory.Argument(SyntaxFactory.IdentifierName("result"))
-                          .WithRefOrOutKeyword(SyntaxFactory.Token(SyntaxKind.OutKeyword)));
+                      SyntaxFactory.Argument(
+                          SyntaxFactory.DeclarationExpression(
+                              baseReturnType,
+                              SyntaxFactory.SingleVariableDesignation(SyntaxFactory.Identifier("result"))))
+                      .WithRefOrOutKeyword(SyntaxFactory.Token(SyntaxKind.OutKeyword))
+                  );
+
                }
                else
                {
@@ -239,7 +243,7 @@ namespace Substrate.DotNet.Service.Node
                MethodDeclarationSyntax getStorageMethod = SyntaxFactory
                   .MethodDeclaration(baseReturnType, $"Get{entry.Name}")
                   .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs));
+                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name));
 
                if (tryGetExpression.Arguments.Count == 0)
                {
@@ -265,7 +269,7 @@ namespace Substrate.DotNet.Service.Node
                           .WithType(keyParamter.Type));
 
                   getStorageMethod = getStorageMethod.AddParameterListParameters(
-                   SyntaxFactory.Parameter(dataParamter.Identifier)
+                   SyntaxFactory.Parameter(keyParamter.Identifier)
                        .WithType(keyParamter.Type));
 
                   getStorageMethod = getStorageMethod.WithBody(
@@ -295,8 +299,9 @@ namespace Substrate.DotNet.Service.Node
                }
 
                interfaceMethods.Add(getInterfaceMethod);
-               onUpdates.Add(onUpdateMethod);
-               getStorages.Add(getStorageMethod);
+
+               methodOnAndGet.Add(onUpdateMethod);
+               methodOnAndGet.Add(getStorageMethod);
             }
 
             //targetClass = targetClass.AddMembers(fields.ToArray());
@@ -310,9 +315,7 @@ namespace Substrate.DotNet.Service.Node
             initializeAsyncMethod = initializeAsyncMethod.WithBody(SyntaxFactory.Block(initializeStatements));
             targetClass = targetClass.AddMembers(initializeAsyncMethod);
 
-            targetClass = targetClass.AddMembers(onUpdates.ToArray());
-
-            targetClass = targetClass.AddMembers(getStorages.ToArray());
+            targetClass = targetClass.AddMembers(methodOnAndGet.ToArray());
 
             namespaceDeclaration = namespaceDeclaration.AddMembers(targetInterface);
 

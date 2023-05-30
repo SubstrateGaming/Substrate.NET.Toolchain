@@ -52,23 +52,23 @@ namespace Substrate.DotNet.Service.Node
                  )
              );
 
-         //// Field declaration
-         //FieldDeclarationSyntax storageKeyField = SyntaxFactory.FieldDeclaration(
-         //        SyntaxFactory.VariableDeclaration(
-         //            SyntaxFactory.ParseTypeName("Dictionary<System.Tuple<string, string>, System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>>"))
-         //        .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("StorageKeyDict"))))
-         //    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-         //    .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"StorageKeyDict for key definition informations." }, null));
-         //targetClass = targetClass.AddMembers(storageKeyField);
+         // Field declaration
+         FieldDeclarationSyntax storageKeyField = SyntaxFactory.FieldDeclaration(
+                 SyntaxFactory.VariableDeclaration(
+                     SyntaxFactory.ParseTypeName("Dictionary<System.Tuple<string, string>, System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>>"))
+                 .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("StorageKeyDict"))))
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"StorageKeyDict for key definition informations." }, null));
+         targetClass = targetClass.AddMembers(storageKeyField);
 
          // Initialize field in constructor
-         //constructor = constructor.WithBody(SyntaxFactory.Block(
-         //    SyntaxFactory.ExpressionStatement(
-         //        SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
-         //            SyntaxFactory.IdentifierName("StorageKeyDict"),
-         //            SyntaxFactory.ObjectCreationExpression(
-         //                SyntaxFactory.ParseTypeName("Dictionary<System.Tuple<string, string>, System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>>"))
-         //            .AddArgumentListArguments()))));
+         constructor = constructor.WithBody(SyntaxFactory.Block(
+             SyntaxFactory.ExpressionStatement(
+                 SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                     SyntaxFactory.IdentifierName("StorageKeyDict"),
+                     SyntaxFactory.ObjectCreationExpression(
+                         SyntaxFactory.ParseTypeName("Dictionary<System.Tuple<string, string>, System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>>"))
+                     .AddArgumentListArguments()))));
 
          // Module related logic
          foreach (string moduleName in ModuleNames)

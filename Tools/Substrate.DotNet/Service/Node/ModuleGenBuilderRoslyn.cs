@@ -78,7 +78,7 @@ namespace Substrate.DotNet.Service.Node
                      SyntaxFactory.SingletonSeparatedList(
                          SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("_client")))))
              .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PrivateKeyword)))
-             .WithLeadingTrivia(SyntaxFactory.Comment("// Substrate client for the storage calls."));
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { "Substrate client for the storage calls." }));
          targetClass = targetClass.AddMembers(clientField);
 
          // Add parameters.
@@ -123,7 +123,8 @@ namespace Substrate.DotNet.Service.Node
                   methodInvoke = SyntaxFactory.ExpressionStatement(SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName(parameterMethod.Identifier)));
 
                   // add storage key mapping in constructor
-                  constructor = constructor.AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn("", returnValueStr.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
+                  constructor = constructor
+                     .AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn("", returnValueStr.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
                }
                else if (entry.StorageType == Storage.Type.Map)
                {

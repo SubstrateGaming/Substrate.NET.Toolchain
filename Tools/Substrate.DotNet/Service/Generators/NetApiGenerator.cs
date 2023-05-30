@@ -40,7 +40,7 @@ namespace Substrate.DotNet.Service.Generators
          List<string> modulesResolved = new();
          foreach (PalletModule module in modules.Values)
          {
-            ModuleGenBuilder
+            ModuleGenBuilderRoslyn
                 .Init(projectName, module.Index, module, typeDict, nodeTypes)
                 .Create()
                 .Build(write: true, out bool _, basePath);
@@ -48,7 +48,7 @@ namespace Substrate.DotNet.Service.Generators
             modulesResolved.Add($"{module.Name}Storage");
          }
 
-         ClientBuilder
+         ClientBuilderRoslyn
              .Init(projectName, 0, modulesResolved, typeDict).Create()
              .Build(write: true, out bool _, basePath);
       }

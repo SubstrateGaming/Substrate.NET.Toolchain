@@ -35,7 +35,7 @@ namespace Substrate.DotNet.Service.Generators
                 .Create()
                 .Build(write: true, out bool _, basePath: _projectSettings.ProjectDirectory);
 
-            RestServiceControllerModuleBuilder
+            RestServiceControllerModuleBuilderRoslyn
                 .Init(_projectSettings.ProjectName, ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: _projectSettings.ProjectDirectory);

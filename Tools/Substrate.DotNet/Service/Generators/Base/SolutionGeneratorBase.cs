@@ -58,7 +58,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                case TypeDefEnum.Composite:
                   {
                      var type = nodeType as NodeTypeComposite;
-                     StructBuilder.Init(ProjectName, type.Id, type, resolver)
+                     StructBuilderRoslyn.Init(ProjectName, type.Id, type, resolver)
                          .Create()
                          .Build(write: write, out bool success, basePath);
                      
@@ -79,7 +79,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                case TypeDefEnum.Array:
                   {
                      var type = nodeType as NodeTypeArray;
-                     ArrayBuilder.Create(ProjectName, type.Id, type, resolver)
+                     ArrayBuilderRoslyn.Create(ProjectName, type.Id, type, resolver)
                          .Create()
                          .Build(write: write, out bool success, basePath);
 
@@ -103,7 +103,7 @@ namespace Substrate.DotNet.Service.Generators.Base
          {
             case "Enum":
                {
-                  EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  EnumBuilderRoslyn.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (!success)
                   {
                      Logger.Error($"Could not build type {nodeType.Id}!");
@@ -127,10 +127,10 @@ namespace Substrate.DotNet.Service.Generators.Base
       
       private static Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
       {
-         NodeType nodeType = nodeTypes.Select(p => p.Value).Where(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType).FirstOrDefault();
-         if (nodeType is null or not NodeTypeVariant)
+         NodeType nodeType = nodeTypes.Select(p => p.Value).FirstOrDefault(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType);
+         if (nodeType is not NodeTypeVariant)
          {
-            throw new Exception($"Node Index changed for {runtime}.{runtimeType} and {nodeType.GetType().Name}");
+            throw new NotSupportedException($"Node Index changed for {runtime}.{runtimeType} and {nodeType?.GetType().Name}");
          }
 
          Dictionary<string, int> result = new();
@@ -195,7 +195,7 @@ namespace Substrate.DotNet.Service.Generators.Base
 
                if (generics.Contains(key))
                {
-                  type.Path[^1] = type.Path[^1] + "T" + (_countPaths.ContainsKey(key) ? _countPaths[key] : 1);
+                  type.Path[^1] = $"{type.Path[^1]}T{(_countPaths.ContainsKey(key) ? _countPaths[key] : 1)}";
                }
             }
          }
