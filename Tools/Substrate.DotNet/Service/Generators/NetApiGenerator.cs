@@ -48,7 +48,7 @@ namespace Substrate.DotNet.Service.Generators
             modulesResolved.Add($"{module.Name}Storage");
          }
 
-         ClientBuilderRoslyn
+         ClientBuilder
              .Init(projectName, 0, modulesResolved, typeDict).Create()
              .Build(write: true, out bool _, basePath);
       }
