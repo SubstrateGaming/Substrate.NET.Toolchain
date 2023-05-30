@@ -1,4 +1,7 @@
-﻿using Substrate.DotNet.Extensions;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Substrate.DotNet.Extensions;
 using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
 using Substrate.ServiceLayer.Storage;
@@ -6,6 +9,9 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Data;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -29,86 +35,96 @@ namespace Substrate.DotNet.Service.Node
             return this;
          }
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.ServiceLayer.Attributes"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.ServiceLayer.Storage"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
-
          FileName = Module.Storage.Prefix + "Storage";
-
          ReferenzName = $"{ProjectName}.Generated.Storage.{FileName}";
          NamespaceName = $"{ProjectName}.Generated.Storage";
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
+         SyntaxList<UsingDirectiveSyntax> usingDirectives = new SyntaxList<UsingDirectiveSyntax>()
+          .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.ServiceLayer.Attributes")))
+          .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.ServiceLayer.Storage")))
+          .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks")));
 
-         CreateStorage(typeNamespace);
+         NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory
+            .NamespaceDeclaration(SyntaxFactory.ParseName(NamespaceName));
+
+         TargetUnit = TargetUnit.AddUsings(usingDirectives.ToArray());
+         TargetUnit = TargetUnit.AddMembers(CreateStorage(namespaceDeclaration));
+
          return this;
       }
 
-      private void CreateStorage(CodeNamespace typeNamespace)
+      private NamespaceDeclarationSyntax CreateStorage(NamespaceDeclarationSyntax namespaceDeclaration)
       {
+         // Setting ClassName
          ClassName = Module.Storage.Prefix + "Storage";
 
-         var targetInterface = new CodeTypeDeclaration($"I{ClassName}")
-         {
-            IsInterface = true
-         };
-         targetInterface.Comments.AddRange(GetComments(new string[] { $"I{ClassName} interface definition." }));
-         targetInterface.BaseTypes.Add(new CodeTypeReference("IStorage"));
-         typeNamespace.Types.Add(targetInterface);
+         // Creating the interface declaration
+         InterfaceDeclarationSyntax targetInterface = SyntaxFactory
+            .InterfaceDeclaration($"I{ClassName}")
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IStorage")))
+            .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"I{ClassName} interface definition" }));
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
+         // Creating the class declaration
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword))
+             .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(targetInterface.Identifier.Text)))
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{ClassName} class definition" }));
 
-         targetClass.Comments.AddRange(GetComments(new string[] { $"{ClassName} class definition." }));
-         targetClass.BaseTypes.Add(new CodeTypeReference(targetInterface.Name));
+         // Creating the constructor
+         ConstructorDeclarationSyntax constructor = SyntaxFactory.ConstructorDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .WithParameterList(SyntaxFactory.ParameterList()
+                 .AddParameters(
+                     SyntaxFactory.Parameter(SyntaxFactory.Identifier("storageDataProvider"))
+                         .WithType(SyntaxFactory.ParseTypeName("IStorageDataProvider")),
+                     SyntaxFactory.Parameter(SyntaxFactory.Identifier("storageChangeDelegates"))
+                         .WithType(SyntaxFactory.ParseTypeName("List<IStorageChangeDelegate>"))
+                 ))
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{ClassName} constructor" }));
 
-         typeNamespace.Types.Add(targetClass);
-
-         CodeConstructor constructor = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-         };
-
-         constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("IStorageDataProvider"), "storageDataProvider"));
-         constructor.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference("List<IStorageChangeDelegate>"), "storageChangeDelegates"));
-         constructor.Comments.AddRange(GetComments(new string[] { $"{ClassName} constructor." }));
-
-         targetClass.Members.Add(constructor);
-
-         CodeMemberMethod initializeAsyncMethod = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            Name = $"InitializeAsync",
-            ReturnType = new CodeTypeReference("async Task")
-         };
-         var clientParamter = new CodeParameterDeclarationExpression(typeof(IStorageDataProvider), "dataProvider");
-         initializeAsyncMethod.Parameters.Add(clientParamter);
-         targetClass.Members.Add(initializeAsyncMethod);
-         initializeAsyncMethod.Comments.AddRange(GetComments(new string[] { $"Connects to all storages and initializes the change subscription handling." }));
+         // Creating the InitializeAsync method
+         MethodDeclarationSyntax initializeAsyncMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "InitializeAsync")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.AsyncKeyword))
+             .AddParameterListParameters(
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("dataProvider"))
+                     .WithType(SyntaxFactory.ParseTypeName("Substrate.ServiceLayer.Storage.IStorageDataProvider"))
+             )
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { "Connects to all storages and initializes the change subscription handling" }));
 
          if (Module.Storage.Entries != null)
          {
-            var keyParamter = new CodeParameterDeclarationExpression(typeof(string), "key");
-            var dataParamter = new CodeParameterDeclarationExpression(typeof(string), "data");
+            ParameterSyntax keyParamter = SyntaxFactory.Parameter(SyntaxFactory.Identifier("key"))
+                .WithType(SyntaxFactory.ParseTypeName("string"));
+
+            ParameterSyntax dataParamter = SyntaxFactory.Parameter(SyntaxFactory.Identifier("data"))
+                .WithType(SyntaxFactory.ParseTypeName("string"));
+
+            var constructorStatements = new List<StatementSyntax>();
+            var initializeStatements = new List<StatementSyntax>();
+
+            //var fields = new List<FieldDeclarationSyntax>();
+            var props = new List<PropertyDeclarationSyntax>();
+
+            var interfaceMethods = new List<MethodDeclarationSyntax>();
+            var methodOnAndGet = new List<MethodDeclarationSyntax>(); 
 
             foreach (Entry entry in Module.Storage.Entries)
             {
-               CodeTypeReference baseReturnType;
-               CodeTypeReference returnType;
-               CodeExpression[] updateExpression, tryGetExpression;
+               TypeSyntax baseReturnType;
+               TypeSyntax returnType;
+               ArgumentListSyntax updateExpression, tryGetExpression;
+
                if (entry.StorageType == Storage.Type.Plain)
                {
                   NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
-                  baseReturnType = new CodeTypeReference(fullItem.ToString());
-                  returnType = new CodeTypeReference($"TypedStorage<{fullItem.ToString()}>");
+                  baseReturnType = SyntaxFactory.ParseTypeName(fullItem.ToString());
+                  returnType = SyntaxFactory.ParseTypeName($"TypedStorage<{fullItem}>");
 
-                  updateExpression = new CodeExpression[] {
-                                            new CodeVariableReferenceExpression(dataParamter.Name)};
-                  tryGetExpression = Array.Empty<CodeExpression>();
+                  updateExpression = SyntaxFactory.ArgumentList().AddArguments(
+                      SyntaxFactory.Argument(SyntaxFactory.IdentifierName(dataParamter.Identifier)));
+
+                  tryGetExpression = SyntaxFactory.ArgumentList();
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
@@ -116,138 +132,199 @@ namespace Substrate.DotNet.Service.Node
                   Storage.Hasher[] hashers = typeMap.Hashers;
                   NodeTypeResolved key = GetFullItemPath(typeMap.Key);
                   NodeTypeResolved value = GetFullItemPath(typeMap.Value);
-                  baseReturnType = new CodeTypeReference(value.ToString());
-                  returnType = new CodeTypeReference($"TypedMapStorage<{value.ToString()}>");
+                  baseReturnType = SyntaxFactory.ParseTypeName(value.ToString());
+                  returnType = SyntaxFactory.ParseTypeName($"TypedMapStorage<{value}>");
 
-                  updateExpression = new CodeExpression[] {
-                                new CodeVariableReferenceExpression(keyParamter.Name),
-                                new CodeVariableReferenceExpression(dataParamter.Name)};
-                  tryGetExpression = new CodeExpression[] {
-                                new CodeVariableReferenceExpression(keyParamter.Name),
-                                new CodeParameterDeclarationExpression(baseReturnType, "result") {
-                                    Direction = FieldDirection.Out
-                                }
-                            };
+                  updateExpression = SyntaxFactory.ArgumentList().AddArguments(
+                      SyntaxFactory.Argument(SyntaxFactory.IdentifierName(keyParamter.Identifier)),
+                      SyntaxFactory.Argument(SyntaxFactory.IdentifierName(dataParamter.Identifier)));
+
+                  tryGetExpression = SyntaxFactory.ArgumentList().AddArguments(
+                      SyntaxFactory.Argument(SyntaxFactory.IdentifierName(keyParamter.Identifier)),
+                      SyntaxFactory.Argument(
+                          SyntaxFactory.DeclarationExpression(
+                              baseReturnType,
+                              SyntaxFactory.SingleVariableDesignation(SyntaxFactory.Identifier("result"))))
+                      .WithRefOrOutKeyword(SyntaxFactory.Token(SyntaxKind.OutKeyword))
+                  );
+
                }
                else
                {
                   throw new NotImplementedException();
                }
 
-               // create typed storage field
-               CodeMemberField field = new()
-               {
-                  Attributes = MemberAttributes.Private,
-                  Name = $"{entry.Name.MakePrivateField()}TypedStorage",
-                  Type = returnType
-               };
+               string fieldName = $"{entry.Name.MakePrivateField()}TypedStorage";
 
-               field.Comments.AddRange(GetComments(new string[] { $"{field.Name} typed storage field" }));
-               targetClass.Members.Add(field);
+               // create typed storage field
+               //FieldDeclarationSyntax field = SyntaxFactory.FieldDeclaration(
+               //    SyntaxFactory.VariableDeclaration(returnType)
+               //        .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(fieldName))))
+               //    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
+               //   .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{entry.Name} typed storage field" }));
+               //fields.Add(field);
 
                // create typed storage property
-               CodeMemberProperty prop = new()
-               {
-                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
-                  Name = field.Name.MakeMethod(),
-                  HasGet = true,
-                  Type = field.Type
-               };
-               prop.GetStatements.Add(new CodeMethodReturnStatement(
-                   new CodeVariableReferenceExpression(field.Name)));
-               prop.SetStatements.Add(new CodeAssignStatement(
-                   new CodeVariableReferenceExpression(field.Name),
-                       new CodePropertySetValueReferenceExpression()));
-
-               prop.Comments.AddRange(GetComments(new string[] { $"{field.Name} property" }));
-               targetClass.Members.Add(prop);
+               string propName = $"{entry.Name}TypedStorage";
+               PropertyDeclarationSyntax prop = SyntaxFactory.PropertyDeclaration(returnType, SyntaxFactory.Identifier(propName))
+                   .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                   .AddAccessorListAccessors(
+                       SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                           .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                       SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                           .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)))
+                   .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{propName} property" }));
+               props.Add(prop);
 
                // constructor initialize storage properties
-               constructor.Statements.Add(new CodeAssignStatement(
-                   new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), prop.Name),
-               new CodeObjectCreateExpression(field.Type,
-                   new CodeExpression[] {
-                        new CodePrimitiveExpression($"{Module.Storage.Prefix}.{entry.Name}"),
-                        new CodeVariableReferenceExpression("storageDataProvider"),
-                        new CodeVariableReferenceExpression("storageChangeDelegates")
-                   })));
+               constructorStatements.Add(SyntaxFactory.ExpressionStatement(
+                           SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                               SyntaxFactory.IdentifierName(prop.Identifier.Text),
+                               SyntaxFactory.ObjectCreationExpression(prop.Type)
+                                   .WithArgumentList(SyntaxFactory.ArgumentList()
+                                       .AddArguments(
+                                           SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal($"{Module.Storage.Prefix}.{entry.Name}"))),
+                                           SyntaxFactory.Argument(SyntaxFactory.IdentifierName("storageDataProvider")),
+                                           SyntaxFactory.Argument(SyntaxFactory.IdentifierName("storageChangeDelegates")))))));
 
                // create initialize records foreach storage
-               CodeMethodInvokeExpression initializeAsyncInvoke = new(
-                   new CodeVariableReferenceExpression($"await {prop.Name}"),
-                   "InitializeAsync", new CodeExpression[] {
-                                new CodePrimitiveExpression(Module.Storage.Prefix),
-                                new CodePrimitiveExpression(entry.Name)
-               });
-               initializeAsyncMethod.Statements.Add(initializeAsyncInvoke);
-
+               initializeStatements.Add(SyntaxFactory.ExpressionStatement(
+                       SyntaxFactory.InvocationExpression(
+                           SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
+                               SyntaxFactory.IdentifierName($"await {prop.Identifier}"),
+                               SyntaxFactory.IdentifierName("InitializeAsync")))
+                           .WithArgumentList(SyntaxFactory.ArgumentList()
+                               .AddArguments(
+                                   SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(Module.Storage.Prefix))),
+                                   SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(entry.Name)))))));
+               
                // create on update
-               CodeMemberMethod onUpdateMethod = new()
-               {
-                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
-                  Name = $"OnUpdate{entry.Name}",
-               };
+               MethodDeclarationSyntax onUpdateMethod = SyntaxFactory.MethodDeclaration(
+                       SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                       SyntaxFactory.Identifier($"OnUpdate{entry.Name}"))
+                   .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                   .AddAttributeLists(
+                       SyntaxFactory.AttributeList(
+                           SyntaxFactory.SeparatedList(
+                               new AttributeSyntax[] {
+                    SyntaxFactory.Attribute(
+                        SyntaxFactory.IdentifierName("StorageChange"),
+                        SyntaxFactory.AttributeArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                new AttributeArgumentSyntax[]{
+                                    SyntaxFactory.AttributeArgument(
+                                        SyntaxFactory.LiteralExpression(
+                                            SyntaxKind.StringLiteralExpression,
+                                            SyntaxFactory.Literal(Module.Storage.Prefix))),
+                                    SyntaxFactory.AttributeArgument(
+                                        SyntaxFactory.LiteralExpression(
+                                            SyntaxKind.StringLiteralExpression,
+                                            SyntaxFactory.Literal(entry.Name)))})))})))
+                   .WithBody(
+                       SyntaxFactory.Block(
+                           SyntaxFactory.ExpressionStatement(
+                               SyntaxFactory.InvocationExpression(
+                                   SyntaxFactory.MemberAccessExpression(
+                                       SyntaxKind.SimpleMemberAccessExpression,
+                                       SyntaxFactory.IdentifierName(prop.Identifier.Text),
+                                       SyntaxFactory.IdentifierName("Update")
+                                   ),
+                                   SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                                       updateExpression.Arguments.Select(expr => expr)))))));
+               onUpdateMethod = onUpdateMethod.WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"Implements any storage change for {Module.Storage.Prefix}.{entry.Name}" }));
 
-               onUpdateMethod.CustomAttributes.Add(
-                   new CodeAttributeDeclaration("StorageChange",
-                   new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodePrimitiveExpression(Module.Storage.Prefix)),
-                                new CodeAttributeArgument(new CodePrimitiveExpression(entry.Name))
-                       }));
-
-               CodeMethodInvokeExpression updateInvoke = new(
-                   new CodeVariableReferenceExpression(prop.Name),
-                   "Update", updateExpression);
-               onUpdateMethod.Statements.Add(updateInvoke);
-               onUpdateMethod.Comments.AddRange(GetComments(new string[] { $"Implements any storage change for {Module.Storage.Prefix}.{entry.Name}" }));
-
-               targetClass.Members.Add(onUpdateMethod);
 
                // create get and gets
-               CodeMemberMethod getStorageMethod = new()
+               MethodDeclarationSyntax getInterfaceMethod = SyntaxFactory
+                  .MethodDeclaration(baseReturnType, $"Get{entry.Name}")
+                   .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name))
+                   .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+
+               MethodDeclarationSyntax getStorageMethod = SyntaxFactory
+                  .MethodDeclaration(baseReturnType, $"Get{entry.Name}")
+                  .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name));
+
+               if (tryGetExpression.Arguments.Count == 0)
                {
-                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
-                  Name = $"Get{entry.Name}",
-                  ReturnType = baseReturnType
-               };
-               getStorageMethod.Comments.AddRange(GetComments(entry.Docs, null, entry.Name));
+                  onUpdateMethod = onUpdateMethod
+                     .AddParameterListParameters(dataParamter);
 
-               targetInterface.Members.Add(getStorageMethod);
-
-               if (tryGetExpression.Length == 0)
-               {
-                  onUpdateMethod.Parameters.Add(dataParamter);
-
-                  getStorageMethod.Statements.Add(new CodeMethodReturnStatement(
-                          new CodeMethodInvokeExpression(
-                              new CodeVariableReferenceExpression(prop.Name),
-                              "Get", Array.Empty<CodeExpression>())));
+                  getStorageMethod = getStorageMethod.WithBody(
+                      SyntaxFactory.Block(
+                          SyntaxFactory.ReturnStatement(
+                              SyntaxFactory.InvocationExpression(
+                                  SyntaxFactory.MemberAccessExpression(
+                                      SyntaxKind.SimpleMemberAccessExpression,
+                                      SyntaxFactory.IdentifierName(prop.Identifier.Text),
+                                      SyntaxFactory.IdentifierName("Get"))))));
                }
                else
                {
-                  onUpdateMethod.Parameters.Add(keyParamter);
-                  onUpdateMethod.Parameters.Add(dataParamter);
+                  onUpdateMethod = onUpdateMethod
+                     .AddParameterListParameters(keyParamter, dataParamter);
 
-                  getStorageMethod.Parameters.Add(keyParamter);
+                  getInterfaceMethod = getInterfaceMethod.AddParameterListParameters(
+                      SyntaxFactory.Parameter(keyParamter.Identifier)
+                          .WithType(keyParamter.Type));
 
-                  getStorageMethod.Statements.Add(new CodeConditionStatement(
-                     new CodeBinaryOperatorExpression(
-                         new CodeVariableReferenceExpression("key"),
-                         CodeBinaryOperatorType.ValueEquality,
-                         new CodePrimitiveExpression(null)),
-                     new CodeStatement[] { new CodeMethodReturnStatement(new CodePrimitiveExpression(null)) }));
+                  getStorageMethod = getStorageMethod.AddParameterListParameters(
+                   SyntaxFactory.Parameter(keyParamter.Identifier)
+                       .WithType(keyParamter.Type));
 
-                  getStorageMethod.Statements.Add(new CodeConditionStatement(
-                      new CodeMethodInvokeExpression(
-                          new CodeVariableReferenceExpression(prop.Name),
-                              "Dictionary.TryGetValue", tryGetExpression),
-                      new CodeStatement[] { new CodeMethodReturnStatement(new CodeVariableReferenceExpression("result")) },
-                      new CodeStatement[] { new CodeMethodReturnStatement(new CodePrimitiveExpression(null)) }));
+                  getStorageMethod = getStorageMethod.WithBody(
+                   SyntaxFactory.Block(
+                       SyntaxFactory.IfStatement(
+                           SyntaxFactory.BinaryExpression(
+                               SyntaxKind.EqualsExpression,
+                               SyntaxFactory.IdentifierName("key"),
+                               SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                           SyntaxFactory.Block(
+                               SyntaxFactory.ReturnStatement(
+                                   SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)))),
+                       SyntaxFactory.IfStatement(
+                           SyntaxFactory.InvocationExpression(
+                               SyntaxFactory.MemberAccessExpression(
+                                   SyntaxKind.SimpleMemberAccessExpression,
+                                   SyntaxFactory.IdentifierName(prop.Identifier.Text),
+                                   SyntaxFactory.IdentifierName("Dictionary.TryGetValue")),
+                               tryGetExpression),
+                           SyntaxFactory.Block(
+                               SyntaxFactory.ReturnStatement(
+                                   SyntaxFactory.IdentifierName("result"))),
+                           SyntaxFactory.ElseClause(
+                               SyntaxFactory.ReturnStatement(
+                                   SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression))))));
+
                }
 
-               targetClass.Members.Add(getStorageMethod);
+               interfaceMethods.Add(getInterfaceMethod);
+
+               methodOnAndGet.Add(onUpdateMethod);
+               methodOnAndGet.Add(getStorageMethod);
             }
+
+            //targetClass = targetClass.AddMembers(fields.ToArray());
+            targetInterface = targetInterface.AddMembers(interfaceMethods.ToArray());
+
+            constructor = constructor.WithBody(SyntaxFactory.Block(constructorStatements));
+            targetClass = targetClass.AddMembers(constructor);
+
+            targetClass = targetClass.AddMembers(props.ToArray());
+
+            initializeAsyncMethod = initializeAsyncMethod.WithBody(SyntaxFactory.Block(initializeStatements));
+            targetClass = targetClass.AddMembers(initializeAsyncMethod);
+
+            targetClass = targetClass.AddMembers(methodOnAndGet.ToArray());
+
+            namespaceDeclaration = namespaceDeclaration.AddMembers(targetInterface);
+
+            namespaceDeclaration = namespaceDeclaration.AddMembers(targetClass);
+
          }
+
+         return namespaceDeclaration;
       }
+
    }
 }

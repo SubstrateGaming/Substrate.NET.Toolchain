@@ -1,9 +1,9 @@
-﻿using Substrate.DotNet.Service.Node.Base;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
-using System;
-using System.CodeDom;
 using System.Linq;
-using System.Reflection;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -16,51 +16,57 @@ namespace Substrate.DotNet.Service.Node
       {
       }
 
-      private static CodeMemberMethod GetDecode(string baseType)
+      private static MethodDeclarationSyntax GetDecodeRoslyn(string baseType)
       {
-         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
-         CodeParameterDeclarationExpression param1 = new()
-         {
-            Type = new CodeTypeReference("System.Byte[]"),
-            Name = "byteArray"
-         };
-         decodeMethod.Parameters.Add(param1);
-         CodeParameterDeclarationExpression param2 = new()
-         {
-            Type = new CodeTypeReference("System.Int32"),
-            Name = "p",
-            Direction = FieldDirection.Ref
-         };
-         decodeMethod.Parameters.Add(param2);
-         decodeMethod.Statements.Add(new CodeSnippetExpression("var start = p"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression($"var array = new {baseType}[TypeSize]"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("for (var i = 0; i < array.Length; i++) " +
+         MethodDeclarationSyntax decodeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "Decode")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.OverrideKeyword))
+             .AddParameterListParameters(
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("byteArray")).WithType(SyntaxFactory.ParseTypeName("byte[]")),
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("p")).WithType(SyntaxFactory.ParseTypeName("int")).WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.RefKeyword))))
+             .WithBody(SyntaxFactory.Block());
+
+         decodeMethod = decodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement("var start = p;"));
+
+         decodeMethod = decodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement($"var array = new {baseType}[TypeSize];"));
+
+         decodeMethod = decodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement("for (var i = 0; i < array.Length; i++) " +
              "{" +
              $"var t = new {baseType}();" +
              "t.Decode(byteArray, ref p);" +
              "array[i] = t;" +
              "}"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("Value = array"));
+
+         decodeMethod = decodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement("var bytesLength = p - start;"));
+         decodeMethod = decodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement("Bytes = new byte[bytesLength];"));
+         decodeMethod = decodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength);"));
+         decodeMethod = decodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement("Value = array;"));
          return decodeMethod;
       }
 
-      private static CodeMemberMethod GetEncode()
+      private static MethodDeclarationSyntax GetEncodeRoslyn()
       {
-         CodeMemberMethod encodeMethod = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Override,
-            Name = "Encode",
-            ReturnType = new CodeTypeReference("System.Byte[]")
-         };
-         encodeMethod.Statements.Add(new CodeSnippetExpression("var result = new List<byte>()"));
-         encodeMethod.Statements.Add(new CodeSnippetExpression("foreach (var v in Value)" +
-             "{" +
-             "result.AddRange(v.Encode());" +
-             "}"));
-         encodeMethod.Statements.Add(new CodeSnippetExpression("return result.ToArray()"));
+         MethodDeclarationSyntax encodeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("System.Byte[]"), "Encode")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.OverrideKeyword))
+             .WithBody(SyntaxFactory.Block());
+
+         encodeMethod = encodeMethod
+            .AddBodyStatements(SyntaxFactory.ParseStatement("var result = new List<byte>();"));
+
+         encodeMethod = encodeMethod.AddBodyStatements(
+            SyntaxFactory.ParseStatement("foreach (var v in Value)" +
+               "{" +
+               "result.AddRange(v.Encode());" +
+               "}"));
+
+         encodeMethod = encodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement("return result.ToArray();"));
+
          return encodeMethod;
       }
 
@@ -77,107 +83,79 @@ namespace Substrate.DotNet.Service.Node
 
          ClassName = $"Arr{typeDef.Length}{fullItem.ClassName}";
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
-
          if (ClassName.Any(ch => !char.IsLetterOrDigit(ch)))
          {
+            // TODO: check if this is a valid solution
             Counter++;
             ClassName = $"Arr{typeDef.Length}Special" + Counter++;
          }
 
          ReferenzName = $"{NamespaceName}.{ClassName}";
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         targetClass.BaseTypes.Add(new CodeTypeReference("BaseType"));
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword))
+             .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("BaseType")));
 
-         // add comment to class if exists
-         targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
-         AddTargetClassCustomAttributes(targetClass, typeDef);
+         //FieldDeclarationSyntax valueField = SyntaxFactory.FieldDeclaration(SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName($"{fullItem}[]"))
+         //        .AddVariables(SyntaxFactory.VariableDeclarator("_value")))
+         //    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+         //targetClass = targetClass.AddMembers(valueField);
 
-         typeNamespace.Types.Add(targetClass);
+         PropertyDeclarationSyntax valueProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName($"{fullItem}[]"), "Value")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddAccessorListAccessors(
+                 SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                 SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
+         targetClass = targetClass.AddMembers(valueProperty);
+
+         ReturnStatementSyntax typeNameReturn = SyntaxFactory.ReturnStatement(
+             SyntaxFactory.InvocationExpression(
+                 SyntaxFactory.MemberAccessExpression(
+                     SyntaxKind.SimpleMemberAccessExpression,
+                     SyntaxFactory.ParseTypeName("string"),
+                     SyntaxFactory.IdentifierName("Format")),
+                 SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(new[]
+                 {
+            SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("[{0}; {1}]"))),
+            SyntaxFactory.Argument(
+                SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.ObjectCreationExpression(SyntaxFactory.ParseTypeName(fullItem.ToString())).WithArgumentList(SyntaxFactory.ArgumentList()),
+                        SyntaxFactory.IdentifierName("TypeName")))),
+            SyntaxFactory.Argument(SyntaxFactory.IdentifierName("TypeSize"))
+                 }))));
 
          // Declaring a name method
-         CodeMemberMethod nameMethod = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Override,
-            Name = "TypeName",
-            ReturnType = new CodeTypeReference(typeof(string))
-         };
+         MethodDeclarationSyntax nameMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("string"), "TypeName")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.OverrideKeyword))
+             .WithBody(SyntaxFactory.Block(typeNameReturn));
+         targetClass = targetClass.AddMembers(nameMethod);
 
-         var methodRef1 = new CodeMethodReferenceExpression(new CodeObjectCreateExpression(fullItem.ToString(), Array.Empty<CodeExpression>()), "TypeName()");
-         var methodRef2 = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), "TypeSize");
+         targetClass = AddTargetClassCustomAttributesRoslyn(targetClass, typeDef);
+         // add comment to class if exists
+         targetClass = targetClass.WithLeadingTrivia(GetCommentsRoslyn(typeDef.Docs, typeDef));
 
-         // Declaring a return statement for method ToString.
-         CodeMethodReturnStatement returnStatement =
-             new()
-             {
-                Expression =
-                     new CodeMethodInvokeExpression(
-                     new CodeTypeReferenceExpression("System.String"), "Format",
-                     new CodePrimitiveExpression("[{0}; {1}]"),
-                     methodRef1, methodRef2)
-             };
-         nameMethod.Statements.Add(returnStatement);
-         targetClass.Members.Add(nameMethod);
+         targetClass = targetClass.AddMembers(GetEncodeRoslyn(), GetDecodeRoslyn(fullItem.ToString()));
 
-         CodeMemberProperty sizeProperty = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Override,
-            Name = "TypeSize",
-            Type = new CodeTypeReference(typeof(int))
-         };
-         sizeProperty.GetStatements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression((int)typeDef.Length)));
-         targetClass.Members.Add(sizeProperty);
+         MethodDeclarationSyntax createMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "Create")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("array")).WithType(SyntaxFactory.ParseTypeName($"{fullItem}[]")))
+             .WithBody(SyntaxFactory.Block(
+                 SyntaxFactory.ExpressionStatement(SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, SyntaxFactory.IdentifierName("Value"), SyntaxFactory.IdentifierName("array"))),
+                 SyntaxFactory.ExpressionStatement(SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, SyntaxFactory.IdentifierName("Bytes"), SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName("Encode"))))));
 
-         CodeMemberMethod encodeMethod = ArrayBuilder.GetEncode();
-         targetClass.Members.Add(encodeMethod);
+         targetClass = targetClass.AddMembers(createMethod);
 
-         CodeMemberMethod decodeMethod = ArrayBuilder.GetDecode(fullItem.ToString());
-         targetClass.Members.Add(decodeMethod);
+         NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory
+            .NamespaceDeclaration(SyntaxFactory.ParseName(NamespaceName))
+            .AddMembers(targetClass);
 
-         CodeMemberField valueField = new()
-         {
-            Attributes = MemberAttributes.Private,
-            Name = "_value",
-            Type = new CodeTypeReference($"{fullItem}[]")
-         };
-         targetClass.Members.Add(valueField);
-         CodeMemberProperty valueProperty = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            Name = "Value",
-            HasGet = true,
-            HasSet = true,
-            Type = new CodeTypeReference($"{fullItem}[]")
-         };
-         valueProperty.GetStatements.Add(new CodeMethodReturnStatement(
-             new CodeFieldReferenceExpression(
-             new CodeThisReferenceExpression(), valueField.Name)));
-         valueProperty.SetStatements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(
-                 new CodeThisReferenceExpression(), valueField.Name),
-                                 new CodePropertySetValueReferenceExpression()));
+         CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
+            .AddMembers(namespaceDeclaration);
 
-         CodeMemberMethod createMethod = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            Name = "Create"
-         };
-         createMethod.Parameters.Add(new()
-         {
-            Type = new CodeTypeReference($"{fullItem.ToString()}[]"),
-            Name = "array"
-         });
-         createMethod.Statements.Add(new CodeSnippetExpression("Value = array"));
-         createMethod.Statements.Add(new CodeSnippetExpression("Bytes = Encode()"));
-         targetClass.Members.Add(createMethod);
+         TargetUnit = TargetUnit.AddMembers(compilationUnit.Members.ToArray());
 
-         targetClass.Members.Add(valueProperty);
          return this;
       }
    }

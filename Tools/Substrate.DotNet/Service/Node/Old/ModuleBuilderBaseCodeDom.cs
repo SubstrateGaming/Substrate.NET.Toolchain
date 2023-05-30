@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Substrate.DotNet.Service.Node.Base
 {
-   public abstract class ModuleBuilderBaseRoslyn : BuilderBaseRoslyn
+   public abstract class ModuleBuilderBaseCodeDom : BuilderBaseCodeDom
    {
       public Dictionary<uint, NodeType> NodeTypes { get; private set; }
 
@@ -12,7 +12,7 @@ namespace Substrate.DotNet.Service.Node.Base
 
       public string PrefixName { get; private set; }
 
-      protected ModuleBuilderBaseRoslyn(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict,
+      public ModuleBuilderBaseCodeDom(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict,
           Dictionary<uint, NodeType> nodeTypes)
           : base(projectName, id, typeDict)
       {

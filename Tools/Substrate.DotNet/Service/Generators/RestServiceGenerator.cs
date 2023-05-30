@@ -30,12 +30,12 @@ namespace Substrate.DotNet.Service.Generators
 
          foreach (PalletModule module in metadata.NodeMetadata.Modules.Values)
          {
-            RestServiceStorageModuleBuilderRoslyn
+            RestServiceStorageModuleBuilder
                 .Init(_projectSettings.ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: _projectSettings.ProjectDirectory);
 
-            RestServiceControllerModuleBuilderRoslyn
+            RestServiceControllerModuleBuilder
                 .Init(_projectSettings.ProjectName, ProjectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath: _projectSettings.ProjectDirectory);

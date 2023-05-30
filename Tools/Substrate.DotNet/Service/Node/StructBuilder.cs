@@ -1,9 +1,11 @@
-﻿using Substrate.DotNet.Extensions;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Substrate.DotNet.Extensions;
 using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
-using System.CodeDom;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -14,54 +16,64 @@ namespace Substrate.DotNet.Service.Node
       {
       }
 
-      private static CodeMemberField GetPropertyField(string name, string baseType)
+      private static FieldDeclarationSyntax GetPropertyFieldRoslyn(string name, string baseType)
       {
-         CodeMemberField field = new()
-         {
-            Attributes = MemberAttributes.Private,
-            Name = name.MakePrivateField(),
-            Type = new CodeTypeReference($"{baseType}")
-         };
-         return field;
+         FieldDeclarationSyntax fieldDeclaration = SyntaxFactory.FieldDeclaration(
+             SyntaxFactory.VariableDeclaration(
+                 SyntaxFactory.ParseTypeName(baseType),
+                 SyntaxFactory.SingletonSeparatedList(
+                     SyntaxFactory.VariableDeclarator(name.MakePrivateField()))))
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+
+         return fieldDeclaration;
       }
 
-      private static CodeMemberProperty GetProperty(string name, CodeMemberField propertyField)
+      private static PropertyDeclarationSyntax GetPropertyWithFieldRoslyn(string name, FieldDeclarationSyntax propertyField)
       {
-         CodeMemberProperty prop = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            Name = name.MakeMethod(),
-            HasGet = true,
-            HasSet = true,
-            Type = propertyField.Type
-         };
-         prop.GetStatements.Add(new CodeMethodReturnStatement(
-             new CodeFieldReferenceExpression(
-             new CodeThisReferenceExpression(), propertyField.Name)));
-         prop.SetStatements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(
-                 new CodeThisReferenceExpression(), propertyField.Name),
-                 new CodePropertySetValueReferenceExpression()));
+         string propertyName = name.MakeMethod();
+         TypeSyntax propertyType = propertyField.Declaration.Type;
+
+         PropertyDeclarationSyntax prop = SyntaxFactory.PropertyDeclaration(propertyType, propertyName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddAccessorListAccessors(
+                 SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                     .WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName(propertyField.Declaration.Variables[0].Identifier)))),
+                 SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                     .WithBody(SyntaxFactory.Block(
+                         SyntaxFactory.ExpressionStatement(
+                             SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                                 SyntaxFactory.IdentifierName(propertyField.Declaration.Variables[0].Identifier),
+                                 SyntaxFactory.IdentifierName("value"))))));
+
          return prop;
       }
 
-      private CodeMemberMethod GetDecode(NodeTypeField[] typeFields)
+      private static PropertyDeclarationSyntax GetPropertyRoslyn(string name, TypeSyntax type)
       {
-         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
-         CodeParameterDeclarationExpression param1 = new()
-         {
-            Type = new CodeTypeReference("System.Byte[]"),
-            Name = "byteArray"
-         };
-         decodeMethod.Parameters.Add(param1);
-         CodeParameterDeclarationExpression param2 = new()
-         {
-            Type = new CodeTypeReference("System.Int32"),
-            Name = "p",
-            Direction = FieldDirection.Ref
-         };
-         decodeMethod.Parameters.Add(param2);
-         decodeMethod.Statements.Add(new CodeSnippetExpression("var start = p"));
+         string propertyName = name.MakeMethod();
+
+         PropertyDeclarationSyntax prop = SyntaxFactory.PropertyDeclaration(type, propertyName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddAccessorListAccessors(
+                 SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                     .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                 SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                     .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
+
+         return prop;
+      }
+
+      private MethodDeclarationSyntax GetDecodeRoslyn(NodeTypeField[] typeFields)
+      {
+         MethodDeclarationSyntax decodeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "Decode")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.OverrideKeyword))
+             .AddParameterListParameters(
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("byteArray")).WithType(SyntaxFactory.ParseTypeName("byte[]")),
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("p")).WithType(SyntaxFactory.ParseTypeName("int")).WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.RefKeyword))))
+             .WithBody(SyntaxFactory.Block());
+
+         decodeMethod = decodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement("var start = p;"));
 
          if (typeFields != null)
          {
@@ -69,30 +81,31 @@ namespace Substrate.DotNet.Service.Node
             {
                NodeTypeField typeField = typeFields[i];
 
-               string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
+               string fieldName = GetFieldName(typeField, "value", typeFields.Length, i);
                NodeTypeResolved fullItem = GetFullItemPath(typeField.TypeId);
 
-               decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()} = new {fullItem.ToString()}()"));
-               decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()}.Decode(byteArray, ref p)"));
+               decodeMethod = decodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement($"{fieldName.MakeMethod()} = new {fullItem}();"));
+               decodeMethod = decodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement($"{fieldName.MakeMethod()}.Decode(byteArray, ref p);"));
             }
          }
-         decodeMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = bytesLength"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
+
+         decodeMethod = decodeMethod.AddBodyStatements(
+             SyntaxFactory.ParseStatement("var bytesLength = p - start;"),
+             SyntaxFactory.ParseStatement("TypeSize = bytesLength;"),
+             SyntaxFactory.ParseStatement("Bytes = new byte[bytesLength];"),
+             SyntaxFactory.ParseStatement("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength);")
+         );
 
          return decodeMethod;
       }
 
-      private static CodeMemberMethod GetEncode(NodeTypeField[] typeFields)
+      private MethodDeclarationSyntax GetEncodeRoslyn(NodeTypeField[] typeFields)
       {
-         CodeMemberMethod encodeMethod = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Override,
-            Name = "Encode",
-            ReturnType = new CodeTypeReference("System.Byte[]")
-         };
-         encodeMethod.Statements.Add(new CodeSnippetExpression("var result = new List<byte>()"));
+         MethodDeclarationSyntax encodeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("System.Byte[]"), "Encode")
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.OverrideKeyword))
+             .WithBody(SyntaxFactory.Block());
+
+         encodeMethod = encodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement("var result = new List<byte>();"));
 
          if (typeFields != null)
          {
@@ -101,11 +114,12 @@ namespace Substrate.DotNet.Service.Node
                NodeTypeField typeField = typeFields[i];
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
 
-               encodeMethod.Statements.Add(new CodeSnippetExpression($"result.AddRange({fieldName.MakeMethod()}.Encode())"));
+               encodeMethod = encodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement($"result.AddRange({fieldName.MakeMethod()}.Encode());"));
             }
          }
 
-         encodeMethod.Statements.Add(new CodeSnippetExpression("return result.ToArray()"));
+         encodeMethod = encodeMethod.AddBodyStatements(SyntaxFactory.ParseStatement("return result.ToArray();"));
+
          return encodeMethod;
       }
 
@@ -120,51 +134,55 @@ namespace Substrate.DotNet.Service.Node
 
          ClassName = $"{typeDef.Path.Last()}";
 
-         ReferenzName = $"{NamespaceName}.{typeDef.Path.Last()}";
+         ReferenzName = $"{NamespaceName}.{ClassName}";
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword))
+             .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.IdentifierName("BaseType")));
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         targetClass.BaseTypes.Add(new CodeTypeReference("BaseType"));
-
+         targetClass = AddTargetClassCustomAttributesRoslyn(targetClass, typeDef);
          // add comment to class if exists
-         targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
-         AddTargetClassCustomAttributes(targetClass, typeDef);
-
-         typeNamespace.Types.Add(targetClass);
-
-         CodeMemberMethod nameMethod = SimpleMethod("TypeName", "System.String", ClassName);
-         targetClass.Members.Add(nameMethod);
+         targetClass = targetClass.WithLeadingTrivia(GetCommentsRoslyn(typeDef.Docs, typeDef));
 
          if (typeDef.TypeFields != null)
          {
             for (int i = 0; i < typeDef.TypeFields.Length; i++)
             {
                NodeTypeField typeField = typeDef.TypeFields[i];
-               string fieldName = StructBuilder.GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
+               string fieldName = GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
 
                NodeTypeResolved fullItem = GetFullItemPath(typeField.TypeId);
 
-               CodeMemberField field = StructBuilder.GetPropertyField(fieldName, fullItem.ToString());
-
+               //FieldDeclarationSyntax field = GetPropertyFieldRoslyn(fieldName, fullItem.ToString());
                // add comment to field if exists
-               field.Comments.AddRange(GetComments(typeField.Docs, null, fieldName));
+               //field = field.WithLeadingTrivia(GetCommentsRoslyn(typeField.Docs, null, fieldName));
+               //targetClass = targetClass.AddMembers(field, GetPropertyWithFieldRoslyn(fieldName, field));
 
-               targetClass.Members.Add(field);
-               targetClass.Members.Add(StructBuilder.GetProperty(fieldName, field));
+               PropertyDeclarationSyntax propertyDeclaration = GetPropertyRoslyn(fieldName, SyntaxFactory.ParseTypeName(fullItem.ToString()));
+               propertyDeclaration = propertyDeclaration.WithLeadingTrivia(GetCommentsRoslyn(typeField.Docs, null, fieldName));
+
+               targetClass = targetClass.AddMembers(propertyDeclaration);
             }
          }
 
-         CodeMemberMethod encodeMethod = StructBuilder.GetEncode(typeDef.TypeFields);
-         targetClass.Members.Add(encodeMethod);
+         MethodDeclarationSyntax nameMethod = SimpleMethodRoslyn("TypeName", "System.String", ClassName);
+         targetClass = targetClass.AddMembers(nameMethod);
 
-         CodeMemberMethod decodeMethod = GetDecode(typeDef.TypeFields);
-         targetClass.Members.Add(decodeMethod);
+         MethodDeclarationSyntax encodeMethod = GetEncodeRoslyn(typeDef.TypeFields);
+         targetClass = targetClass.AddMembers(encodeMethod);
+
+         MethodDeclarationSyntax decodeMethod = GetDecodeRoslyn(typeDef.TypeFields);
+         targetClass = targetClass.AddMembers(decodeMethod);
+
+         NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory
+            .NamespaceDeclaration(SyntaxFactory.IdentifierName(NamespaceName))
+             .AddMembers(targetClass);
+
+         CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
+             .AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("System")))
+             .AddMembers(namespaceDeclaration);
+
+         TargetUnit = TargetUnit.AddMembers(compilationUnit.Members.ToArray());
 
          return this;
       }

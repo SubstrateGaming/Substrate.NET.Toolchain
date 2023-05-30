@@ -2,11 +2,11 @@
 
 namespace Substrate.DotNet.Service.Node.Base
 {
-   public abstract class TypeBuilderBaseRoslyn : BuilderBaseRoslyn
+   public abstract class TypeBuilderBaseCodeDom : BuilderBaseCodeDom
    {
       public NodeType TypeDef { get; }
 
-      public TypeBuilderBaseRoslyn(string projectName, uint id, NodeType typeDef, NodeTypeResolver resolver)
+      public TypeBuilderBaseCodeDom(string projectName, uint id, NodeType typeDef, NodeTypeResolver resolver)
           : base(projectName, id, resolver)
       {
          TypeDef = typeDef;

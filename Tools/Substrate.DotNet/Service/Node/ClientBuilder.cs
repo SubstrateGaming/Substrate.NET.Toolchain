@@ -1,11 +1,8 @@
-﻿using Substrate.DotNet.Service.Node.Base;
-using Substrate.NetApi;
-using Substrate.NetApi.Model.Extrinsics;
-using Substrate.NetApi.Model.Meta;
-using System;
-using System.CodeDom;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Substrate.DotNet.Service.Node.Base;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -26,87 +23,97 @@ namespace Substrate.DotNet.Service.Node
          ClassName = "SubstrateClientExt";
          NamespaceName = $"{ProjectName}.Generated";
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
+         NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(NamespaceName));
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Meta"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Extrinsics"));
+         // Using Directives
+         namespaceDeclaration = namespaceDeclaration.AddUsings(
+             SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Model.Meta")),
+             SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Model.Extrinsics"))
+         );
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         targetClass.BaseTypes.Add(new CodeTypeReference(typeof(SubstrateClient)));
-         typeNamespace.Types.Add(targetClass);
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword))
+             .WithBaseList(
+                 SyntaxFactory.BaseList().AddTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("Substrate.NetApi.SubstrateClient")))
+             );
 
-         CodeConstructor constructor = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final
-         };
+         // Constructor
+         ConstructorDeclarationSyntax constructor = SyntaxFactory.ConstructorDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .AddParameterListParameters(
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("uri")).WithType(SyntaxFactory.ParseTypeName("System.Uri")),
+                 SyntaxFactory.Parameter(SyntaxFactory.Identifier("chargeType")).WithType(SyntaxFactory.ParseTypeName("ChargeType"))
+             )
+             .WithInitializer(
+                 SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer)
+                 .AddArgumentListArguments(
+                     SyntaxFactory.Argument(SyntaxFactory.IdentifierName("uri")),
+                     SyntaxFactory.Argument(SyntaxFactory.IdentifierName("chargeType"))
+                 )
+             );
 
-         // Add parameters.
-         constructor.Parameters.Add(
-             new CodeParameterDeclarationExpression(typeof(Uri), "uri"));
-         constructor.Parameters.Add(
-            new CodeParameterDeclarationExpression(typeof(ChargeType), "chargeType"));
+         // Field declaration
+         FieldDeclarationSyntax storageKeyField = SyntaxFactory.FieldDeclaration(
+                 SyntaxFactory.VariableDeclaration(
+                     SyntaxFactory.ParseTypeName("Dictionary<System.Tuple<string, string>, System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>>"))
+                 .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("StorageKeyDict"))))
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"StorageKeyDict for key definition informations." }, null));
+         targetClass = targetClass.AddMembers(storageKeyField);
 
-         constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression("uri"));
-         constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression("chargeType"));
+         // Initialize field in constructor
+         constructor = constructor.WithBody(SyntaxFactory.Block(
+             SyntaxFactory.ExpressionStatement(
+                 SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                     SyntaxFactory.IdentifierName("StorageKeyDict"),
+                     SyntaxFactory.ObjectCreationExpression(
+                         SyntaxFactory.ParseTypeName("Dictionary<System.Tuple<string, string>, System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>>"))
+                     .AddArgumentListArguments()))));
 
-         targetClass.Members.Add(constructor);
-
-         CodeMemberField storageKeyField = new()
-         {
-            Attributes = MemberAttributes.Public,
-            Name = "StorageKeyDict",
-            Type = new CodeTypeReference(typeof(Dictionary<Tuple<string, string>, Tuple<Storage.Hasher[], Type, Type>>)),
-         };
-         storageKeyField.Comments.AddRange(GetComments(new string[] { $"{storageKeyField.Name} for key definition informations." }, null, null));
-         targetClass.Members.Add(storageKeyField);
-
-         constructor.Statements.Add(
-             new CodeAssignStatement(
-                 new CodeVariableReferenceExpression(storageKeyField.Name),
-                 new CodeObjectCreateExpression(storageKeyField.Type, Array.Empty<CodeExpression>())));
-
-         //CodeMemberField eventKeyField = new()
-         //{
-         //    Attributes = MemberAttributes.Public | MemberAttributes.Static,
-         //    Name = "EventKeyDict",
-         //    Type = new CodeTypeReference(typeof(Dictionary<Tuple<int, int>, Type>)),
-         //};
-         //eventKeyField.Comments.AddRange(GetComments(new string[] { $"{eventKeyField.Name} for event definition informations." }, null, null));
-         //targetClass.Members.Add(eventKeyField);
-
-         //constructor.Statements.Add(
-         //    new CodeAssignStatement(
-         //        new CodeVariableReferenceExpression(eventKeyField.Name),
-         //        new CodeObjectCreateExpression(eventKeyField.Type, new CodeExpression[] { })));
-
+         // Module related logic
          foreach (string moduleName in ModuleNames)
          {
             string[] pallets = new string[] { "Storage" }; // , "Call"};
 
             foreach (string pallet in pallets)
             {
-               CodeMemberField clientField = new()
-               {
-                  Attributes = MemberAttributes.Public,
-                  Name = moduleName,
-                  Type = new CodeTypeReference(moduleName)
-               };
-               clientField.Comments.AddRange(GetComments(new string[] { $"{moduleName} storage calls." }, null, null));
-               targetClass.Members.Add(clientField);
 
-               CodeFieldReferenceExpression fieldReference =
-                   new(new CodeThisReferenceExpression(), moduleName);
+               // Property declaration
+               PropertyDeclarationSyntax moduleProperty = SyntaxFactory.PropertyDeclaration(
+                       SyntaxFactory.ParseTypeName(moduleName),
+                       SyntaxFactory.Identifier(moduleName))
+                   .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                   .AddAccessorListAccessors(
+                       SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                   )
+                   .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{moduleName} storage calls." }, null));
 
-               var createPallet = new CodeObjectCreateExpression(moduleName);
-               createPallet.Parameters.Add(new CodeThisReferenceExpression());
-               constructor.Statements.Add(new CodeAssignStatement(fieldReference, createPallet));
+
+               // Adding Field to Class
+               targetClass = targetClass.AddMembers(moduleProperty);
+
+               // Initialize field in constructor
+               ExpressionStatementSyntax fieldAssignment = SyntaxFactory.ExpressionStatement(
+                   SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                       SyntaxFactory.IdentifierName(moduleName),
+                       SyntaxFactory.ObjectCreationExpression(SyntaxFactory.ParseTypeName(moduleName))
+                           .AddArgumentListArguments(SyntaxFactory.Argument(SyntaxFactory.ThisExpression()))));
+
+               // Adding statement to constructor's body
+               constructor = constructor.AddBodyStatements(fieldAssignment);
             }
          }
+
+         // Reassigning the updated constructor to the class
+         targetClass = targetClass.RemoveNode(constructor, SyntaxRemoveOptions.KeepNoTrivia);
+         targetClass = targetClass.AddMembers(constructor);
+
+         // Adding Class to Namespace
+         namespaceDeclaration = namespaceDeclaration.RemoveNode(targetClass, SyntaxRemoveOptions.KeepNoTrivia);
+         namespaceDeclaration = namespaceDeclaration.AddMembers(targetClass);
+
+         // Adding Namespace to Compilation Unit
+         TargetUnit = TargetUnit.AddMembers(namespaceDeclaration);
 
          return this;
       }
