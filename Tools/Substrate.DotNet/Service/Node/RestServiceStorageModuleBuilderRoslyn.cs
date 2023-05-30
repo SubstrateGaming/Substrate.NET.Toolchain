@@ -63,13 +63,13 @@ namespace Substrate.DotNet.Service.Node
             .InterfaceDeclaration($"I{ClassName}")
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IStorage")))
-            .WithLeadingTrivia(SyntaxFactory.Comment($"// I{ClassName} interface definition"));
+            .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"I{ClassName} interface definition" }));
 
          // Creating the class declaration
          ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
              .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword))
              .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(targetInterface.Identifier.Text)))
-             .WithLeadingTrivia(SyntaxFactory.Comment($"// {ClassName} class definition"));
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{ClassName} class definition" }));
 
          // Creating the constructor
          ConstructorDeclarationSyntax constructor = SyntaxFactory.ConstructorDeclaration(ClassName)
@@ -106,6 +106,7 @@ namespace Substrate.DotNet.Service.Node
             //var fields = new List<FieldDeclarationSyntax>();
             var props = new List<PropertyDeclarationSyntax>();
 
+            var interfaceMethods = new List<MethodDeclarationSyntax>();
             var onUpdates = new List<MethodDeclarationSyntax>(); 
             var getStorages = new List<MethodDeclarationSyntax>();
 
@@ -119,7 +120,7 @@ namespace Substrate.DotNet.Service.Node
                {
                   NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
                   baseReturnType = SyntaxFactory.ParseTypeName(fullItem.ToString());
-                  returnType = SyntaxFactory.ParseTypeName($"TypedStorage<{fullItem.ToString()}>");
+                  returnType = SyntaxFactory.ParseTypeName($"TypedStorage<{fullItem}>");
 
                   updateExpression = SyntaxFactory.ArgumentList().AddArguments(
                       SyntaxFactory.Argument(SyntaxFactory.IdentifierName(dataParamter.Identifier)));
@@ -133,7 +134,7 @@ namespace Substrate.DotNet.Service.Node
                   NodeTypeResolved key = GetFullItemPath(typeMap.Key);
                   NodeTypeResolved value = GetFullItemPath(typeMap.Value);
                   baseReturnType = SyntaxFactory.ParseTypeName(value.ToString());
-                  returnType = SyntaxFactory.ParseTypeName($"TypedMapStorage<{value.ToString()}>");
+                  returnType = SyntaxFactory.ParseTypeName($"TypedMapStorage<{value}>");
 
                   updateExpression = SyntaxFactory.ArgumentList().AddArguments(
                       SyntaxFactory.Argument(SyntaxFactory.IdentifierName(keyParamter.Identifier)),
@@ -232,11 +233,8 @@ namespace Substrate.DotNet.Service.Node
                // create get and gets
                MethodDeclarationSyntax getInterfaceMethod = SyntaxFactory
                   .MethodDeclaration(baseReturnType, $"Get{entry.Name}")
-                   .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs))
+                   .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name))
                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-
-               targetInterface = targetInterface.AddMembers(getInterfaceMethod);
-
 
                MethodDeclarationSyntax getStorageMethod = SyntaxFactory
                   .MethodDeclaration(baseReturnType, $"Get{entry.Name}")
@@ -262,9 +260,13 @@ namespace Substrate.DotNet.Service.Node
                   onUpdateMethod = onUpdateMethod
                      .AddParameterListParameters(keyParamter, dataParamter);
 
-                  getStorageMethod = getStorageMethod.AddParameterListParameters(
-                      SyntaxFactory.Parameter(dataParamter.Identifier)
+                  getInterfaceMethod = getInterfaceMethod.AddParameterListParameters(
+                      SyntaxFactory.Parameter(keyParamter.Identifier)
                           .WithType(keyParamter.Type));
+
+                  getStorageMethod = getStorageMethod.AddParameterListParameters(
+                   SyntaxFactory.Parameter(dataParamter.Identifier)
+                       .WithType(keyParamter.Type));
 
                   getStorageMethod = getStorageMethod.WithBody(
                    SyntaxFactory.Block(
@@ -292,11 +294,13 @@ namespace Substrate.DotNet.Service.Node
 
                }
 
+               interfaceMethods.Add(getInterfaceMethod);
                onUpdates.Add(onUpdateMethod);
                getStorages.Add(getStorageMethod);
             }
 
             //targetClass = targetClass.AddMembers(fields.ToArray());
+            targetInterface = targetInterface.AddMembers(interfaceMethods.ToArray());
 
             constructor = constructor.WithBody(SyntaxFactory.Block(constructorStatements));
             targetClass = targetClass.AddMembers(constructor);
