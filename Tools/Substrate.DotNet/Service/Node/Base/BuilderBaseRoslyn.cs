@@ -31,8 +31,6 @@ namespace Substrate.DotNet.Service.Node.Base
 
       public string ProjectName { get; private set; }
 
-      public NamespaceDeclarationSyntax ImportsNamespace { get; set; }
-
       public CompilationUnitSyntax TargetUnit { get; set; }
 
       public abstract BuilderBaseRoslyn Create();
@@ -42,7 +40,6 @@ namespace Substrate.DotNet.Service.Node.Base
          ProjectName = projectName;
          Id = id;
          Resolver = resolver;
-         ImportsNamespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("Substrate.NetApi.Model.Types.Base"));
          TargetUnit = SyntaxFactory.CompilationUnit()
             .AddUsings(
                 SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Model.Types.Base")),

@@ -58,7 +58,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                case TypeDefEnum.Composite:
                   {
                      var type = nodeType as NodeTypeComposite;
-                     StructBuilderRoslyn.Init(ProjectName, type.Id, type, resolver)
+                     StructBuilder.Init(ProjectName, type.Id, type, resolver)
                          .Create()
                          .Build(write: write, out bool success, basePath);
                      
@@ -79,7 +79,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                case TypeDefEnum.Array:
                   {
                      var type = nodeType as NodeTypeArray;
-                     ArrayBuilderRoslyn.Create(ProjectName, type.Id, type, resolver)
+                     ArrayBuilder.Create(ProjectName, type.Id, type, resolver)
                          .Create()
                          .Build(write: write, out bool success, basePath);
 
@@ -103,7 +103,7 @@ namespace Substrate.DotNet.Service.Generators.Base
          {
             case "Enum":
                {
-                  EnumBuilderRoslyn.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  EnumBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (!success)
                   {
                      Logger.Error($"Could not build type {nodeType.Id}!");
