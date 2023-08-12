@@ -108,6 +108,18 @@ namespace Substrate.DotNet.Service.Node
                  SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
          targetClass = targetClass.AddMembers(valueProperty);
 
+         PropertyDeclarationSyntax typeSizeProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword)), "TypeSize")
+            .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.OverrideKeyword)))
+            .WithAccessorList(SyntaxFactory.AccessorList(SyntaxFactory.SingletonList(
+                SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                    .WithBody(SyntaxFactory.Block(
+                        SyntaxFactory.SingletonList<StatementSyntax>(
+                            SyntaxFactory.ReturnStatement(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal((int)typeDef.Length)))
+                        )
+                    ))
+            )));
+         targetClass = targetClass.AddMembers(typeSizeProperty);
+
          ReturnStatementSyntax typeNameReturn = SyntaxFactory.ReturnStatement(
              SyntaxFactory.InvocationExpression(
                  SyntaxFactory.MemberAccessExpression(
