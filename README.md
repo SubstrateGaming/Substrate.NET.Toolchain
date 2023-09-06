@@ -61,7 +61,7 @@ dotnet new substrate \
    --net_api PROJECTNAME.NetApiExt \
    --rest_client PROJECTNAME.RestClient \
    --metadata_websocket ws://127.0.0.1:9944 \
-   --generate_openapi_documentation true \
+   --generate_openapi_documentation false \
    --force \
    --allow-scripts yes
 ```
