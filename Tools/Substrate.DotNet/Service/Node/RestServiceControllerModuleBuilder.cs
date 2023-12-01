@@ -1,10 +1,14 @@
-﻿using Substrate.DotNet.Extensions;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Substrate.DotNet.Extensions;
 using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -25,178 +29,217 @@ namespace Substrate.DotNet.Service.Node
 
       public override RestServiceControllerModuleBuilder Create()
       {
-
          if (Module.Storage == null)
          {
             Success = false;
             return this;
          }
 
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Storage"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Microsoft.AspNetCore.Mvc"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.ServiceLayer.Attributes"));
          FileName = Module.Storage.Prefix + "Controller";
          ReferenzName = $"{ProjectName}.Generated.Controller.{FileName}";
          NamespaceName = $"{ProjectName}.Generated.Controller";
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
+         SyntaxList<UsingDirectiveSyntax> usingDirectives = new SyntaxList<UsingDirectiveSyntax>()
+             .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName($"{ProjectName}.Generated.Storage")))
+             .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Microsoft.AspNetCore.Mvc")))
+             .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Threading.Tasks")))
+             .Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.ServiceLayer.Attributes")));
 
-         CreateController(typeNamespace);
+         NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory
+            .NamespaceDeclaration(SyntaxFactory.ParseName(NamespaceName));
+
+         CreateController(namespaceDeclaration);
+
+         TargetUnit = TargetUnit.AddUsings(usingDirectives.ToArray());
 
          return this;
       }
 
-      private void CreateController(CodeNamespace typeNamespace)
+      private void CreateController(NamespaceDeclarationSyntax namespaceDeclaration)
       {
          ClassName = FileName;
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+         // Create ControllerBase attribute
+         AttributeListSyntax baseAttribute = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(
+                 SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("ApiController()"))));
 
-         };
-         targetClass.BaseTypes.Add(new CodeTypeReference("ControllerBase"));
-         targetClass.Comments.AddRange(GetComments(new string[] { $"{ClassName} controller to access storages." }));
+         // Create Route attribute
+         AttributeListSyntax routeAttribute = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(
+                 SyntaxFactory.Attribute(
+                     SyntaxFactory.IdentifierName("Route"),
+                     SyntaxFactory.AttributeArgumentList(SyntaxFactory.SingletonSeparatedList(
+                         SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("[controller]"))))))));
 
+         // Creating class declaration
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword))
+             .AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.IdentifierName("ControllerBase")))
+             .AddAttributeLists(baseAttribute, routeAttribute)
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{ClassName} controller to access storages." }));
 
-         typeNamespace.Types.Add(targetClass);
-         targetClass.CustomAttributes.Add(
-             new CodeAttributeDeclaration("ApiController"));
-         targetClass.CustomAttributes.Add(
-             new CodeAttributeDeclaration("Route",
-             new CodeAttributeArgument[] {
-                        new CodeAttributeArgument(new CodePrimitiveExpression("[controller]"))
-             }));
-
+         // Assuming that fieldName and Module.Storage.Prefix are string variables
          string fieldName = $"{Module.Storage.Prefix}Storage";
-         CodeMemberField field = new()
-         {
-            Attributes = MemberAttributes.Private,
-            Name = fieldName.MakePrivateField(),
-            Type = new CodeTypeReference($"I{fieldName}")
-         };
-         targetClass.Members.Add(field);
+         string fieldNamePublic = char.ToLower(fieldName[0]) + fieldName.Substring(1);
+         string fieldNamePrivate = "_" + fieldNamePublic;
 
-         CodeConstructor constructor = new()
-         {
-            Attributes =
-             MemberAttributes.Public | MemberAttributes.Final
-         };
-         targetClass.Members.Add(constructor);
-         constructor.Comments.AddRange(GetComments(new string[] { $"{ClassName} constructor." }));
-
-         constructor.Parameters.Add(new CodeParameterDeclarationExpression($"I{fieldName}", fieldName.MakePublicField()));
-
-         // constructor initialize storage properties
-         constructor.Statements.Add(new CodeAssignStatement(
-             new CodeVariableReferenceExpression(field.Name),
-             new CodeVariableReferenceExpression(fieldName.MakePublicField())));
+         // Field declaration
+         FieldDeclarationSyntax field = SyntaxFactory.FieldDeclaration(
+             SyntaxFactory.VariableDeclaration(
+                 SyntaxFactory.IdentifierName($"I{fieldName}"),
+                 SyntaxFactory.SingletonSeparatedList(
+                     SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(fieldNamePrivate)))))
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
 
 
+         targetClass = targetClass.AddMembers(field);
+
+         // Create constructor
+         ConstructorDeclarationSyntax constructor = SyntaxFactory
+            .ConstructorDeclaration(SyntaxFactory.Identifier(ClassName))
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .WithLeadingTrivia(GetCommentsRoslyn(new string[] { $"{ClassName} constructor." }))
+            .WithParameterList(
+               SyntaxFactory.ParameterList(
+                  SyntaxFactory.SeparatedList(new[] {
+                    SyntaxFactory.Parameter(SyntaxFactory.Identifier(fieldNamePublic))
+                    .WithType(SyntaxFactory.ParseTypeName($"I{fieldName}"))
+                  })))
+             .WithBody(
+                 SyntaxFactory.Block(
+                     SyntaxFactory.ExpressionStatement(
+                         SyntaxFactory.AssignmentExpression(
+                             SyntaxKind.SimpleAssignmentExpression,
+                             SyntaxFactory.IdentifierName(fieldNamePrivate),
+                             SyntaxFactory.IdentifierName(fieldNamePublic)))));
+         // Add constructor to class
+         targetClass = targetClass.AddMembers(constructor);
+
+
+         // Assuming you have a method that accepts a string and returns a MethodDeclarationSyntax object
+         // Iterate over the storage entries and create the methods
          if (Module.Storage.Entries != null)
          {
             foreach (Entry entry in Module.Storage.Entries)
             {
-               CodeParameterDeclarationExpression parameterDeclaration;
-               CodeTypeReference baseReturnType;
-               CodeExpression[] codeExpressions;
-               if (entry.StorageType == Storage.Type.Plain)
-               {
-                  NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
-                  baseReturnType = new CodeTypeReference(fullItem.ToString());
-                  parameterDeclaration = null;
-                  codeExpressions = Array.Empty<CodeExpression>();
-               }
-               else if (entry.StorageType == Storage.Type.Map)
-               {
-                  TypeMap typeMap = entry.TypeMap.Item2;
-                  Storage.Hasher[] hashers = typeMap.Hashers;
-                  NodeTypeResolved value = GetFullItemPath(typeMap.Value);
-                  baseReturnType = new CodeTypeReference(value.ToString());
-                  parameterDeclaration = new CodeParameterDeclarationExpression(typeof(string), "key");
-                  codeExpressions = new CodeExpression[] {
-                                new CodeVariableReferenceExpression(parameterDeclaration.Name)
-                            };
-               }
-               else
-               {
-                  throw new NotImplementedException();
-               }
+               // Assuming CreateMethod is a method that creates a MethodDeclarationSyntax object for a given entry
+               MethodDeclarationSyntax methodDeclaration = CreateMethod(fieldNamePrivate, entry);
+               methodDeclaration = methodDeclaration
+                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name));
 
-               // create get and gets
-               CodeMemberMethod getStorageMethod = new()
-               {
-                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
-                  Name = $"Get{entry.Name}",
-                  ReturnType = new CodeTypeReference("IActionResult")
-               };
-               getStorageMethod.Comments.AddRange(GetComments(entry.Docs, null, entry.Name));
-               getStorageMethod.CustomAttributes.Add(
-                   new CodeAttributeDeclaration("HttpGet",
-                   new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodePrimitiveExpression(entry.Name))
-                   })
-               );
-               getStorageMethod.CustomAttributes.Add(
-                   new CodeAttributeDeclaration("ProducesResponseType",
-                   new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodeTypeOfExpression(baseReturnType)),
-                                new CodeAttributeArgument(new CodePrimitiveExpression(200))
-                   }));
-
-               if (entry.StorageType == Storage.Type.Plain)
-               {
-                  string prefixName = Module.Name == "System" ? "Frame" : "Pallet";
-
-                  getStorageMethod.CustomAttributes.Add(
-                      new CodeAttributeDeclaration("StorageKeyBuilder",
-                      new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Storage.{Module.Name}Storage")),
-                                new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params"))
-                      }));
-               }
-               else if (entry.StorageType == Storage.Type.Map)
-               {
-                  string prefixName = Module.Name == "System" ? "Frame" : "Pallet";
-
-                  getStorageMethod.CustomAttributes.Add(
-                      new CodeAttributeDeclaration("StorageKeyBuilder",
-                      new CodeAttributeArgument[] {
-                                new CodeAttributeArgument(new CodeTypeOfExpression($"{NetApiProjectName}.Generated.Storage.{Module.Name}Storage")),
-                                new CodeAttributeArgument(new CodePrimitiveExpression($"{entry.Name}Params")),
-                                new CodeAttributeArgument(new CodeTypeOfExpression(GetFullItemPath(entry.TypeMap.Item2.Key).ToString()))
-                      }));
-               }
-               else
-               {
-                  throw new NotImplementedException();
-               }
-
-
-               if (parameterDeclaration != null)
-               {
-                  getStorageMethod.Parameters.Add(parameterDeclaration);
-               }
-
-               getStorageMethod.Statements.Add(
-                   new CodeMethodReturnStatement(new CodeMethodInvokeExpression(
-                       new CodeThisReferenceExpression(),
-                       "Ok",
-                       new CodeExpression[] { new CodeMethodInvokeExpression(
-                                    new CodeVariableReferenceExpression(field.Name),
-                                    getStorageMethod.Name,
-                                    codeExpressions
-                                    )}
-                       )));
-
-               targetClass.Members.Add(getStorageMethod);
-
-
+               targetClass = targetClass.AddMembers(methodDeclaration);
             }
          }
+
+         namespaceDeclaration = namespaceDeclaration.AddMembers(targetClass);
+
+         TargetUnit = TargetUnit.AddMembers(namespaceDeclaration);
       }
+
+      private MethodDeclarationSyntax CreateMethod(string fieldNamePrivate, Entry entry)
+      {
+         // Prepare the method parameters and return type based on the entry.StorageType
+         TypeSyntax baseReturnType;
+         var methodParameters = new List<ParameterSyntax>();
+
+         ExpressionSyntax invokeExpression;
+
+         if (entry.StorageType == Storage.Type.Plain)
+         {
+            NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
+            baseReturnType = SyntaxFactory.ParseTypeName(fullItem.ToString());
+            invokeExpression = SyntaxFactory.IdentifierName("");
+         }
+         else if (entry.StorageType == Storage.Type.Map)
+         {
+            TypeMap typeMap = entry.TypeMap.Item2;
+            Storage.Hasher[] hashers = typeMap.Hashers;
+            NodeTypeResolved value = GetFullItemPath(typeMap.Value);
+            baseReturnType = SyntaxFactory.ParseTypeName(value.ToString());
+
+            methodParameters.Add(SyntaxFactory.Parameter(SyntaxFactory.Identifier("key"))
+                .WithType(SyntaxFactory.ParseTypeName("string")));
+
+            invokeExpression = SyntaxFactory.IdentifierName("key");
+         }
+         else
+         {
+            throw new NotImplementedException();
+         }
+
+         string indentifier = $"Get{entry.Name}";
+
+         MethodDeclarationSyntax getStorageMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("IActionResult"), indentifier)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+             .WithBody(SyntaxFactory.Block(
+                 SyntaxFactory.ReturnStatement(
+                     SyntaxFactory.InvocationExpression(
+                         SyntaxFactory.IdentifierName("Ok"),
+                         SyntaxFactory.ArgumentList(
+                             SyntaxFactory.SingletonSeparatedList(
+                                 SyntaxFactory.Argument(
+                                     SyntaxFactory.InvocationExpression(
+                                         SyntaxFactory.MemberAccessExpression(
+                                             SyntaxKind.SimpleMemberAccessExpression,
+                                             SyntaxFactory.IdentifierName(fieldNamePrivate),
+                                             SyntaxFactory.IdentifierName(indentifier)),
+                                         SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Argument(invokeExpression)))))))))));
+
+
+
+         // Add parameters to method
+         foreach (ParameterSyntax parameter in methodParameters)
+         {
+            getStorageMethod = getStorageMethod.AddParameterListParameters(parameter);
+         }
+
+         // Add HttpGet attribute
+         AttributeListSyntax getAttribute = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(
+                 SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("HttpGet"),
+                 SyntaxFactory.AttributeArgumentList(SyntaxFactory.SingletonSeparatedList(
+                     SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(entry.Name))))))));
+         getStorageMethod = getStorageMethod.AddAttributeLists(getAttribute);
+
+         // Add ProducesResponseType attribute
+         AttributeListSyntax responseAttribute = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(
+                 SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("ProducesResponseType"),
+                 SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(new[] {
+                SyntaxFactory.AttributeArgument(SyntaxFactory.TypeOfExpression(baseReturnType)),
+                SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(200))) })))));
+         getStorageMethod = getStorageMethod.AddAttributeLists(responseAttribute);
+
+         // Add StorageKeyBuilder attribute
+         AttributeListSyntax storageAttribute;
+
+         if (entry.StorageType == Storage.Type.Plain)
+         {
+            string prefixName = Module.Name == "System" ? "Frame" : "Pallet";
+
+            storageAttribute = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("StorageKeyBuilder"),
+                    SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(new[] {
+                    SyntaxFactory.AttributeArgument(SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName($"{NetApiProjectName}.Generated.Storage.{Module.Name}Storage"))),
+                    SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal($"{entry.Name}Params"))) })))));
+         }
+         else if (entry.StorageType == Storage.Type.Map)
+         {
+            string prefixName = Module.Name == "System" ? "Frame" : "Pallet";
+
+            storageAttribute = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("StorageKeyBuilder"),
+                    SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(new[] {
+                    SyntaxFactory.AttributeArgument(SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName($"{NetApiProjectName}.Generated.Storage.{Module.Name}Storage"))),
+                    SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal($"{entry.Name}Params"))),
+                    SyntaxFactory.AttributeArgument(SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName(GetFullItemPath(entry.TypeMap.Item2.Key).ToString()))) })))));
+         }
+         else
+         {
+            throw new NotImplementedException();
+         }
+
+         getStorageMethod = getStorageMethod.AddAttributeLists(storageAttribute);
+
+         return getStorageMethod;
+      }
+
    }
 }

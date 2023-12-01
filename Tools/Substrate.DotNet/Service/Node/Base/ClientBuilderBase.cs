@@ -1,4 +1,6 @@
-﻿using System.CodeDom;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.CodeDom;
 using System.Collections.Generic;
 
 namespace Substrate.DotNet.Service.Node.Base
@@ -7,12 +9,13 @@ namespace Substrate.DotNet.Service.Node.Base
    {
       public List<string> ModuleNames { get; }
 
-      public ClientBuilderBase(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict)
+      protected ClientBuilderBase(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict)
           : base(projectName, id, typeDict)
       {
          ModuleNames = moduleNames;
-         NamespaceName = $"{ProjectName}.Generated";
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"{ProjectName}.Generated.Storage"));
+
+         TargetUnit = TargetUnit.AddUsings(
+                SyntaxFactory.UsingDirective(SyntaxFactory.ParseName($"{ProjectName}.Generated.Storage")));
       }
    }
 }

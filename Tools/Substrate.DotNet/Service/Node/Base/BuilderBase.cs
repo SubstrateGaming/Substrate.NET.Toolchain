@@ -1,20 +1,23 @@
-﻿using Substrate.NetApi.Model.Meta;
-using System.CodeDom;
-using System.CodeDom.Compiler;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Substrate.NetApi.Model.Meta;
+using System;
+using Serilog;
+using System.Net.NetworkInformation;
 
 namespace Substrate.DotNet.Service.Node.Base
 {
-
    public abstract class BuilderBase
    {
-      public static readonly List<string> Files = new();
+      protected static readonly List<string> Files = new();
 
       public uint Id { get; }
-      
-      NodeTypeResolver Resolver { get; }
+
+      protected NodeTypeResolver Resolver { get; }
 
       public bool Success { get; set; }
 
@@ -28,28 +31,31 @@ namespace Substrate.DotNet.Service.Node.Base
 
       public string ProjectName { get; private set; }
 
-      public CodeNamespace ImportsNamespace { get; set; }
-
-      public CodeCompileUnit TargetUnit { get; set; }
+      public CompilationUnitSyntax TargetUnit { get; set; }
 
       public abstract BuilderBase Create();
 
-      public BuilderBase(string projectName, uint id, NodeTypeResolver resolver)
+      protected BuilderBase(string projectName, uint id, NodeTypeResolver resolver)
       {
          ProjectName = projectName;
          Id = id;
          Resolver = resolver;
-         ImportsNamespace = new()
-         {
-            Imports = {
-               new CodeNamespaceImport("Substrate.NetApi.Model.Types.Base"),
-               new CodeNamespaceImport("System.Collections.Generic")
-                           }
-         };
-         TargetUnit = new CodeCompileUnit();
-         TargetUnit.Namespaces.Add(ImportsNamespace);
-
+         TargetUnit = SyntaxFactory.CompilationUnit()
+            .AddUsings(
+                SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Model.Types.Base")),
+                SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")));
          Success = true;
+      }
+
+      public static string EscapeIfKeyword(string parameterName)
+      {
+         if (SyntaxFacts.GetKeywordKind(parameterName) != SyntaxKind.None)
+         {
+            // If it is a keyword, create a verbatim identifier which adds '@' prefix
+            parameterName = "@" + parameterName;
+         }
+
+         return parameterName;
       }
 
       public NodeTypeResolved GetFullItemPath(uint typeId)
@@ -63,87 +69,29 @@ namespace Substrate.DotNet.Service.Node.Base
          return fullItem;
       }
 
-      public static CodeCommentStatementCollection GetComments(string[] docs, NodeType typeDef = null,
-          string typeName = null)
-      {
-         CodeCommentStatementCollection comments = new()
-         {
-            new CodeCommentStatement("<summary>", true)
-         };
-
-         if (typeDef != null)
-         {
-            string path = typeDef.Path != null ? "[" + string.Join('.', typeDef.Path) + "]" : "";
-            comments.Add(new CodeCommentStatement($">> {typeDef.Id} - {typeDef.TypeDef}{path}", true));
-         }
-
-         if (typeName != null)
-         {
-            comments.Add(new CodeCommentStatement($">> {typeName}", true));
-         }
-
-         if (docs != null)
-         {
-            foreach (string doc in docs)
-            {
-               comments.Add(new CodeCommentStatement(doc, true));
-            }
-         }
-
-         comments.Add(new CodeCommentStatement("</summary>", true));
-         return comments;
-      }
-
-      public static CodeMemberMethod SimpleMethod(string name, string returnType = null, object returnExpression = null)
-      {
-         CodeMemberMethod nameMethod = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Override,
-            Name = name
-         };
-
-         if (returnType != null)
-         {
-            nameMethod.ReturnType = new CodeTypeReference(returnType);
-            CodeMethodReturnStatement nameReturnStatement = new()
-            {
-               Expression = new CodePrimitiveExpression(returnExpression)
-            };
-            nameMethod.Statements.Add(nameReturnStatement);
-         }
-
-         return nameMethod;
-      }
-
       public virtual void Build(bool write, out bool success, string basePath = null)
       {
          success = Success;
          if (write && Success)
          {
-            var provider = CodeDomProvider.CreateProvider("CSharp");
-            CodeGeneratorOptions options = new()
-            {
-               BracingStyle = "C"
-            };
-
             string path = GetPath(basePath);
 
             Directory.CreateDirectory(Path.GetDirectoryName(path));
 
-            if (Files.Contains(path))
-            {
-               // TODO (svnscha) Why does this happen?
-               // Console.WriteLine($"Overwriting[BUG]: {path}");
-               //path += _index++;
-            }
-            else
+            if (!Files.Contains(path))
             {
                Files.Add(path);
             }
+            else
+            {
+               Log.Warning($"Overwriting[BUG]: {path}");
+            }
+
+            // add autogenerated header
+            TargetUnit = TargetUnit.WithLeadingTrivia(SyntaxFactory.TriviaList(HeaderComment));
 
             using StreamWriter sourceWriter = new(path);
-            provider.GenerateCodeFromCompileUnit(
-                TargetUnit, sourceWriter, options);
+            sourceWriter.Write(TargetUnit.NormalizeWhitespace().ToFullString());
          }
       }
 
@@ -153,7 +101,7 @@ namespace Substrate.DotNet.Service.Node.Base
 
          space.Add((FileName is null ? ClassName : FileName) + ".cs");
 
-         // Remove the first two parts of the namespace to avoid the files being created in the Substrate/NetApi sub folder. 
+         // Remove the first two parts of the namespace to avoid the files being created in the Substrate/NetApi sub folder.
          space = space.TakeLast(space.Count - 2).ToList();
 
          // Add base path at the beginning of the paths list
@@ -167,16 +115,83 @@ namespace Substrate.DotNet.Service.Node.Base
          return path;
       }
 
-      protected void AddTargetClassCustomAttributes(CodeTypeDeclaration targetClass, NodeType typeDef)
+      protected ClassDeclarationSyntax AddTargetClassCustomAttributesRoslyn(ClassDeclarationSyntax targetClass, NodeType typeDef)
       {
          // TODO (svnscha): Change version to given metadata version.
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Types.Metadata.V14"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi.Attributes"));
+         TargetUnit = TargetUnit.AddUsings(
+                SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Model.Types.Metadata.V14")),
+                SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Substrate.NetApi.Attributes")));
 
-         targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("SubstrateNodeType"), new CodeAttributeArgument(
-            new CodeSnippetExpression($"TypeDefEnum.{typeDef.TypeDef}")
-         )));
+         AttributeArgumentSyntax attributeArgument = SyntaxFactory.AttributeArgument(
+             SyntaxFactory.ParseExpression($"TypeDefEnum.{typeDef.TypeDef}"));
 
+         AttributeListSyntax attributeList = SyntaxFactory.AttributeList(
+             SyntaxFactory.SingletonSeparatedList(
+                 SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("SubstrateNodeType"), SyntaxFactory.AttributeArgumentList(SyntaxFactory.SingletonSeparatedList(attributeArgument)))));
+
+         return targetClass.AddAttributeLists(attributeList);
       }
+
+      public static MethodDeclarationSyntax SimpleMethodRoslyn(string name, string returnType = null, object returnExpression = null)
+      {
+         MethodDeclarationSyntax nameMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName(returnType ?? "void"), name)
+             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.OverrideKeyword));
+
+         if (returnType != null && returnExpression != null)
+         {
+            nameMethod = nameMethod.WithBody(SyntaxFactory.Block(
+                SyntaxFactory.ReturnStatement(SyntaxFactory.ParseExpression($"\"{returnExpression}\""))
+            ));
+         }
+
+         return nameMethod;
+      }
+
+      public static SyntaxTriviaList GetCommentsRoslyn(string[] docs, NodeType typeDef = null, string typeName = null)
+      {
+         var commentList = new List<SyntaxTrivia>
+         {
+            SyntaxFactory.Comment("/// <summary>")
+         };
+
+         if (typeDef != null)
+         {
+            string path = typeDef.Path != null ? "[" + string.Join('.', typeDef.Path) + "]" : "";
+            commentList.Add(SyntaxFactory.Comment($"/// >> {typeDef.Id} - {typeDef.TypeDef}{path}"));
+         }
+
+         if (typeName != null)
+         {
+            commentList.Add(SyntaxFactory.Comment($"/// >> {typeName}"));
+         }
+
+         if (docs != null)
+         {
+            foreach (string doc in docs)
+            {
+               string[] lines = doc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+               foreach (string line in lines)
+               {
+                  commentList.Add(SyntaxFactory.Comment($"/// {line}"));
+               }
+            }
+         }
+
+         commentList.Add(SyntaxFactory.Comment("/// </summary>"));
+
+         return SyntaxFactory.TriviaList(commentList);
+      }
+
+      public static SyntaxTrivia HeaderComment => SyntaxFactory.Comment(
+@"//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------");
+
    }
 }

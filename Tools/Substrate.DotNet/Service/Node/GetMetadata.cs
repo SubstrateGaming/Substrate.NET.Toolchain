@@ -1,10 +1,10 @@
 ﻿#nullable enable
 
+using Serilog;
 using Substrate.NetApi;
 using Substrate.NetApi.Model.Extrinsics;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Types.Metadata;
-using Serilog;
 using System;
 using System.IO;
 using System.Threading;

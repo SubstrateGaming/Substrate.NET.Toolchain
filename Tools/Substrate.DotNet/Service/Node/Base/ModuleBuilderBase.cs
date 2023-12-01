@@ -12,7 +12,7 @@ namespace Substrate.DotNet.Service.Node.Base
 
       public string PrefixName { get; private set; }
 
-      public ModuleBuilderBase(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict,
+      protected ModuleBuilderBase(string projectName, uint id, PalletModule module, NodeTypeResolver typeDict,
           Dictionary<uint, NodeType> nodeTypes)
           : base(projectName, id, typeDict)
       {

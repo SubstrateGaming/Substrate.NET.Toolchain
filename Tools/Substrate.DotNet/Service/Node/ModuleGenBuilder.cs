@@ -1,13 +1,13 @@
-﻿using Substrate.DotNet.Extensions;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Substrate.DotNet.Extensions;
 using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Extrinsics;
 using Substrate.NetApi.Model.Meta;
-using Substrate.NetApi.Model.Types;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -25,214 +25,202 @@ namespace Substrate.DotNet.Service.Node
 
       public override ModuleGenBuilder Create()
       {
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading.Tasks"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi.Model.Meta"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("System.Threading"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi.Model.Types"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi.Model.Extrinsics"));
+         UsingDirectiveSyntax[] usings = new[]
+         {
+            "System.Threading.Tasks",
+            "Substrate.NetApi.Model.Meta",
+            "System.Threading",
+            "Substrate.NetApi",
+            "Substrate.NetApi.Model.Types",
+            "Substrate.NetApi.Model.Extrinsics",
+         }.Select(u => SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(u))).ToArray();
 
          FileName = "Main" + Module.Name;
          NamespaceName = $"{ProjectName}.Generated.Storage";
          ReferenzName = NamespaceName;
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
+         NamespaceDeclarationSyntax typeNamespace = SyntaxFactory
+            .NamespaceDeclaration(SyntaxFactory.ParseName(NamespaceName));
 
-         // add constructor
-         CodeConstructor constructor = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final
-         };
+         typeNamespace = CreateStorage(typeNamespace);
+         typeNamespace = CreateCalls(typeNamespace);
+         typeNamespace = CreateEvents(typeNamespace);
+         typeNamespace = CreateConstants(typeNamespace);
+         typeNamespace = CreateErrors(typeNamespace);
 
-         CreateStorage(typeNamespace, constructor);
-         CreateCalls(typeNamespace);
-         CreateEvents(typeNamespace);
-         CreateConstants(typeNamespace);
-         CreateErrors(typeNamespace);
+         TargetUnit = TargetUnit
+            .AddUsings(usings)
+            .AddMembers(typeNamespace);
 
          return this;
       }
 
-      private void CreateStorage(CodeNamespace typeNamespace, CodeConstructor constructor)
+      private NamespaceDeclarationSyntax CreateStorage(NamespaceDeclarationSyntax typeNamespace)
       {
          ClassName = Module.Name + "Storage";
 
          PalletStorage storage = Module.Storage;
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         typeNamespace.Types.Add(targetClass);
+         ConstructorDeclarationSyntax constructor = SyntaxFactory
+            .ConstructorDeclaration(ClassName)
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .WithBody(SyntaxFactory.Block());
 
-         // Declare the client field.
-         var clientField = new CodeMemberField
-         {
-            Attributes = MemberAttributes.Private,
-            Name = "_client",
-            Type = new CodeTypeReference("SubstrateClientExt")
-         };
-         clientField.Comments.Add(new CodeCommentStatement("Substrate client for the storage calls."));
-         targetClass.Members.Add(clientField);
+         // Create the class
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+              .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword)));
+
+         // Create the client field.
+         FieldDeclarationSyntax clientField = SyntaxFactory.FieldDeclaration(
+                 SyntaxFactory.VariableDeclaration(
+                     SyntaxFactory.ParseTypeName("SubstrateClientExt"))
+                 .WithVariables(
+                     SyntaxFactory.SingletonSeparatedList(
+                         SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("_client")))))
+             .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PrivateKeyword)))
+             .WithLeadingTrivia(GetCommentsRoslyn(new string[] { "Substrate client for the storage calls." }));
+         targetClass = targetClass.AddMembers(clientField);
 
          // Add parameters.
-         constructor.Parameters.Add(new CodeParameterDeclarationExpression(
-             clientField.Type, "client"));
-         CodeFieldReferenceExpression fieldReference =
-             new(new CodeThisReferenceExpression(), "_client");
-         constructor.Statements.Add(new CodeAssignStatement(fieldReference,
-             new CodeArgumentReferenceExpression("client")));
+         constructor = constructor.AddParameterListParameters(
+             SyntaxFactory.Parameter(SyntaxFactory.Identifier("client"))
+                 .WithType(SyntaxFactory.ParseTypeName(clientField.Declaration.Type.ToString())));
 
-         targetClass.Members.Add(constructor);
+         // Assignment statement for the constructor.
+         constructor = constructor.AddBodyStatements(
+             SyntaxFactory.ExpressionStatement(
+                 SyntaxFactory.AssignmentExpression(
+                     SyntaxKind.SimpleAssignmentExpression,
+                     SyntaxFactory.IdentifierName("_client"),
+                     SyntaxFactory.IdentifierName("client"))));
 
          if (storage?.Entries != null)
          {
             foreach (Entry entry in storage.Entries)
             {
                string storageParams = entry.Name + "Params";
-               CodeMemberMethod parameterMethod = new()
-               {
-                  Attributes = MemberAttributes.Static | MemberAttributes.Public | MemberAttributes.Final,
-                  Name = storageParams,
-                  ReturnType = new CodeTypeReference(typeof(string))
-               };
-               // add comment to class if exists
-               parameterMethod.Comments.AddRange(GetComments(entry.Docs, null, storageParams));
-               targetClass.Members.Add(parameterMethod);
 
-               // default function
-               if (entry.Default != null || entry.Default.Length != 0)
-               {
-                  string storageDefault = entry.Name + "Default";
-                  CodeMemberMethod defaultMethod = new()
-                  {
-                     Attributes = MemberAttributes.Static | MemberAttributes.Public | MemberAttributes.Final,
-                     Name = storageDefault,
-                     ReturnType = new CodeTypeReference(typeof(string))
-                  };
-                  // add comment to class if exists
-                  defaultMethod.Comments.AddRange(GetComments(new string[] { "Default value as hex string" }, null, storageDefault));
-                  targetClass.Members.Add(defaultMethod);
-                  // add return statement
-                  defaultMethod.Statements.Add(new CodeMethodReturnStatement(
-                     new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty))));
-               }
+               // Create static method
+               MethodDeclarationSyntax parameterMethod = SyntaxFactory
+                  .MethodDeclaration(SyntaxFactory.ParseTypeName("string"), storageParams)
+                  .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
+                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, storageParams)); // Assuming GetComments() returns a string
 
-               // async Task<object>
-               CodeMemberMethod storageMethod = new()
-               {
-                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
-                  Name = entry.Name,
-               };
-               // add comment to class if exists
-               storageMethod.Comments.AddRange(GetComments(entry.Docs, null, entry.Name));
-
-               targetClass.Members.Add(storageMethod);
+               MethodDeclarationSyntax storageMethod;
+               ExpressionStatementSyntax methodInvoke;
+               NodeTypeResolved returnValueStr;
 
                if (entry.StorageType == Storage.Type.Plain)
                {
-                  NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
+                  returnValueStr = GetFullItemPath(entry.TypeMap.Item1);
 
-                  parameterMethod.Statements.Add(new CodeMethodReturnStatement(
-                      ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
+                  storageMethod = SyntaxFactory
+                     .MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<{returnValueStr}>"), entry.Name);
 
-                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem}>");
+                  parameterMethod = parameterMethod.AddBodyStatements(
+                     SyntaxFactory.ReturnStatement(GetStorageStringRoslyn(storage.Prefix, entry.Name, entry.StorageType)));
 
-                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
-
-                  CodeMethodInvokeExpression methodInvoke = new(
-                      new CodeTypeReferenceExpression(targetClass.Name),
-                      parameterMethod.Name, Array.Empty<CodeExpression>());
-
-                  CodeVariableDeclarationStatement variableDeclaration1 = new(typeof(string), "parameters", methodInvoke);
-                  storageMethod.Statements.Add(variableDeclaration1);
-
-                  // create result
-                  var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.ToString()));
-                  CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
-                  storageMethod.Statements.Add(variableDeclaration2);
-
-                  // return statement
-                  storageMethod.Statements.Add(
-                     new CodeMethodReturnStatement(
-                        new CodeVariableReferenceExpression("result")));
+                  methodInvoke = SyntaxFactory.ExpressionStatement(SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName(parameterMethod.Identifier)));
 
                   // add storage key mapping in constructor
-                  constructor.Statements.Add(
-                      ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString("", fullItem.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
+                  constructor = constructor
+                     .AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn("", returnValueStr.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
                   TypeMap typeMap = entry.TypeMap.Item2;
                   Storage.Hasher[] hashers = typeMap.Hashers;
                   NodeTypeResolved key = GetFullItemPath(typeMap.Key);
-                  NodeTypeResolved value = GetFullItemPath(typeMap.Value);
+                  returnValueStr = GetFullItemPath(typeMap.Value);
 
-                  parameterMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
-                  parameterMethod.Statements.Add(new CodeMethodReturnStatement(
-                      ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
+                  storageMethod = SyntaxFactory
+                     .MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<{returnValueStr}>"), entry.Name);
 
-                  storageMethod.ReturnType = new CodeTypeReference($"async Task<{value}>");
-                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
-                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
+                  parameterMethod = parameterMethod
+                     .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("key"))
+                     .WithType(SyntaxFactory.ParseTypeName(key.ToString())))
+                     .AddBodyStatements(SyntaxFactory.ReturnStatement(GetStorageStringRoslyn(storage.Prefix, entry.Name, entry.StorageType, hashers)));
 
-                  CodeMethodInvokeExpression methodInvoke = new(new CodeTypeReferenceExpression(targetClass.Name), parameterMethod.Name,
-                      new CodeExpression[] { new CodeArgumentReferenceExpression("key") });
-                  CodeVariableDeclarationStatement variableDeclaration = new(typeof(string), "parameters", methodInvoke);
-                  storageMethod.Statements.Add(variableDeclaration);
+                  storageMethod = storageMethod
+                     .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("key"))
+                     .WithType(SyntaxFactory.ParseTypeName(key.ToString())));
 
-                  // create result
-                  var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.ToString()));
-                  CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
-                  storageMethod.Statements.Add(variableDeclaration2);
+                  ArgumentListSyntax argumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(new[] { SyntaxFactory.Argument(SyntaxFactory.IdentifierName("key")) }));
 
-                  // default handling
-                  //if (entry.Default != null || entry.Default.Length != 0)
-                  //{
-                  //   var conditionalStatement = new CodeConditionStatement(
-                  //    new CodeBinaryOperatorExpression(
-                  //      new CodeVariableReferenceExpression("result"),
-                  //      CodeBinaryOperatorType.ValueEquality,
-                  //      new CodePrimitiveExpression(null)),
-                  //    new CodeStatement[] {
-                  //      new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( value.ToString(), Array.Empty<CodeExpression>() )),
-                  //      new CodeExpressionStatement(
-                  //          new CodeMethodInvokeExpression(
-                  //            new CodeVariableReferenceExpression("result"), "Create",
-                  //            new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
-                  //   storageMethod.Statements.Add(conditionalStatement);
-                  //}
-
-                  // return statement
-                  storageMethod.Statements.Add(
-                      new CodeMethodReturnStatement(
-                          new CodeVariableReferenceExpression("result")));
+                  methodInvoke = SyntaxFactory.ExpressionStatement(
+                     SyntaxFactory.InvocationExpression(SyntaxFactory.IdentifierName(parameterMethod.Identifier), argumentList));
 
                   // add storage key mapping in constructor
-                  constructor.Statements.Add(ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString(key.ToString(), value.ToString(), storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
+                  constructor = constructor.AddBodyStatements(AddPropertyValuesRoslyn(GetStorageMapStringRoslyn(key.ToString(), returnValueStr.ToString(), storage.Prefix, entry.Name, hashers), "_client.StorageKeyDict"));
                }
                else
                {
                   throw new NotImplementedException();
                }
+
+               storageMethod = storageMethod
+                  .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.AsyncKeyword)))
+                  .WithLeadingTrivia(GetCommentsRoslyn(entry.Docs, null, entry.Name)); // Assuming GetComments() returns a string
+
+               storageMethod = storageMethod
+                  .AddParameterListParameters(SyntaxFactory.Parameter(SyntaxFactory.Identifier("token")).WithType(SyntaxFactory.ParseTypeName("CancellationToken")));
+
+               VariableDeclarationSyntax variableDeclaration1 = SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("string"))
+                   .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("parameters"), null, SyntaxFactory.EqualsValueClause(methodInvoke.Expression)));
+
+               storageMethod = storageMethod.AddBodyStatements(SyntaxFactory.LocalDeclarationStatement(variableDeclaration1));
+
+               string resultString = GetInvoceString(returnValueStr.ToString());
+
+               VariableDeclarationSyntax variableDeclaration2 = SyntaxFactory
+                  .VariableDeclaration(SyntaxFactory.IdentifierName("var"))
+                  .AddVariables(SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("result"), null, SyntaxFactory.EqualsValueClause(SyntaxFactory.IdentifierName(resultString))));
+
+               storageMethod = storageMethod.AddBodyStatements(SyntaxFactory.LocalDeclarationStatement(variableDeclaration2));
+
+               storageMethod = storageMethod.AddBodyStatements(SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName("result")));
+
+               // add parameter method to the class
+               targetClass = targetClass.AddMembers(parameterMethod);
+
+               // default function
+               if (entry.Default != null && entry.Default.Length != 0)
+               {
+                  string storageDefault = entry.Name + "Default";
+                  MethodDeclarationSyntax defaultMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("string"), storageDefault)
+                      .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
+                      .WithLeadingTrivia(GetCommentsRoslyn(new string[] { "Default value as hex string" }, null, storageDefault));
+
+                  // Add return statement
+                  defaultMethod = defaultMethod.WithBody(SyntaxFactory.Block(SyntaxFactory.ReturnStatement(
+                      SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty))))));
+
+                  // add default method to the class
+                  targetClass = targetClass.AddMembers(defaultMethod);
+               }
+
+               // add storage method to the class
+               targetClass = targetClass.AddMembers(storageMethod);
             }
          }
+
+         // add constructor to the class
+         targetClass = targetClass.AddMembers(constructor);
+
+         // Add class to the namespace.
+         typeNamespace = typeNamespace.AddMembers(targetClass);
+
+         return typeNamespace;
       }
 
-      private void CreateCalls(CodeNamespace typeNamespace)
+      private NamespaceDeclarationSyntax CreateCalls(NamespaceDeclarationSyntax namespaceDeclaration)
       {
          ClassName = Module.Name + "Calls";
 
          PalletCalls calls = Module.Calls;
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         typeNamespace.Types.Add(targetClass);
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword)));
 
          if (calls != null)
          {
@@ -244,20 +232,26 @@ namespace Substrate.DotNet.Service.Node
                {
                   foreach (TypeVariant variant in typeDef.Variants)
                   {
-                     CodeMemberMethod callMethod = new()
-                     {
-                        Attributes = MemberAttributes.Static | MemberAttributes.Public | MemberAttributes.Final,
-                        Name = variant.Name.MakeMethod(),
-                        ReturnType = new CodeTypeReference(typeof(Method).Name)
-                     };
+                     MethodDeclarationSyntax callMethod = SyntaxFactory
+                        .MethodDeclaration(SyntaxFactory.ParseTypeName(nameof(Method)), variant.Name.MakeMethod())
+                        .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.StaticKeyword)))
+                        .WithBody(SyntaxFactory.Block());
 
                      // add comment to class if exists
-                     callMethod.Comments.AddRange(GetComments(typeDef.Docs, null, variant.Name));
+                     callMethod = callMethod.WithLeadingTrivia(GetCommentsRoslyn(typeDef.Docs, null, variant.Name));
 
                      string byteArrayName = "byteArray";
 
-                     callMethod.Statements.Add(new CodeVariableDeclarationStatement(
-                         typeof(List<byte>), byteArrayName, new CodeObjectCreateExpression("List<byte>", Array.Empty<CodeExpression>())));
+                     TypeSyntax byteListType = SyntaxFactory.ParseTypeName("List<byte>");
+
+                     callMethod = callMethod.AddBodyStatements(
+                         SyntaxFactory.LocalDeclarationStatement(SyntaxFactory.VariableDeclaration(
+                             byteListType,
+                             SyntaxFactory.SingletonSeparatedList(SyntaxFactory.VariableDeclarator(
+                                 SyntaxFactory.Identifier(byteArrayName),
+                                 null,
+                                 SyntaxFactory.EqualsValueClause(SyntaxFactory.ObjectCreationExpression(byteListType)
+                                     .WithArgumentList(SyntaxFactory.ArgumentList())))))));
 
                      if (variant.TypeFields != null)
                      {
@@ -265,151 +259,177 @@ namespace Substrate.DotNet.Service.Node
                         {
                            NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
 
-                           CodeParameterDeclarationExpression param = new()
-                           {
-                              Type = new CodeTypeReference(fullItem.ToString()),
-                              Name = field.Name
-                           };
-                           callMethod.Parameters.Add(param);
+                           // Adding '@' prefix to the parameter
+                           string parameterName = EscapeIfKeyword(field.Name);
 
-                           callMethod.Statements.Add(new CodeMethodInvokeExpression(
-                               new CodeVariableReferenceExpression(byteArrayName), "AddRange", new CodeMethodInvokeExpression(
-                               new CodeVariableReferenceExpression(field.Name), "Encode")));
+                           callMethod = callMethod.AddParameterListParameters(
+                               SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameterName))
+                                   .WithType(SyntaxFactory.ParseTypeName(fullItem.ToString())));
+
+                           callMethod = callMethod.AddBodyStatements(
+                               SyntaxFactory.ExpressionStatement(
+                                   SyntaxFactory.InvocationExpression(
+                                       SyntaxFactory.MemberAccessExpression(
+                                           SyntaxKind.SimpleMemberAccessExpression,
+                                           SyntaxFactory.IdentifierName(byteArrayName),
+                                           SyntaxFactory.IdentifierName("AddRange")),
+                                       SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(
+                                           SyntaxFactory.Argument(
+                                               SyntaxFactory.InvocationExpression(
+                                                   SyntaxFactory.MemberAccessExpression(
+                                                       SyntaxKind.SimpleMemberAccessExpression,
+                                                       SyntaxFactory.IdentifierName(parameterName),
+                                                       SyntaxFactory.IdentifierName("Encode")))))))));
                         }
                      }
 
-                     // return statment
-                     var create = new CodeObjectCreateExpression(typeof(Method).Name, Array.Empty<CodeExpression>());
-                     create.Parameters.Add(new CodePrimitiveExpression((int)Module.Index));
-                     create.Parameters.Add(new CodePrimitiveExpression(Module.Name));
-                     create.Parameters.Add(new CodePrimitiveExpression(variant.Index));
-                     create.Parameters.Add(new CodePrimitiveExpression(variant.Name));
-                     create.Parameters.Add(new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(byteArrayName), "ToArray"));
-                     CodeMethodReturnStatement returnStatement = new()
-                     {
-                        Expression = create
-                     };
+                     // return statement
+                     ObjectCreationExpressionSyntax create = SyntaxFactory.ObjectCreationExpression(SyntaxFactory.ParseTypeName(nameof(Method)))
+                         .WithArgumentList(
+                             SyntaxFactory.ArgumentList(
+                                 SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                     new SyntaxNodeOrToken[]
+                                     {
+                                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal((int)Module.Index))),
+                                        SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(Module.Name))),
+                                        SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(variant.Index))),
+                                        SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                        SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(variant.Name))),
+                                        SyntaxFactory.Token(SyntaxKind.CommaToken),
+                                        SyntaxFactory.Argument(
+                                            SyntaxFactory.InvocationExpression(
+                                                SyntaxFactory.MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    SyntaxFactory.IdentifierName(byteArrayName),
+                                                    SyntaxFactory.IdentifierName("ToArray")))),
+                                     })));
 
-                     callMethod.Statements.Add(returnStatement);
-                     targetClass.Members.Add(callMethod);
+                     ReturnStatementSyntax returnStatement = SyntaxFactory.ReturnStatement(create);
+
+                     callMethod = callMethod.AddBodyStatements(returnStatement);
+                     targetClass = targetClass.AddMembers(callMethod);
                   }
                }
             }
          }
+
+         namespaceDeclaration = namespaceDeclaration.AddMembers(targetClass);
+         return namespaceDeclaration;
       }
 
-      private void CreateEvents(CodeNamespace typeNamespace)
+      private NamespaceDeclarationSyntax CreateEvents(NamespaceDeclarationSyntax namespaceDeclaration)
       {
          ClassName = Module.Name + "Events";
 
          PalletEvents events = Module.Events;
 
-         //if (events != null)
+         //if (events != null && NodeTypes.TryGetValue(events.TypeId, out NodeType nodeType))
          //{
-         //   if (NodeTypes.TryGetValue(events.TypeId, out NodeType nodeType))
+         //   var typeDef = nodeType as NodeTypeVariant;
+
+         //   if (typeDef.Variants != null)
          //   {
-         //      var typeDef = nodeType as NodeTypeVariant;
-
-         //      if (typeDef.Variants != null)
+         //      foreach (TypeVariant variant in typeDef.Variants)
          //      {
-         //         foreach (TypeVariant variant in typeDef.Variants)
+         //         string eventClassName = "Event" + variant.Name.MakeMethod();
+         //         ClassDeclarationSyntax eventClass = SyntaxFactory.ClassDeclaration(eventClassName)
+         //             .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword)))
+         //             .WithLeadingTrivia(GetCommentsRoslyn(variant.Docs, null, variant.Name));
+
+         //         QualifiedNameSyntax baseTupleType = SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("BaseTuple"), SyntaxFactory.IdentifierName(string.Empty));
+         //         if (variant.TypeFields != null)
          //         {
-         //            var eventClass = new CodeTypeDeclaration("Event" + variant.Name.MakeMethod())
+         //            foreach (NodeTypeField field in variant.TypeFields)
          //            {
-         //               IsClass = true,
-         //               TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         //            };
-
-         //            // add comment to variant if exists
-         //            eventClass.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
-
-         //            var codeTypeRef = new CodeTypeReference("BaseTuple");
-         //            if (variant.TypeFields != null)
-         //            {
-         //               foreach (NodeTypeField field in variant.TypeFields)
-         //               {
-         //                  NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
-         //                  codeTypeRef.TypeArguments.Add(new CodeTypeReference(fullItem.ToString()));
-         //               }
+         //               NodeTypeResolved fullItem = GetFullItemPath(field.TypeId);
+         //               baseTupleType = baseTupleType.WithRight(SyntaxFactory.IdentifierName(fullItem.ToString()));
          //            }
-         //            eventClass.BaseTypes.Add(codeTypeRef);
-
-         //            // add event key mapping in constructor
-         //            // TODO (svnscha) What is with events?
-         //            //Console.WriteLine($"case \"{Module.Index}-{variant.Index}\": return typeof({NamespaceName + "." + eventClass.Name});");
-         //            //constructor.Statements.Add(
-         //            //    AddPropertyValues(new CodeExpression[] {
-         //            //     new CodeObjectCreateExpression(
-         //            //        new CodeTypeReference(typeof(Tuple<int, int>)),
-         //            //        new CodeExpression[] {
-         //            //            new CodePrimitiveExpression((int) Module.Index),
-         //            //            new CodePrimitiveExpression((int) variant.Index)
-         //            //        }),
-         //            //     new CodeTypeOfExpression(NameSpace + "." + eventClass.Name)
-
-         //            //    }, "SubstrateClientExt.EventKeyDict"));
-
-         //            typeNamespace.Types.Add(eventClass);
          //         }
+         //         eventClass = eventClass.AddBaseListTypes(SyntaxFactory.SimpleBaseType(baseTupleType));
+
+         //         namespaceDeclaration = namespaceDeclaration.AddMembers(eventClass);
          //      }
          //   }
          //}
+
+         return namespaceDeclaration;
       }
 
-      private void CreateConstants(CodeNamespace typeNamespace)
+      private NamespaceDeclarationSyntax CreateConstants(NamespaceDeclarationSyntax namespaceDeclaration)
       {
          ClassName = Module.Name + "Constants";
 
          PalletConstant[] constants = Module.Constants;
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
-         {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         typeNamespace.Types.Add(targetClass);
+         ClassDeclarationSyntax targetClass = SyntaxFactory.ClassDeclaration(ClassName)
+             .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.SealedKeyword)));
 
          if (constants != null && constants.Any())
          {
             foreach (PalletConstant constant in constants)
             {
-               // async Task<object>
-               CodeMemberMethod constantMethod = new()
-               {
-                  Attributes = MemberAttributes.Public | MemberAttributes.Final,
-                  Name = constant.Name,
-               };
-               // add comment to class if exists
-               constantMethod.Comments.AddRange(GetComments(constant.Docs, null, constant.Name));
+               MethodDeclarationSyntax constantMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), constant.Name)
+                   .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
 
-               targetClass.Members.Add(constantMethod);
+               // add comment to class if exists
+               constantMethod = constantMethod.WithLeadingTrivia(GetCommentsRoslyn(constant.Docs, null, constant.Name));
+
+               targetClass = targetClass.AddMembers(constantMethod);
 
                if (NodeTypes.TryGetValue(constant.TypeId, out NodeType nodeType))
                {
                   NodeTypeResolved nodeTypeResolved = GetFullItemPath(nodeType.Id);
-                  constantMethod.ReturnType = new CodeTypeReference(nodeTypeResolved.ToString());
+                  constantMethod = constantMethod.WithReturnType(SyntaxFactory.ParseTypeName(nodeTypeResolved.ToString()));
 
                   // assign new result object
-                  CodeVariableDeclarationStatement newStatement = new("var", "result", new CodeObjectCreateExpression(nodeTypeResolved.ToString(), Array.Empty<CodeExpression>()));
-                  constantMethod.Statements.Add(newStatement);
+                  constantMethod = constantMethod.AddBodyStatements(
+                      SyntaxFactory.LocalDeclarationStatement(
+                          SyntaxFactory.VariableDeclaration(
+                              SyntaxFactory.IdentifierName("var"),
+                              SyntaxFactory.SingletonSeparatedList(
+                                  SyntaxFactory.VariableDeclarator(
+                                      SyntaxFactory.Identifier("result"),
+                                      null,
+                                      SyntaxFactory.EqualsValueClause(
+                                          SyntaxFactory.ObjectCreationExpression(
+                                              SyntaxFactory.ParseTypeName(nodeTypeResolved.ToString()),
+                                              SyntaxFactory.ArgumentList(),
+                                              null)))))));
 
                   // create with hex string object
-                  var createStatement = new CodeExpressionStatement(
-                            new CodeMethodInvokeExpression(
-                              new CodeVariableReferenceExpression("result"), "Create",
-                              new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(constant.Value).Replace("-", string.Empty)) }));
-                  constantMethod.Statements.Add(createStatement);
+                  constantMethod = constantMethod.AddBodyStatements(
+                      SyntaxFactory.ExpressionStatement(
+                          SyntaxFactory.InvocationExpression(
+                              SyntaxFactory.MemberAccessExpression(
+                                  SyntaxKind.SimpleMemberAccessExpression,
+                                  SyntaxFactory.IdentifierName("result"),
+                                  SyntaxFactory.IdentifierName("Create")),
+                              SyntaxFactory.ArgumentList(
+                                  SyntaxFactory.SingletonSeparatedList(
+                                      SyntaxFactory.Argument(
+                                          SyntaxFactory.LiteralExpression(
+                                              SyntaxKind.StringLiteralExpression,
+                                              SyntaxFactory.Literal("0x" + BitConverter.ToString(constant.Value).Replace("-", string.Empty)))))))));
 
                   // return statement
-                  constantMethod.Statements.Add(
-                      new CodeMethodReturnStatement(
-                          new CodeVariableReferenceExpression("result")));
+                  constantMethod = constantMethod.AddBodyStatements(
+                      SyntaxFactory.ReturnStatement(
+                          SyntaxFactory.IdentifierName("result")));
+
+                  targetClass = targetClass.ReplaceNode(
+                      targetClass.DescendantNodes().OfType<MethodDeclarationSyntax>().Single(m => m.Identifier.Text == constant.Name),
+                      constantMethod);
                }
             }
          }
+
+         namespaceDeclaration = namespaceDeclaration.AddMembers(targetClass);
+         return namespaceDeclaration;
       }
 
-      private void CreateErrors(CodeNamespace typeNamespace)
+      private NamespaceDeclarationSyntax CreateErrors(NamespaceDeclarationSyntax namespaceDeclaration)
       {
          ClassName = Module.Name + "Errors";
 
@@ -421,28 +441,27 @@ namespace Substrate.DotNet.Service.Node
             {
                var typeDef = nodeType as NodeTypeVariant;
 
-               var targetClass = new CodeTypeDeclaration(ClassName)
-               {
-                  IsEnum = true,
-                  TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-               };
+               EnumDeclarationSyntax targetClass = SyntaxFactory.EnumDeclaration(ClassName)
+                   .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
 
                if (typeDef.Variants != null)
                {
                   foreach (TypeVariant variant in typeDef.Variants)
                   {
-                     var enumField = new CodeMemberField(ClassName, variant.Name);
+                     EnumMemberDeclarationSyntax enumField = SyntaxFactory.EnumMemberDeclaration(variant.Name);
 
                      // add comment to field if exists
-                     enumField.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
+                     enumField = enumField.WithLeadingTrivia(GetCommentsRoslyn(variant.Docs, null, variant.Name));
 
-                     targetClass.Members.Add(enumField);
+                     targetClass = targetClass.AddMembers(enumField);
                   }
                }
 
-               typeNamespace.Types.Add(targetClass);
+               namespaceDeclaration = namespaceDeclaration.AddMembers(targetClass);
             }
          }
+
+         return namespaceDeclaration;
       }
 
       private static string GetInvoceString(string returnType)
@@ -450,100 +469,144 @@ namespace Substrate.DotNet.Service.Node
          return "await _client.GetStorageAsync<" + returnType + ">(parameters, token)";
       }
 
-      private static CodeMethodInvokeExpression GetStorageString(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
+      private static InvocationExpressionSyntax GetStorageStringRoslyn(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
       {
-         var codeExpressions =
-             new CodeExpression[] {
-                        new CodePrimitiveExpression(module),
-                        new CodePrimitiveExpression(item),
-                        new CodePropertyReferenceExpression(new CodeTypeReferenceExpression(typeof(Storage.Type)), type.ToString())
+         var codeExpressions = new List<ArgumentSyntax>
+          {
+              SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(module))),
+              SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(item))),
+              SyntaxFactory.Argument(
+                  SyntaxFactory.MemberAccessExpression(
+                      SyntaxKind.SimpleMemberAccessExpression,
+                      SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Meta.Storage.Type"),
+                      SyntaxFactory.IdentifierName(type.ToString())))
           };
 
          // if it is a map fill hashers and key
          if (hashers != null && hashers.Length > 0)
          {
-            CodeExpression keyReference = new CodeArrayCreateExpression(
-               new CodeTypeReference(typeof(IType)),
-               new CodeArgumentReferenceExpression[] {
-                  new CodeArgumentReferenceExpression("key")
-            });
+            ExpressionSyntax keyReference = SyntaxFactory.ArrayCreationExpression(
+                SyntaxFactory.ArrayType(
+                    SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Types.IType"),
+                    SyntaxFactory.SingletonList(
+                        SyntaxFactory.ArrayRankSpecifier(
+                            SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                                SyntaxFactory.OmittedArraySizeExpression())))),
+                SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression,
+                    SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                        SyntaxFactory.IdentifierName("key"))));
 
             if (hashers.Length > 1)
             {
-               keyReference = new CodeSnippetExpression("key.Value");
+               keyReference = SyntaxFactory.MemberAccessExpression(
+                   SyntaxKind.SimpleMemberAccessExpression,
+                   SyntaxFactory.IdentifierName("key"),
+                   SyntaxFactory.IdentifierName("Value")
+               );
             }
 
-            codeExpressions = new CodeExpression[] {
-                        new CodePrimitiveExpression(module),
-                        new CodePrimitiveExpression(item),
-                        new CodePropertyReferenceExpression(
-                            new CodeTypeReferenceExpression(typeof(Storage.Type)), type.ToString()),
-                        new CodeArrayCreateExpression(
-                            new CodeTypeReference(typeof(Storage.Hasher)),
-                                hashers.Select(p => new CodePropertyReferenceExpression(
-                                    new CodeTypeReferenceExpression(typeof(Storage.Hasher)), p.ToString())).ToArray()),
-                        keyReference
-                    };
+            codeExpressions = new List<ArgumentSyntax>
+            {
+                SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(module))),
+                SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(item))),
+                SyntaxFactory.Argument(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Meta.Storage.Type"),
+                        SyntaxFactory.IdentifierName(type.ToString()))),
+                SyntaxFactory.Argument(
+                    SyntaxFactory.ArrayCreationExpression(
+                        SyntaxFactory.ArrayType(
+                            SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Meta.Storage.Hasher"),
+                            SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier())),
+                        SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression,
+                            SyntaxFactory.SeparatedList(
+                                hashers.Select(p => SyntaxFactory.ParseExpression($"Substrate.NetApi.Model.Meta.Storage.Hasher.{p}")))))),
+                SyntaxFactory.Argument(keyReference)
+            };
          }
 
-         return new CodeMethodInvokeExpression(new CodeTypeReferenceExpression("RequestGenerator"), "GetStorage", codeExpressions);
+         return SyntaxFactory.InvocationExpression(
+             SyntaxFactory.MemberAccessExpression(
+                 SyntaxKind.SimpleMemberAccessExpression,
+                 SyntaxFactory.IdentifierName("RequestGenerator"),
+                 SyntaxFactory.IdentifierName("GetStorage")))
+             .WithArgumentList(SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(codeExpressions)));
       }
 
-      private static CodeExpression[] GetStorageMapString(string keyType, string returnType, string module, string item, Storage.Hasher[] hashers = null)
+      private static ExpressionSyntax[] GetStorageMapStringRoslyn(string keyType, string returnType, string module, string item, Storage.Hasher[] hashers = null)
       {
-         var typeofReturn = new CodeTypeOfExpression(returnType);
+         TypeOfExpressionSyntax typeofReturn = SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName(returnType));
 
-         var result = new CodeExpression[] {
-                    new CodeObjectCreateExpression(
-                            new CodeTypeReference(typeof(Tuple<string,string>)),
-                            new CodeExpression[] {
-                                new CodePrimitiveExpression(module),
-                                new CodePrimitiveExpression(item)
-                            }),
-                    new CodeObjectCreateExpression(
-                        new CodeTypeReference(typeof(Tuple<Storage.Hasher[], Type, Type>)),
-                        new CodeExpression[] {
-                            new CodePrimitiveExpression(null),
-                            new CodePrimitiveExpression(null),
-                            typeofReturn})
-                };
+         var result = new ExpressionSyntax[] {
+              SyntaxFactory.ObjectCreationExpression(
+                  SyntaxFactory.IdentifierName("System.Tuple<string,string>"),
+                  SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                      new ArgumentSyntax[]
+                      {
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(module))),
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(item)))
+                      })),
+                  null),
+              SyntaxFactory.ObjectCreationExpression(
+                  SyntaxFactory.IdentifierName("System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>"),
+                  SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                      new ArgumentSyntax[]
+                      {
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                          SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)),
+                          SyntaxFactory.Argument(typeofReturn)
+                      })),
+                  null)
+          };
 
          // if it is a map fill hashers and key
          if (hashers != null && hashers.Length > 0)
          {
-            var arrayExpression = new CodeArrayCreateExpression(
-                        new CodeTypeReference(typeof(Storage.Hasher)),
-                            hashers.Select(p => new CodePropertyReferenceExpression(
-                                new CodeTypeReferenceExpression(typeof(Storage.Hasher)), p.ToString())).ToArray());
-            var typeofType = new CodeTypeOfExpression(keyType);
+            ArrayCreationExpressionSyntax arrayExpression = SyntaxFactory.ArrayCreationExpression(
+                SyntaxFactory.ArrayType(SyntaxFactory.IdentifierName("Substrate.NetApi.Model.Meta.Storage.Hasher[]")),
+                SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression,
+                    SyntaxFactory.SeparatedList(hashers.Select(p =>
+                        SyntaxFactory.ParseExpression($"Substrate.NetApi.Model.Meta.Storage.Hasher.{p}")))));
 
-            result = new CodeExpression[] {
-                            new CodeObjectCreateExpression(
-                                new CodeTypeReference(typeof(Tuple<string,string>)),
-                                new CodeExpression[] {
-                                    new CodePrimitiveExpression(module),
-                                    new CodePrimitiveExpression(item)
-                            }),
-                        new CodeObjectCreateExpression(
-                            new CodeTypeReference(typeof(Tuple<Storage.Hasher[], Type, Type>)),
-                            new CodeExpression[] {
-                                arrayExpression,
-                                typeofType,
-                                typeofReturn
-                            })
-                    };
+            TypeOfExpressionSyntax typeofType = SyntaxFactory.TypeOfExpression(SyntaxFactory.IdentifierName(keyType));
+
+            result =
+               new ExpressionSyntax[] {
+                  SyntaxFactory.ObjectCreationExpression(
+                      SyntaxFactory.IdentifierName("System.Tuple<string,string>"),
+                      SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                          new ArgumentSyntax[]
+                          {
+                              SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(module))),
+                              SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(item)))
+                          })),
+                      null),
+                  SyntaxFactory.ObjectCreationExpression(
+                      SyntaxFactory.IdentifierName("System.Tuple<Substrate.NetApi.Model.Meta.Storage.Hasher[], System.Type, System.Type>"),
+                      SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(
+                          new ArgumentSyntax[]
+                          {
+                              SyntaxFactory.Argument(arrayExpression),
+                              SyntaxFactory.Argument(typeofType),
+                              SyntaxFactory.Argument(typeofReturn)
+                          })),
+                   null)
+            };
          }
 
          return result;
       }
 
-      private static CodeStatement AddPropertyValues(CodeExpression[] exprs, string variableReference)
+      private static ExpressionStatementSyntax AddPropertyValuesRoslyn(ExpressionSyntax[] exprs, string variableReference)
       {
-         return new CodeExpressionStatement(
-             new CodeMethodInvokeExpression(
-                 new CodeMethodReferenceExpression(
-                     new CodeTypeReferenceExpression(
-                         new CodeTypeReference(variableReference)), "Add"), exprs));
+         return SyntaxFactory.ExpressionStatement(
+             SyntaxFactory.InvocationExpression(
+                 SyntaxFactory.MemberAccessExpression(
+                     SyntaxKind.SimpleMemberAccessExpression,
+                     SyntaxFactory.IdentifierName(variableReference),
+                     SyntaxFactory.IdentifierName("Add")),
+                 SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(exprs.Select(SyntaxFactory.Argument)))));
       }
    }
 }
