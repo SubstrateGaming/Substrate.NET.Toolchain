@@ -11,8 +11,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-		<PackageReference Include="Substrate.NET.API" Version="0.9.10" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+		<PackageReference Include="Substrate.NET.API" Version="0.9.12" />
 		<PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
 	</ItemGroup>
 
