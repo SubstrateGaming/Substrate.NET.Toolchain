@@ -1,6 +1,7 @@
 ﻿using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Types;
+using Substrate.NetApi.Model.Types.Metadata.V14;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -33,22 +34,25 @@ namespace Substrate.DotNet.Service.Node
          CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
-         CodeTypeDeclaration TargetType = new(enumName)
+         CodeTypeDeclaration enumType = new(enumName)
          {
             IsEnum = true
          };
+         enumType.Comments.AddRange(GetComments(typeDef.Docs, null, enumName));
 
          if (typeDef.Variants != null)
          {
             foreach (TypeVariant variant in typeDef.Variants)
             {
-               TargetType.Members.Add(new CodeMemberField(ClassName, variant.Name)
+               var enumMember = new CodeMemberField(ClassName, variant.Name)
                {
                   InitExpression = new CodePrimitiveExpression(variant.Index)
-               });
+               };
+               enumMember.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
+               enumType.Members.Add(enumMember);
             }
          }
-         typeNamespace.Types.Add(TargetType);
+         typeNamespace.Types.Add(enumType);
 
          var targetClass = new CodeTypeDeclaration(ClassName)
          {

@@ -5,6 +5,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -26,43 +27,48 @@ namespace Substrate.DotNet.Service.Node
          return field;
       }
 
-      private static CodeMemberProperty GetProperty(string name, CodeMemberField propertyField)
+      public CodeTypeMember CreateAutoProperty(string propertyName, string propertyType)
+      {
+         string propertyCode = $"        public {propertyType} {propertyName.MakeMethod()} {{ get; set; }}";
+
+         // Using CodeSnippetTypeMember to inject a raw string of code.
+         CodeSnippetTypeMember autoProperty = new (propertyCode);
+         return autoProperty;
+      }
+
+      private static CodeMemberProperty GetProperty(string name, string baseType)
       {
          CodeMemberProperty prop = new()
          {
             Attributes = MemberAttributes.Public | MemberAttributes.Final,
             Name = name.MakeMethod(),
+            Type = new CodeTypeReference(baseType),
             HasGet = true,
-            HasSet = true,
-            Type = propertyField.Type
+            HasSet = true
          };
-         prop.GetStatements.Add(new CodeMethodReturnStatement(
-             new CodeFieldReferenceExpression(
-             new CodeThisReferenceExpression(), propertyField.Name)));
-         prop.SetStatements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(
-                 new CodeThisReferenceExpression(), propertyField.Name),
-                 new CodePropertySetValueReferenceExpression()));
+         // No need to add GetStatements and SetStatements for auto-implemented properties
          return prop;
       }
 
       private CodeMemberMethod GetDecode(NodeTypeField[] typeFields)
       {
-         CodeMemberMethod decodeMethod = SimpleMethod("Decode");
+         CodeMemberMethod memberMethod = SimpleMethod("Decode");
+         memberMethod.Comments.Add(new CodeCommentStatement("<inheritdoc/>", true));
+
          CodeParameterDeclarationExpression param1 = new()
          {
             Type = new CodeTypeReference("System.Byte[]"),
             Name = "byteArray"
          };
-         decodeMethod.Parameters.Add(param1);
+         memberMethod.Parameters.Add(param1);
          CodeParameterDeclarationExpression param2 = new()
          {
             Type = new CodeTypeReference("System.Int32"),
             Name = "p",
             Direction = FieldDirection.Ref
          };
-         decodeMethod.Parameters.Add(param2);
-         decodeMethod.Statements.Add(new CodeSnippetExpression("var start = p"));
+         memberMethod.Parameters.Add(param2);
+         memberMethod.Statements.Add(new CodeSnippetExpression("var start = p"));
 
          if (typeFields != null)
          {
@@ -73,27 +79,28 @@ namespace Substrate.DotNet.Service.Node
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
                NodeTypeResolved fullItem = GetFullItemPath(typeField.TypeId);
 
-               decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()} = new {fullItem.ToString()}()"));
-               decodeMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()}.Decode(byteArray, ref p)"));
+               memberMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()} = new {fullItem.ToString()}()"));
+               memberMethod.Statements.Add(new CodeSnippetExpression($"{fieldName.MakeMethod()}.Decode(byteArray, ref p)"));
             }
          }
-         decodeMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("TypeSize = bytesLength"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
-         decodeMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
+         memberMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
+         memberMethod.Statements.Add(new CodeSnippetExpression("TypeSize = bytesLength"));
+         memberMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
+         memberMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
 
-         return decodeMethod;
+         return memberMethod;
       }
 
       private static CodeMemberMethod GetEncode(NodeTypeField[] typeFields)
       {
-         CodeMemberMethod encodeMethod = new()
+         CodeMemberMethod memberMethod = new()
          {
             Attributes = MemberAttributes.Public | MemberAttributes.Override,
             Name = "Encode",
-            ReturnType = new CodeTypeReference("System.Byte[]")
+            ReturnType = new CodeTypeReference("System.Byte[]"),
          };
-         encodeMethod.Statements.Add(new CodeSnippetExpression("var result = new List<byte>()"));
+         memberMethod.Comments.Add(new CodeCommentStatement("<inheritdoc/>", true));
+         memberMethod.Statements.Add(new CodeSnippetExpression("var result = new List<byte>()"));
 
          if (typeFields != null)
          {
@@ -102,12 +109,12 @@ namespace Substrate.DotNet.Service.Node
                NodeTypeField typeField = typeFields[i];
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeFields.Length, i);
 
-               encodeMethod.Statements.Add(new CodeSnippetExpression($"result.AddRange({fieldName.MakeMethod()}.Encode())"));
+               memberMethod.Statements.Add(new CodeSnippetExpression($"result.AddRange({fieldName.MakeMethod()}.Encode())"));
             }
          }
 
-         encodeMethod.Statements.Add(new CodeSnippetExpression("return result.ToArray()"));
-         return encodeMethod;
+         memberMethod.Statements.Add(new CodeSnippetExpression("return result.ToArray()"));
+         return memberMethod;
       }
 
       public static BuilderBase Init(string projectName, uint id, NodeTypeComposite typeDef, NodeTypeResolver typeDict)
@@ -119,9 +126,9 @@ namespace Substrate.DotNet.Service.Node
       {
          var typeDef = TypeDef as NodeTypeComposite;
 
-         ClassName = $"{typeDef.Path.Last()}";
+         ClassName = $"{typeDef.Path[^1]}";
 
-         ReferenzName = $"{NamespaceName}.{typeDef.Path.Last()}";
+         ReferenzName = $"{NamespaceName}.{typeDef.Path[^1]}";
 
          CodeNamespace typeNamespace = new(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
@@ -140,6 +147,7 @@ namespace Substrate.DotNet.Service.Node
          typeNamespace.Types.Add(targetClass);
 
          CodeMemberMethod nameMethod = SimpleMethod("TypeName", "System.String", ClassName);
+         nameMethod.Comments.Add(new CodeCommentStatement("<inheritdoc/>", true));
          targetClass.Members.Add(nameMethod);
 
          if (typeDef.TypeFields != null)
@@ -152,13 +160,12 @@ namespace Substrate.DotNet.Service.Node
 
                NodeTypeResolved fullItem = GetFullItemPath(typeField.TypeId);
 
-               CodeMemberField field = StructBuilder.GetPropertyField(fieldName, fullItem.ToString());
+               CodeTypeMember autoProperty = CreateAutoProperty(fieldName, fullItem.ToString());
 
-               // add comment to field if exists
-               field.Comments.AddRange(GetComments(typeField.Docs, null, fieldName));
+               // add comment to propertiy if exists
+               autoProperty.Comments.AddRange(GetComments(typeField.Docs, null, fieldName));
 
-               targetClass.Members.Add(field);
-               targetClass.Members.Add(StructBuilder.GetProperty(fieldName, field));
+               targetClass.Members.Add(autoProperty);
             }
          }
 

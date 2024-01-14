@@ -37,6 +37,7 @@ namespace Substrate.DotNet.Service.Node
             IsClass = true,
             TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
          };
+         targetClass.Comments.AddRange(GetComments(null, null, $"Substrate Client Extension, including all Storage classes direct access."));
          targetClass.BaseTypes.Add(new CodeTypeReference(typeof(SubstrateClient)));
          typeNamespace.Types.Add(targetClass);
 
