@@ -15,24 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Substrate.DotNet", "Tools\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Substrate.DotNet.Template", "Tools\Substrate.DotNet.Template\Substrate.DotNet.Template.csproj", "{CD4C2D2D-021A-4DC0-8365-5276A63B2D96}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Substrate.DotNet", "Substrate.DotNet", "{6DB2C460-F886-4058-9C29-648927CE7520}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bin", "bin", "{35854229-F4D2-448B-A1E0-9E45258C1597}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{2941D3CA-8054-4096-876C-D92FD9488C6C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net6.0", "net6.0", "{605F0960-3D59-402B-8D65-AEC10809493F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate.Hexalem.NET.RestService", "Tools\Substrate.DotNet\bin\Debug\net6.0\Substrate.Hexalem.NET.RestService\Substrate.Hexalem.NET.RestService.csproj", "{808546C7-946B-4122-97B1-9C61691B220C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate.Hexalem.NET.NetApiExt", "Tools\Substrate.DotNet\bin\Debug\net6.0\Substrate.Hexalem.NET.NetApiExt\Substrate.Hexalem.NET.NetApiExt.csproj", "{D2F89C7C-EF12-45AD-8D2C-B52C8939D9FD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate.Hexalem.NET.RestClient", "Tools\Substrate.DotNet\bin\Debug\net6.0\Substrate.Hexalem.NET.RestClient\Substrate.Hexalem.NET.RestClient.csproj", "{CA25F02F-2289-4840-83BC-FF2D7437FBCC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate.Hexalem.NET.RestClient.Mockup", "Tools\Substrate.DotNet\bin\Debug\net6.0\Substrate.Hexalem.NET.RestClient.Mockup\Substrate.Hexalem.NET.RestClient.Mockup.csproj", "{283C8101-6922-42F0-9919-04E7153969DE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Substrate.Hexalem.NET.RestClient.Test", "Tools\Substrate.DotNet\bin\Debug\net6.0\Substrate.Hexalem.NET.RestClient.Test\Substrate.Hexalem.NET.RestClient.Test.csproj", "{52E96204-BD78-4A82-A556-C3DA11E294BB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,26 +41,6 @@ Global
 		{CD4C2D2D-021A-4DC0-8365-5276A63B2D96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD4C2D2D-021A-4DC0-8365-5276A63B2D96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD4C2D2D-021A-4DC0-8365-5276A63B2D96}.Release|Any CPU.Build.0 = Release|Any CPU
-		{808546C7-946B-4122-97B1-9C61691B220C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{808546C7-946B-4122-97B1-9C61691B220C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{808546C7-946B-4122-97B1-9C61691B220C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{808546C7-946B-4122-97B1-9C61691B220C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D2F89C7C-EF12-45AD-8D2C-B52C8939D9FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2F89C7C-EF12-45AD-8D2C-B52C8939D9FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D2F89C7C-EF12-45AD-8D2C-B52C8939D9FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D2F89C7C-EF12-45AD-8D2C-B52C8939D9FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CA25F02F-2289-4840-83BC-FF2D7437FBCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA25F02F-2289-4840-83BC-FF2D7437FBCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CA25F02F-2289-4840-83BC-FF2D7437FBCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CA25F02F-2289-4840-83BC-FF2D7437FBCC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{283C8101-6922-42F0-9919-04E7153969DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{283C8101-6922-42F0-9919-04E7153969DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{283C8101-6922-42F0-9919-04E7153969DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{283C8101-6922-42F0-9919-04E7153969DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52E96204-BD78-4A82-A556-C3DA11E294BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{52E96204-BD78-4A82-A556-C3DA11E294BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{52E96204-BD78-4A82-A556-C3DA11E294BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{52E96204-BD78-4A82-A556-C3DA11E294BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,15 +48,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0A0D875B-87F6-4C76-B27A-3FA8A60DBE73} = {50BA7457-5486-403C-9BF8-960D45E41596}
 		{CD4C2D2D-021A-4DC0-8365-5276A63B2D96} = {50BA7457-5486-403C-9BF8-960D45E41596}
-		{6DB2C460-F886-4058-9C29-648927CE7520} = {50BA7457-5486-403C-9BF8-960D45E41596}
-		{35854229-F4D2-448B-A1E0-9E45258C1597} = {6DB2C460-F886-4058-9C29-648927CE7520}
-		{2941D3CA-8054-4096-876C-D92FD9488C6C} = {35854229-F4D2-448B-A1E0-9E45258C1597}
-		{605F0960-3D59-402B-8D65-AEC10809493F} = {2941D3CA-8054-4096-876C-D92FD9488C6C}
-		{808546C7-946B-4122-97B1-9C61691B220C} = {605F0960-3D59-402B-8D65-AEC10809493F}
-		{D2F89C7C-EF12-45AD-8D2C-B52C8939D9FD} = {605F0960-3D59-402B-8D65-AEC10809493F}
-		{CA25F02F-2289-4840-83BC-FF2D7437FBCC} = {605F0960-3D59-402B-8D65-AEC10809493F}
-		{283C8101-6922-42F0-9919-04E7153969DE} = {605F0960-3D59-402B-8D65-AEC10809493F}
-		{52E96204-BD78-4A82-A556-C3DA11E294BB} = {605F0960-3D59-402B-8D65-AEC10809493F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {52EC630C-541A-4A51-B8E0-B6BEDCD0ADCC}
