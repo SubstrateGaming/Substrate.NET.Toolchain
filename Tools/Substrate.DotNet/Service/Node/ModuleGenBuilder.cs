@@ -3,6 +3,7 @@ using Substrate.DotNet.Service.Node.Base;
 using Substrate.NetApi.Model.Extrinsics;
 using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Types;
+using Substrate.NetApi.Model.Types.Metadata.V14;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -65,6 +66,7 @@ namespace Substrate.DotNet.Service.Node
             IsClass = true,
             TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
          };
+         targetClass.Comments.AddRange(GetComments(null, null, ClassName));
          typeNamespace.Types.Add(targetClass);
 
          // Declare the client field.
@@ -85,6 +87,7 @@ namespace Substrate.DotNet.Service.Node
          constructor.Statements.Add(new CodeAssignStatement(fieldReference,
              new CodeArgumentReferenceExpression("client")));
 
+         constructor.Comments.AddRange(GetComments(null, null, $"{ClassName} Constructor"));
          targetClass.Members.Add(constructor);
 
          if (storage?.Entries != null)
@@ -232,6 +235,7 @@ namespace Substrate.DotNet.Service.Node
             IsClass = true,
             TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
          };
+         targetClass.Comments.AddRange(GetComments(null, null, ClassName));
          typeNamespace.Types.Add(targetClass);
 
          if (calls != null)
@@ -367,6 +371,7 @@ namespace Substrate.DotNet.Service.Node
             IsClass = true,
             TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
          };
+         targetClass.Comments.AddRange(GetComments(null, null, ClassName));
          typeNamespace.Types.Add(targetClass);
 
          if (constants != null && constants.Any())
@@ -426,6 +431,7 @@ namespace Substrate.DotNet.Service.Node
                   IsEnum = true,
                   TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
                };
+               targetClass.Comments.AddRange(GetComments(null, null, ClassName));
 
                if (typeDef.Variants != null)
                {
