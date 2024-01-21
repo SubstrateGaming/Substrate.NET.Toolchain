@@ -731,8 +731,9 @@ namespace Substrate.DotNet.Extensions
             // Get the actual array type field.
             var instanced = Activator.CreateInstance(propertyType.GetTypeInfo()) as IType;
 
-            FieldInfo privateValueFieldInfo = propertyType.GetTypeInfo().DeclaredFields.FirstOrDefault(x => x.Name == "_value");
-            elementType = privateValueFieldInfo?.FieldType.GetElementType() ?? null;
+            // Find the public property named "Value".
+            PropertyInfo valuePropertyInfo = propertyType.GetTypeInfo().DeclaredProperties.FirstOrDefault(x => x.Name == "Value");
+            elementType = valuePropertyInfo?.PropertyType.GetElementType() ?? null;
             elementArraySize = instanced.TypeSize;
          }
 
