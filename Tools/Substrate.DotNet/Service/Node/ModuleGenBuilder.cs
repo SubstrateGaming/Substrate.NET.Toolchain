@@ -139,10 +139,10 @@ namespace Substrate.DotNet.Service.Node
                   NodeTypeResolved fullItem = GetFullItemPath(entry.TypeMap.Item1);
 
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
-                      ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
+                      GetStorageString(storage.Prefix, entry.Name, entry.StorageType)));
 
                   storageMethod.ReturnType = new CodeTypeReference($"async Task<{fullItem}>");
-
+                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "blockhash"));
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
                   CodeMethodInvokeExpression methodInvoke = new(
@@ -153,7 +153,7 @@ namespace Substrate.DotNet.Service.Node
                   storageMethod.Statements.Add(variableDeclaration1);
 
                   // create result
-                  var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(fullItem.ToString()));
+                  var resultStatement = new CodeArgumentReferenceExpression(GetInvoceString(fullItem.ToString()));
                   CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
                   storageMethod.Statements.Add(variableDeclaration2);
 
@@ -164,7 +164,7 @@ namespace Substrate.DotNet.Service.Node
 
                   // add storage key mapping in constructor
                   constructor.Statements.Add(
-                      ModuleGenBuilder.AddPropertyValues(ModuleGenBuilder.GetStorageMapString("", fullItem.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
+                      AddPropertyValues(GetStorageMapString("", fullItem.ToString(), storage.Prefix, entry.Name), "_client.StorageKeyDict"));
                }
                else if (entry.StorageType == Storage.Type.Map)
                {
@@ -175,14 +175,15 @@ namespace Substrate.DotNet.Service.Node
 
                   parameterMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
                   parameterMethod.Statements.Add(new CodeMethodReturnStatement(
-                      ModuleGenBuilder.GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
+                      GetStorageString(storage.Prefix, entry.Name, entry.StorageType, hashers)));
 
                   storageMethod.ReturnType = new CodeTypeReference($"async Task<{value}>");
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(key.ToString(), "key"));
+                  storageMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "blockhash"));
                   storageMethod.Parameters.Add(new CodeParameterDeclarationExpression("CancellationToken", "token"));
 
                   CodeMethodInvokeExpression methodInvoke = new(new CodeTypeReferenceExpression(targetClass.Name), parameterMethod.Name,
-                      new CodeExpression[] { new CodeArgumentReferenceExpression("key") });
+                       new CodeArgumentReferenceExpression("key"));
                   CodeVariableDeclarationStatement variableDeclaration = new(typeof(string), "parameters", methodInvoke);
                   storageMethod.Statements.Add(variableDeclaration);
 
@@ -190,23 +191,6 @@ namespace Substrate.DotNet.Service.Node
                   var resultStatement = new CodeArgumentReferenceExpression(ModuleGenBuilder.GetInvoceString(value.ToString()));
                   CodeVariableDeclarationStatement variableDeclaration2 = new("var", "result", resultStatement);
                   storageMethod.Statements.Add(variableDeclaration2);
-
-                  // default handling
-                  //if (entry.Default != null || entry.Default.Length != 0)
-                  //{
-                  //   var conditionalStatement = new CodeConditionStatement(
-                  //    new CodeBinaryOperatorExpression(
-                  //      new CodeVariableReferenceExpression("result"),
-                  //      CodeBinaryOperatorType.ValueEquality,
-                  //      new CodePrimitiveExpression(null)),
-                  //    new CodeStatement[] {
-                  //      new CodeAssignStatement(new CodeVariableReferenceExpression("result"), new CodeObjectCreateExpression( value.ToString(), Array.Empty<CodeExpression>() )),
-                  //      new CodeExpressionStatement(
-                  //          new CodeMethodInvokeExpression(
-                  //            new CodeVariableReferenceExpression("result"), "Create",
-                  //            new CodeExpression[] { new CodePrimitiveExpression("0x" + BitConverter.ToString(entry.Default).Replace("-", string.Empty)) }))});
-                  //   storageMethod.Statements.Add(conditionalStatement);
-                  //}
 
                   // return statement
                   storageMethod.Statements.Add(
@@ -453,7 +437,7 @@ namespace Substrate.DotNet.Service.Node
 
       private static string GetInvoceString(string returnType)
       {
-         return "await _client.GetStorageAsync<" + returnType + ">(parameters, token)";
+         return "await _client.GetStorageAsync<" + returnType + ">(parameters, blockhash, token)";
       }
 
       private static CodeMethodInvokeExpression GetStorageString(string module, string item, Storage.Type type, Storage.Hasher[] hashers = null)
