@@ -19,7 +19,7 @@
       },
       "api_version": {
          "datatype": "string",
-         "defaultValue": "0.9.16",
+         "defaultValue": "0.9.18",
          "description": "Uses the given Substrate .NET API version.",
          "replaces": "SUBSTRATE_NETAPI_VERSION",
          "type": "parameter"
