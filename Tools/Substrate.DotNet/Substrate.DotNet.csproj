@@ -40,7 +40,7 @@
 
    <ItemGroup>
 	   <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-	   <PackageReference Include="Substrate.NET.API" Version="0.9.18" />
+	   <PackageReference Include="Substrate.NET.API" Version="0.9.19" />
       <PackageReference Include="System.CodeDom" Version="8.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
    </ItemGroup>
