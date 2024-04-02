@@ -19,6 +19,9 @@ namespace Substrate.DotNet
       [JsonProperty("net_api")]
       public string NetApi { get; set; }
 
+      [JsonProperty("net_integration")]
+      public string Integration { get; set; }
+
       [JsonProperty("rest_service")]
       public string RestService { get; set; }
 
