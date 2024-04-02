@@ -28,6 +28,7 @@ To list all available template parameters, simply run the command `dotnet new su
 | --api_version                    | This parameter specifies the used Substrate .NET API version. Defaults to the latest version.                            |
 | --metadata_websocket             | This parameter tells the generator where to pull the substrate metadata from. Default is localhost `ws://127.0.0.1:9944`.|
 | --net_api                        | This parameter controls the generated type extension librarys name. Default is `Substrate.NetApiExt`.                    |
+| --net_integration                | This parameter controls the integration boiler plate. Default is `Substrate.Integration`.                                |
 | --rest_service                   | This parameter controls the generated rest service name. Default is `Substrate.RestService`.                             |
 | --rest_client                    | This parameter controls generated rest client name, tests and mockup project. Default is `Substrate.RestClient`.         |
 | --generate_openapi_documentation | This parameter Activates or deactivates the OpenApi Document Generation in the generated rest service. Default is `true`.|
