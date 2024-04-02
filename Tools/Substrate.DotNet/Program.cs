@@ -247,6 +247,10 @@ namespace Substrate.DotNet
          generator.Generate(metadata);
       }
 
+      /// <summary>
+      /// Generates all classes for the RestClient project
+      /// </summary>
+      /// <param name="configuration"></param>
       private static void GenerateRestClientClasses(SubstrateConfiguration configuration)
       {
          string filePath = ResolveRestServiceAssembly(configuration);
@@ -330,6 +334,11 @@ namespace Substrate.DotNet
       /// </summary>
       private static string ResolveRuntimeFilePath() => Path.Join(ResolveConfigurationDirectory(), "runtime.txt");
 
+      /// <summary>
+      /// Resolves the RestService assembly file path.
+      /// </summary>
+      /// <param name="configuration"></param>
+      /// <returns></returns>
       private static string ResolveRestServiceAssembly(SubstrateConfiguration configuration)
       {
          if (File.Exists(configuration.RestClientSettings.ServiceAssembly))
@@ -363,6 +372,14 @@ namespace Substrate.DotNet
          return string.Empty;
       }
 
+      /// <summary>
+      /// Resolves the service path for the given configuration
+      /// </summary>
+      /// <param name="framework"></param>
+      /// <param name="configuration"></param>
+      /// <param name="restServiceProject"></param>
+      /// <param name="assembly"></param>
+      /// <returns></returns>
       private static string ResolveServicePath(string framework, string configuration, string restServiceProject, string assembly)
       {
          return Path.Combine(

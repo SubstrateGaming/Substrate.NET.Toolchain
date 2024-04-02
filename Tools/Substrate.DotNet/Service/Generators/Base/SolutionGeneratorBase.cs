@@ -104,7 +104,7 @@ namespace Substrate.DotNet.Service.Generators.Base
          {
             case "Runtime":
                {
-                  RunetimeBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
+                  RuntimeBuilder.Init(ProjectName, nodeType.Id, nodeType, typeDict).Create().Build(write: write, out bool success, basePath);
                   if (!success)
                   {
                      Logger.Error($"Could not build type {nodeType.Id}!");
