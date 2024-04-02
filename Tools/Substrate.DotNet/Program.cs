@@ -118,6 +118,7 @@ namespace Substrate.DotNet
          }
 
          Log.Information("Using NetApi Project = {name}", configuration.Projects.NetApi);
+         Log.Information("Using Integration Project = {name}", configuration.Projects.Integration);
          Log.Information("Using RestService Project = {name}", configuration.Projects.RestService);
          Log.Information("Using RestClient Project = {name}", configuration.Projects.RestClient);
          Log.Information("Using RestClient.Mockup Project = {name}", configuration.Projects.RestClientMockup);
@@ -303,9 +304,22 @@ namespace Substrate.DotNet
       /// <summary>
       /// Generates all classes for the NetApi project
       /// </summary>
+      /// <param name="metadata"></param>
+      /// <param name="configuration"></param>
       private static void GenerateNetApiClasses(MetaData metadata, SubstrateConfiguration configuration)
       {
          var generator = new NetApiGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.NetApi));
+         generator.Generate(metadata);
+      }
+
+      /// <summary>
+      /// Generates all classes for the Integration project
+      /// </summary>
+      /// <param name="metadata"></param>
+      /// <param name="configuration"></param>
+      private static void GenerateIntegrationClasses(MetaData metadata, SubstrateConfiguration configuration)
+      {
+         var generator = new IntegrationGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.NetApi));
          generator.Generate(metadata);
       }
 

@@ -56,9 +56,10 @@ Using a terminal of your choice, create a new directory for your project and exe
 ```sh
 dotnet new sln
 dotnet new substrate \
-   --sdk_version 0.6.0 \
+   --sdk_version 0.6.1 \
    --rest_service PROJECTNAME.RestService \
    --net_api PROJECTNAME.NetApiExt \
+   --net_integration PROJECTNAME.Integration \
    --rest_client PROJECTNAME.RestClient \
    --metadata_websocket ws://127.0.0.1:9944 \
    --generate_openapi_documentation false \
@@ -75,6 +76,7 @@ which generates a new solution and a couple of .NET projects in your project dir
 ├─── .substrate
 ├─── .config
 ├─── PROJECTNAME.NetApiExt
+├─── PROJECTNAME.Integration
 ├─── PROJECTNAME.RestClient
 ├─── PROJECTNAME.RestClient.Mockup
 ├─── PROJECTNAME.RestClient.Test
@@ -125,9 +127,10 @@ You can also watch our short step-by-step tutorial that guides you through the e
  - AstarNET
  ```sh
    dotnet new substrate \
-      --sdk_version 0.6.0 \  
+      --sdk_version 0.6.1 \  
       --rest_service AstarNET.RestService \  
       --net_api AstarNET.NetApiExt \  
+      --net_api AstarNET.Integration \ 
       --rest_client AstarNET.RestClient \  
       --metadata_websocket wss://rpc.astar.network \  
       --generate_openapi_documentation false \  
