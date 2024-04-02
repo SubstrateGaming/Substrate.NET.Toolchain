@@ -12,14 +12,14 @@
    "symbols": {
       "sdk_version": {
          "datatype": "string",
-         "defaultValue": "0.5.3",
+         "defaultValue": "0.6.0",
          "description": "Uses the given Substrate .NET Toolchain version.",
          "replaces": "SUBSTRATE_TOOLCHAIN_VERSION",
          "type": "parameter"
       },
       "api_version": {
          "datatype": "string",
-         "defaultValue": "0.9.19",
+         "defaultValue": "0.9.20",
          "description": "Uses the given Substrate .NET API version.",
          "replaces": "SUBSTRATE_NETAPI_VERSION",
          "type": "parameter"
@@ -57,19 +57,20 @@
       },
       "generate_openapi_documentation": {
          "datatype": "bool",
-         "defaultValue": "true",
+         "defaultValue": "false",
          "description": "Activates/deactivates the OpenApi Document Generation",
          "replaces": "OPENAPI_DOCUMENTATION_ENABLED",
          "type": "parameter"
       }
    },
-   "primaryOutputs": [
+  "primaryOutputs": [
       { "path": "Substrate.RestService/Substrate.RestService.csproj" },
       { "path": "Substrate.NetApiExt/Substrate.NetApiExt.csproj" },
+      { "path": "Substrate.Integration/Substrate.Integation.csproj" },
       { "path": "Substrate.RestClient/Substrate.RestClient.csproj" },
       { "path": "Substrate.RestClient.Mockup/Substrate.RestClient.Mockup.csproj" },
       { "path": "Substrate.RestClient.Test/Substrate.RestClient.Test.csproj" }
-   ],
+  ],
    "postActions": [
       {
          "description": "Add projects to solution",

@@ -7,16 +7,16 @@ using System.Reflection;
 
 namespace Substrate.DotNet.Service.Node
 {
-   public class RunetimeBuilder : TypeBuilderBase
+   public class RuntimeBuilder : TypeBuilderBase
    {
-      private RunetimeBuilder(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
+      private RuntimeBuilder(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
           : base(projectName, id, typeDef, typeDict)
       {
       }
 
-      public static RunetimeBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
+      public static RuntimeBuilder Init(string projectName, uint id, NodeTypeVariant typeDef, NodeTypeResolver typeDict)
       {
-         return new RunetimeBuilder(projectName, id, typeDef, typeDict);
+         return new RuntimeBuilder(projectName, id, typeDef, typeDict);
       }
 
       public override TypeBuilderBase Create()
