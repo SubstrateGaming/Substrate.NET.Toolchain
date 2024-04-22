@@ -20,8 +20,20 @@ namespace Substrate.DotNet.Service.Generators
 
       protected override void GenerateClasses(MetaData metadata)
       {
-         GetGenericStructs(metadata.NodeMetadata.Types);
+         GenerateIntegration(metadata.NodeMetadata.Modules);
       }
 
-  }
+      private void GenerateIntegration(Dictionary<uint, PalletModule> modules)
+      {
+         List<string> modulesResolved = new();
+         foreach (PalletModule module in modules.Values)
+         {
+
+         }
+
+         BaseClientBuilder
+          .Init(_projectSettings.ProjectName, 0, modulesResolved, null).Create()
+          .Build(write: true, out bool _, _projectSettings.ProjectDirectory);
+      }
+   }
 }

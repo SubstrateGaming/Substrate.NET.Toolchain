@@ -174,6 +174,9 @@ namespace Substrate.DotNet
          // Client
          GenerateRestClientClasses(configuration);
 
+         // Integration
+         GenerateIntegrationClasses(metadata, configuration);
+
          return true;
       }
 
@@ -319,7 +322,7 @@ namespace Substrate.DotNet
       /// <param name="configuration"></param>
       private static void GenerateIntegrationClasses(MetaData metadata, SubstrateConfiguration configuration)
       {
-         var generator = new IntegrationGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.NetApi));
+         var generator = new IntegrationGenerator(Log.Logger, configuration.Metadata.Runtime, new ProjectSettings(configuration.Projects.Integration));
          generator.Generate(metadata);
       }
 

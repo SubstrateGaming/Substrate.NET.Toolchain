@@ -16,38 +16,13 @@ namespace Substrate.DotNet.Service.Node
       {
       }
 
-      private static CodeMemberField GetPropertyField(string name, string baseType)
-      {
-         CodeMemberField field = new()
-         {
-            Attributes = MemberAttributes.Private,
-            Name = name.MakePrivateField(),
-            Type = new CodeTypeReference($"{baseType}")
-         };
-         return field;
-      }
-
       public CodeTypeMember CreateAutoProperty(string propertyName, string propertyType)
       {
          string propertyCode = $"        public {propertyType} {propertyName.MakeMethod()} {{ get; set; }}";
 
          // Using CodeSnippetTypeMember to inject a raw string of code.
-         CodeSnippetTypeMember autoProperty = new (propertyCode);
+         CodeSnippetTypeMember autoProperty = new(propertyCode);
          return autoProperty;
-      }
-
-      private static CodeMemberProperty GetProperty(string name, string baseType)
-      {
-         CodeMemberProperty prop = new()
-         {
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            Name = name.MakeMethod(),
-            Type = new CodeTypeReference(baseType),
-            HasGet = true,
-            HasSet = true
-         };
-         // No need to add GetStatements and SetStatements for auto-implemented properties
-         return prop;
       }
 
       private CodeMemberMethod GetDecode(NodeTypeField[] typeFields)
@@ -86,7 +61,7 @@ namespace Substrate.DotNet.Service.Node
          memberMethod.Statements.Add(new CodeSnippetExpression("var bytesLength = p - start"));
          memberMethod.Statements.Add(new CodeSnippetExpression("TypeSize = bytesLength"));
          memberMethod.Statements.Add(new CodeSnippetExpression("Bytes = new byte[bytesLength]"));
-         memberMethod.Statements.Add(new CodeSnippetExpression("System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
+         memberMethod.Statements.Add(new CodeSnippetExpression("global::System.Array.Copy(byteArray, start, Bytes, 0, bytesLength)"));
 
          return memberMethod;
       }
@@ -154,7 +129,6 @@ namespace Substrate.DotNet.Service.Node
          {
             for (int i = 0; i < typeDef.TypeFields.Length; i++)
             {
-
                NodeTypeField typeField = typeDef.TypeFields[i];
                string fieldName = StructBuilder.GetFieldName(typeField, "value", typeDef.TypeFields.Length, i);
 

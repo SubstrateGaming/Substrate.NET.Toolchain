@@ -3,6 +3,7 @@ using Substrate.DotNet.Service.Node;
 using Substrate.NetApi.Model.Meta;
 using Serilog;
 using System.Collections.Generic;
+using System;
 
 namespace Substrate.DotNet.Service.Generators
 {
