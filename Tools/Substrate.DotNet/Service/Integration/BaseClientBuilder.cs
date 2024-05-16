@@ -1,156 +1,360 @@
-﻿using Substrate.DotNet.Service.Node.Base;
+﻿using Chaos.NaCl;
+using Serilog;
+using Substrate.DotNet.Service.Node.Base;
+using Substrate.NET.Schnorrkel.Keys;
 using Substrate.NetApi;
 using Substrate.NetApi.Model.Extrinsics;
 using Substrate.NetApi.Model.Meta;
+using Substrate.NetApi.Model.Types;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Threading;
-using Substrate.DotNet.Extensions;
-using System.Xml.Linq;
+using System.Threading.Tasks;
 
 namespace Substrate.DotNet.Service.Node
 {
-   public class BaseClientBuilder : BaseClientBuilderBase
+   public class BaseClientBuilder : IntegrationBuilderBase
    {
-      private BaseClientBuilder(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict) :
+      public MetaData MetaData { get; }
+
+      private BaseClientBuilder(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict, MetaData metaData) :
           base(projectName, id, moduleNames, typeDict)
       {
+         MetaData = metaData;
       }
 
-      public static BaseClientBuilder Init(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict)
+      public static BaseClientBuilder Init(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict, MetaData metaData)
       {
-         return new BaseClientBuilder(projectName, id, moduleNames, typeDict);
+         return new BaseClientBuilder(projectName, id, moduleNames, typeDict, metaData);
       }
 
       public override BaseClientBuilder Create()
       {
          ClassName = "BaseClient";
-         NamespaceName = $"{ProjectName}.Generated";
+         NamespaceName = $"{ProjectName}.Client";
 
-         CodeNamespace typeNamespace = new(NamespaceName);
-         TargetUnit.Namespaces.Add(typeNamespace);
+         ExtrinsicMetadata extrinsicMetaData = MetaData.NodeMetadata.Extrinsic;
 
-         // Import necessary namespaces
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Meta"));
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Extrinsics"));
+         string chargeDefault = "";
 
-         var targetClass = new CodeTypeDeclaration(ClassName)
+         if (extrinsicMetaData.SignedExtensions.Any(p => p.SignedIdentifier == "ChargeAssetTxPayment"))
          {
-            IsClass = true,
-            TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-         };
-         targetClass.Comments.AddRange(GetComments(null, null, $"Base Client, Boilerplate."));
-         targetClass.BaseTypes.Add(new CodeTypeReference(typeof(SubstrateClient)));
-         typeNamespace.Types.Add(targetClass);
-
-         // Add fields
-         var maxConcurrentCallsField = new CodeMemberField(typeof(int), "_maxConcurrentCalls")
+            chargeDefault = "ChargeAssetTxPayment";
+         }
+         else if (extrinsicMetaData.SignedExtensions.Any(p => p.SignedIdentifier == "ChargeTransactionPayment"))
          {
-            Attributes = MemberAttributes.Private
-         };
-         targetClass.Members.Add(maxConcurrentCallsField);
-
-         var chargeTypeField = new CodeMemberField("ChargeType", "_chargeTypeDefault")
+            chargeDefault = "ChargeTransactionPayment";
+         }
+         else
          {
-            Attributes = MemberAttributes.Private
-         };
-         targetClass.Members.Add(chargeTypeField);
+            throw new NotSupportedException("No ChargeAssetTxPayment or ChargeTransactionPayment found!");
+         }
 
-         targetClass.Members.Add(CreateAutoProperty("ExtrinsicManager", "ExtrinsicManager", 
-            "Extrinsic manager, used to manage extrinsic subscriptions and the corresponding states."));
-         targetClass.Members.Add(CreateAutoProperty("SubscriptionManager", "SubscriptionManager", 
-            "Subscription manager, used to manage subscriptions of storage elements."));
-         targetClass.Members.Add(CreateAutoProperty("SubstrateClientExt", "SubstrateClientExt", 
-            "Substrate Extension Client."));
-         targetClass.Members.Add(CreateAutoProperty("NetworkType", "NetworkType",
-            "Network type."));
+         SignedExtensionMetadata last = extrinsicMetaData.SignedExtensions.Last();
 
-         // Define the IsConnected property
-         var isConnectedProperty = new CodeMemberProperty
-         {
-            Name = "IsConnected",
-            Type = new CodeTypeReference(typeof(bool)),
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            HasGet = true,
-            HasSet = false
-         };
-         isConnectedProperty.Comments.AddRange(GetComments(null, null, "Is connected to the network."));
-         isConnectedProperty.GetStatements.Add(new CodeMethodReturnStatement(
-             new CodePropertyReferenceExpression(
-                 new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "substrateClient"),
-                 "IsConnected"
-             )
-         ));
-         targetClass.Members.Add(isConnectedProperty);
+         // Define the class using a snippet
+         string literalCode = $@"
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Serilog;
+using StreamJsonRpc;
+using {NetApiExtProject}.Generated;
+using {NetApiExtProject}.Generated.Model.frame_system;
+using {NetApiExtProject}.Generated.Storage;
+using {ProjectName}.Helper;
+using Substrate.NET.Schnorrkel.Keys;
+using Substrate.NetApi;
+using Substrate.NetApi.Model.Extrinsics;
+using Substrate.NetApi.Model.Rpc;
+using Substrate.NetApi.Model.Types;
+using Substrate.NetApi.Model.Types.Base;
+using Substrate.NetApi.Model.Types.Primitive;
 
-         // Define constructor
-         var constructor = new CodeConstructor
-         {
-            Attributes = MemberAttributes.Public,
-            Parameters =
-            {
-                new CodeParameterDeclarationExpression(typeof(string), "url"),
-                new CodeParameterDeclarationExpression(typeof(int), "networkType"),
-                new CodeParameterDeclarationExpression(typeof(int), "maxConcurrentCalls")
-            }
-         };
-         targetClass.Members.Add(constructor);
+namespace {NamespaceName}
+{{
+    /// <summary>
+    /// Base client
+    /// </summary>
+    public class {ClassName}
+    {{
+        private readonly int _maxConcurrentCalls;
 
-         // Modifying constructor for initialization
-         constructor.Statements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "_chargeTypeDefault"),
-             new CodeMethodInvokeExpression(
-                 new CodeTypeReferenceExpression("ChargeType"),
-                 "Default" // Assuming a static method Default() based on context
-             )
-         ));
+        private readonly ChargeType _chargeTypeDefault;
 
-         constructor.Statements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "extrinsicManager"),
-             new CodeObjectCreateExpression("ExtrinsicManager")
-         ));
+        private static MiniSecret MiniSecretAlice => new MiniSecret(Utils.HexToByteArray(""0xe5be9a5092b81bca64be81d212e7f2f9eba183bb7a90954f7b76361f6edb5c0a""), ExpandMode.Ed25519);
 
-         constructor.Statements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "subscriptionManager"),
-             new CodeObjectCreateExpression("SubscriptionManager")
-         ));
+        /// <summary>
+        /// Alice account
+        /// </summary>
+        public static Account Alice => Account.Build(KeyType.Sr25519, MiniSecretAlice.ExpandToSecret().ToEd25519Bytes(), MiniSecretAlice.GetPair().Public.Key);
 
-         constructor.Statements.Add(new CodeAssignStatement(
-             new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "substrateClient"),
-             new CodeObjectCreateExpression("SubstrateClientExt", new CodeVariableReferenceExpression("uri"), new CodeVariableReferenceExpression("_chargeTypeDefault"))
-         ));
+        /// <summary>
+        /// Extrinsic manager, used to manage extrinsic subscriptions and the corresponding states.
+        /// </summary>
+        public ExtrinsicManager ExtrinsicManager {{ get; }}
 
+        /// <summary>
+        /// Subscription manager, used to manage subscriptions of storage elements.
+        /// </summary>
+        public SubscriptionManager SubscriptionManager {{ get; }}
 
-         // Add methods
-         var connectMethod = new CodeMemberMethod
-         {
-            Name = "ConnectAsync",
-            Attributes = MemberAttributes.Public | MemberAttributes.Final,
-            ReturnType = new CodeTypeReference(typeof(Task<bool>)),
-            Parameters =
-            {
-                new CodeParameterDeclarationExpression(typeof(bool), "useMetadata"),
-                new CodeParameterDeclarationExpression(typeof(bool), "standardSubstrate"),
-                new CodeParameterDeclarationExpression(typeof(CancellationToken), "token")
-            }
-         };
-         targetClass.Members.Add(connectMethod);
+        /// <summary>
+        /// Substrate Extension Client
+        /// </summary>
+        public SubstrateClientExt SubstrateClient {{ get; }}
+
+        /// <summary>
+        /// Is connected to the network
+        /// </summary>
+        public bool IsConnected => SubstrateClient.IsConnected;
+
+        /// <summary>
+        /// Base Client Constructor
+        /// </summary>
+        /// <param name=""url""></param>
+        /// <param name=""maxConcurrentCalls""></param>
+        public {ClassName}(string url, int maxConcurrentCalls = 10)
+        {{
+            _chargeTypeDefault = {chargeDefault}.Default();
+
+            _maxConcurrentCalls = maxConcurrentCalls;
+
+            SubstrateClient = new SubstrateClientExt(new Uri(url), _chargeTypeDefault);
+
+            ExtrinsicManager = new ExtrinsicManager();
+
+            SubscriptionManager = new SubscriptionManager();
+        }}
+
+        /// <summary>
+        /// Connect to the network
+        /// </summary>
+        /// <param name=""useMetadata""></param>
+        /// <param name=""standardSubstrate""></param>
+        /// <param name=""token""></param>
+        /// <returns></returns>
+        public async Task<bool> ConnectAsync(bool useMetadata, bool standardSubstrate, CancellationToken token)
+        {{
+            if (!IsConnected)
+            {{
+                try
+                {{
+                    await SubstrateClient.ConnectAsync(useMetadata, standardSubstrate, token);
+                }}
+                catch (Exception e)
+                {{
+                    Log.Error(""BaseClient.ConnectAsync: {0}"",
+                        e.ToString());
+                }}
+            }}
+
+            return IsConnected;
+        }}
+
+        /// <summary>
+        /// Disconnect from the network
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> DisconnectAsync()
+        {{
+            if (!IsConnected)
+            {{
+                return false;
+            }}
+
+            await SubstrateClient.CloseAsync();
+            return true;
+        }}
+
+        /// <summary>
+        /// Check if extrinsic can be sent
+        /// </summary>
+        /// <param name=""extrinsicType""></param>
+        /// <param name=""concurrentTasks""></param>
+        /// <returns></returns>
+        public bool CanExtrinsic(string extrinsicType, int concurrentTasks)
+            => IsConnected && !HasMaxConcurentTaskRunning() && !HasToManyConcurentTaskRunning(extrinsicType, concurrentTasks);
+
+        /// <summary>
+        /// Check if we have maximum of concurrent tasks running reached
+        /// </summary>
+        /// <returns></returns>
+        public bool HasMaxConcurentTaskRunning()
+            => ExtrinsicManager.Running.Count() >= _maxConcurrentCalls;
+
+        /// <summary>
+        /// Check if we have maximum of concurrent tasks running reached
+        /// </summary>
+        /// <param name=""extrinsicType""></param>
+        /// <param name=""concurrentTasks""></param>
+        /// <returns></returns>
+        public bool HasToManyConcurentTaskRunning(string extrinsicType, int concurrentTasks)
+            => ExtrinsicManager.Running.Count(p => p.ExtrinsicType == extrinsicType) >= concurrentTasks;
+
+        /// <summary>
+        /// Generic extrinsic sender
+        /// </summary>
+        /// <param name=""extrinsicType""></param>
+        /// <param name=""extrinsicMethod""></param>
+        /// <param name=""concurrentTasks""></param>
+        /// <param name=""token""></param>
+        /// <returns></returns>
+        public async Task<string> GenericExtrinsicAsync(Account account, string extrinsicType, Method extrinsicMethod, int concurrentTasks, CancellationToken token)
+        {{
+            if (account == null)
+            {{
+                Log.Warning(""Account is null!"");
+                return null;
+            }}
+
+            if (!IsConnected)
+            {{
+                Log.Warning(""Currently not connected to the network!"");
+                return null;
+            }}
+
+            if (HasMaxConcurentTaskRunning())
+            {{
+                Log.Warning(""There can not be more then {0} concurrent tasks overall!"", _maxConcurrentCalls);
+                return null;
+            }}
+
+            if (HasToManyConcurentTaskRunning(extrinsicType, concurrentTasks))
+            {{
+                Log.Warning(""There can not be more then {0} concurrent tasks of {1}!"", concurrentTasks, extrinsicType);
+                return null;
+            }}
+
+            string subscription = null;
+            try
+            {{
+                subscription = await SubstrateClient.Unstable.TransactionUnstableSubmitAndWatchAsync(ActionExtrinsicUpdate, extrinsicMethod, account, _chargeTypeDefault, 64, token);
+            }}
+            catch (RemoteInvocationException e)
+            {{
+                Log.Error(""RemoteInvocationException: {0}"", e.Message);
+                return subscription;
+            }}
+
+            if (subscription == null)
+            {{
+                return null;
+            }}
+
+            Log.Debug(""Generic extrinsic sent {0} with {1}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
+
+            if (ExtrinsicManager.TryAdd(subscription, extrinsicType))
+            {{
+                Log.Debug(""Generic extrinsic sent {0} with {1}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
+            }}
+            else
+            {{
+                Log.Warning(""ExtrinsicManager.Add failed for {0} with {1}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
+            }}
+
+            return subscription;
+        }}
+
+        /// <summary>
+        /// Callback for extrinsic update
+        /// </summary>
+        /// <param name=""subscriptionId""></param>
+        /// <param name=""extrinsicUpdate""></param>
+        public async void ActionExtrinsicUpdate(string subscriptionId, TransactionEventInfo extrinsicUpdate)
+        {{
+            try
+            {{
+                ExtrinsicManager.UpdateExtrinsicInfo(subscriptionId, extrinsicUpdate);
+
+                // proccessing events scrapping
+                if (ExtrinsicManager.TryGet(subscriptionId, out ExtrinsicInfo extrinsicInfo) && !extrinsicInfo.HasEvents && extrinsicUpdate.Hash != null && extrinsicUpdate.Index != null)
+                {{
+                    string parameters = SystemStorage.EventsParams();
+
+                    BaseVec<EventRecord> events = await SubstrateClient.GetStorageAsync<BaseVec<EventRecord>>(parameters, extrinsicUpdate.Hash.Value, CancellationToken.None);
+                    if (events == null)
+                    {{
+                        ExtrinsicManager.UpdateExtrinsicError(subscriptionId, ""No block events"");
+                        return;
+                    }}
+
+                    System.Collections.Generic.IEnumerable<EventRecord> allExtrinsicEvents = events.Value.Where(p => p.Phase.Value == Phase.ApplyExtrinsic && ((U32)p.Phase.Value2).Value == extrinsicUpdate.Index);
+                    if (!allExtrinsicEvents.Any())
+                    {{
+                        ExtrinsicManager.UpdateExtrinsicError(subscriptionId, ""No extrinsic events"");
+                        return;
+                    }}
+
+                    ExtrinsicManager.UpdateExtrinsicEvents(subscriptionId, allExtrinsicEvents);
+                }}
+            }}
+            catch (Exception ex)
+            {{
+                Log.Warning(""ActionExtrinsicUpdate: {0}"", ex.Message);
+            }}
+        }}
+
+        /// <summary>
+        /// Subscribe to event storage
+        /// </summary>
+        /// <param name=""token""></param>
+        /// <returns></returns>
+        public async Task<string> SubscribeEventsAsync(CancellationToken token)
+        {{
+            if (!IsConnected)
+            {{
+                Log.Warning(""Currently not connected to the network!"");
+                return null;
+            }}
+
+            if (SubscriptionManager.IsSubscribed)
+            {{
+                Log.Warning(""Already active subscription to events!"");
+                return null;
+            }}
+
+            string subscription = await SubstrateClient.SubscribeStorageKeyAsync(SystemStorage.EventsParams(), SubscriptionManager.ActionSubscrptionEvent, token);
+            if (subscription == null)
+            {{
+                return null;
+            }}
+
+            SubscriptionManager.IsSubscribed = true;
+
+            Log.Debug(""SystemStorage.Events subscription id [{0}] registred."", subscription);
+
+            return subscription;
+         }}
+
+         /// <summary>
+         /// Generate a random account
+         /// </summary>
+         /// <param name=""seed""></param>
+         /// <param name=""derivationPsw""></param>
+         /// <param name=""keyType""></param>
+         /// <returns></returns>
+         public static Account RandomAccount(int seed, string derivationPsw = """", KeyType keyType = KeyType.Sr25519)
+         {{
+            var random = new Random(seed);
+            byte[] randomBytes = new byte[16];
+            random.NextBytes(randomBytes);
+            string mnemonic = string.Join("" "", Mnemonic.MnemonicFromEntropy(randomBytes, Mnemonic.BIP39Wordlist.English));
+            Log.Debug(""mnemonic[Sr25519]: {{0}} "", mnemonic);
+            return Mnemonic.GetAccountFromMnemonic(mnemonic, derivationPsw, keyType);
+         }}
+      }}
+}}
+";
+
+         var csu = new CodeSnippetCompileUnit(literalCode);
+         TargetUnit = csu;
 
          return this;
       }
-
-      public CodeTypeMember CreateAutoProperty(string propertyName, string propertyType, string comment)
-      {
-         string propertyCode = $"        public {propertyType} {propertyName.MakeMethod()} {{ get; }}";
-
-         // Using CodeSnippetTypeMember to inject a raw string of code.
-         CodeSnippetTypeMember autoProperty = new(propertyCode);
-         autoProperty.Comments.AddRange(GetComments(null, null, comment));
-         return autoProperty;
-      }
    }
-
 }

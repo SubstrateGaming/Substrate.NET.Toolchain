@@ -147,7 +147,7 @@ namespace Substrate.DotNet.Service.Node.Base
          }
       }
 
-      private string GetPath(string basePath)
+      internal string GetPath(string basePath)
       {
          var space = NamespaceName.Split('.').ToList();
 
@@ -177,6 +177,16 @@ namespace Substrate.DotNet.Service.Node.Base
             new CodeSnippetExpression($"TypeDefEnum.{typeDef.TypeDef}")
          )));
 
+      }
+
+      public void GenerateFileFromTemplate(string template, Dictionary<string, string> replacements, string outputPath)
+      {
+         foreach (KeyValuePair<string, string> placeholder in replacements)
+         {
+            template = template.Replace(placeholder.Key, placeholder.Value);
+         }
+
+         File.WriteAllText(outputPath, template);
       }
    }
 }
