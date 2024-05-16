@@ -147,7 +147,7 @@ namespace Substrate.DotNet.Service.Node.Base
          }
       }
 
-      internal string GetPath(string basePath)
+      private string GetPath(string basePath)
       {
          var space = NamespaceName.Split('.').ToList();
 
@@ -179,14 +179,5 @@ namespace Substrate.DotNet.Service.Node.Base
 
       }
 
-      public void GenerateFileFromTemplate(string template, Dictionary<string, string> replacements, string outputPath)
-      {
-         foreach (KeyValuePair<string, string> placeholder in replacements)
-         {
-            template = template.Replace(placeholder.Key, placeholder.Value);
-         }
-
-         File.WriteAllText(outputPath, template);
-      }
    }
 }
