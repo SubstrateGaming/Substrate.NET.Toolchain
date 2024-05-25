@@ -11,18 +11,15 @@ namespace Substrate.DotNet.Service.Node
    {
       public MetaData MetaData { get; }
 
-      public string NodeRuntime { get; }
-
-      private ExtrinsicInfoBuilder(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict, MetaData metaData, string nodeRuntime) :
+      private ExtrinsicInfoBuilder(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict, MetaData metaData) :
           base(projectName, id, moduleNames, typeDict)
       {
          MetaData = metaData;
-         NodeRuntime = nodeRuntime;
       }
 
-      public static ExtrinsicInfoBuilder Init(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict, MetaData metaData, string nodeRuntime)
+      public static ExtrinsicInfoBuilder Init(string projectName, uint id, List<string> moduleNames, NodeTypeResolver typeDict, MetaData metaData)
       {
-         return new ExtrinsicInfoBuilder(projectName, id, moduleNames, typeDict, metaData, nodeRuntime);
+         return new ExtrinsicInfoBuilder(projectName, id, moduleNames, typeDict, metaData);
       }
 
       public override ExtrinsicInfoBuilder Create()

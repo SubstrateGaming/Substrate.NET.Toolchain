@@ -39,7 +39,7 @@ namespace Substrate.DotNet.Service.Generators
           .Build(write: true, out bool _, _projectSettings.ProjectDirectory);
 
          ExtrinsicInfoBuilder
-          .Init(_projectSettings.ProjectName, 0, modulesResolved, null, metadata, _nodeRuntime).Create()
+          .Init(_projectSettings.ProjectName, 0, modulesResolved, null, metadata).Create()
           .Build(write: true, out bool _, _projectSettings.ProjectDirectory);
 
         SubscriptionManagerBuilder
