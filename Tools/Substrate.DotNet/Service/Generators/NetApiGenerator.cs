@@ -29,20 +29,20 @@ namespace Substrate.DotNet.Service.Generators
          NodeTypeResolver typeDict = GenerateTypes(metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory, write: true);
 
          // generate modules
-         GenerateModules(ProjectName, metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types, _projectSettings.ProjectDirectory);
+         GenerateModules(ProjectName, metadata, typeDict, _projectSettings.ProjectDirectory);
 
          // generate base event handler
          // TODO (svnscha) Why disabled?
          // GenerateBaseEvents(metadata.NodeMetadata.Modules, typeDict, metadata.NodeMetadata.Types);
       }
 
-      private static void GenerateModules(string projectName, Dictionary<uint, PalletModule> modules, NodeTypeResolver typeDict, Dictionary<uint, NodeType> nodeTypes, string basePath)
+      private static void GenerateModules(string projectName, MetaData metadata, NodeTypeResolver typeDict, string basePath)
       {
          List<string> modulesResolved = new();
-         foreach (PalletModule module in modules.Values)
+         foreach (PalletModule module in metadata.NodeMetadata.Modules.Values)
          {
             ModuleGenBuilder
-                .Init(projectName, module.Index, module, typeDict, nodeTypes)
+                .Init(projectName, module.Index, module, typeDict, metadata.NodeMetadata.Types)
                 .Create()
                 .Build(write: true, out bool _, basePath);
 
@@ -52,6 +52,26 @@ namespace Substrate.DotNet.Service.Generators
          ClientBuilder
              .Init(projectName, 0, modulesResolved, typeDict).Create()
              .Build(write: true, out bool _, basePath);
+
+         BaseClientBuilder
+          .Init(projectName, 0, modulesResolved, null, metadata).Create()
+          .Build(write: true, out bool _, basePath);
+
+         ExtrinsicManagerBuilder
+          .Init(projectName, 0, modulesResolved, null).Create()
+          .Build(write: true, out bool _, basePath);
+
+         ExtrinsicInfoBuilder
+          .Init(projectName, 0, modulesResolved, null, metadata).Create()
+          .Build(write: true, out bool _, basePath);
+
+         SubscriptionManagerBuilder
+           .Init(projectName, 0, modulesResolved, null).Create()
+           .Build(write: true, out bool _, basePath);
+
+         GenericHelperBuilder
+          .Init(projectName, 0, modulesResolved, null).Create()
+          .Build(write: true, out bool _, basePath);
       }
    }
 }
