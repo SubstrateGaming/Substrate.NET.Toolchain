@@ -148,7 +148,7 @@ namespace {NamespaceName}
                 }}
                 catch (Exception e)
                 {{
-                    Log.Error(""BaseClient.ConnectAsync: {0}"",
+                    Log.Error(""BaseClient.ConnectAsync: {{0}}"",
                         e.ToString());
                 }}
             }}
@@ -220,24 +220,24 @@ namespace {NamespaceName}
 
             if (HasMaxConcurentTaskRunning())
             {{
-                Log.Warning(""There can not be more then {0} concurrent tasks overall!"", _maxConcurrentCalls);
+                Log.Warning(""There can not be more then {{0}} concurrent tasks overall!"", _maxConcurrentCalls);
                 return null;
             }}
 
             if (HasToManyConcurentTaskRunning(extrinsicType, concurrentTasks))
             {{
-                Log.Warning(""There can not be more then {0} concurrent tasks of {1}!"", concurrentTasks, extrinsicType);
+                Log.Warning(""There can not be more then {{0}} concurrent tasks of {{1}}!"", concurrentTasks, extrinsicType);
                 return null;
             }}
 
             string subscription = null;
             try
             {{
-                subscription = await SubstrateClient.Unstable.TransactionUnstableSubmitAndWatchAsync(ActionExtrinsicUpdate, extrinsicMethod, account, _chargeTypeDefault, 64, token);
+                subscription = await SubstrateClient.TransactionWatchCalls.TransactionWatchV1SubmitAndWatchAsync(ActionExtrinsicUpdate, extrinsicMethod, account, _chargeTypeDefault, 64, token);
             }}
             catch (RemoteInvocationException e)
             {{
-                Log.Error(""RemoteInvocationException: {0}"", e.Message);
+                Log.Error(""RemoteInvocationException: {{0}}"", e.Message);
                 return subscription;
             }}
 
@@ -246,15 +246,15 @@ namespace {NamespaceName}
                 return null;
             }}
 
-            Log.Debug(""Generic extrinsic sent {0} with {1}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
+            Log.Debug(""Generic extrinsic sent {{0}} with {{1}}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
 
             if (ExtrinsicManager.TryAdd(subscription, extrinsicType))
             {{
-                Log.Debug(""Generic extrinsic sent {0} with {1}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
+                Log.Debug(""Generic extrinsic sent {{0}} with {{1}}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
             }}
             else
             {{
-                Log.Warning(""ExtrinsicManager.Add failed for {0} with {1}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
+                Log.Warning(""ExtrinsicManager.Add failed for {{0}} with {{1}}."", extrinsicMethod.ModuleName + ""_"" + extrinsicMethod.CallName, subscription);
             }}
 
             return subscription;
@@ -295,7 +295,7 @@ namespace {NamespaceName}
             }}
             catch (Exception ex)
             {{
-                Log.Warning(""ActionExtrinsicUpdate: {0}"", ex.Message);
+                Log.Warning(""ActionExtrinsicUpdate: {{0}}"", ex.Message);
             }}
         }}
 
@@ -326,7 +326,7 @@ namespace {NamespaceName}
 
             SubscriptionManager.IsSubscribed = true;
 
-            Log.Debug(""SystemStorage.Events subscription id [{0}] registred."", subscription);
+            Log.Debug(""SystemStorage.Events subscription id [{{0}}] registred."", subscription);
 
             return subscription;
          }}
