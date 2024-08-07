@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Substrate.NetApi.Model.Types.Metadata.V14;
 
 namespace Substrate.DotNet.Service.Node
 {
@@ -50,7 +51,7 @@ namespace Substrate.DotNet.Service.Node
       {
          try
          {
-            var runtimeMetadata = new RuntimeMetadata();
+            var runtimeMetadata = new RuntimeMetadata<RuntimeMetadataV14>();
             runtimeMetadata.Create(serializedText);
             return new MetaData(runtimeMetadata, string.Empty);
          }

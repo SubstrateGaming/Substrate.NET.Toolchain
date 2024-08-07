@@ -3,6 +3,7 @@ using Substrate.NetApi.Model.Meta;
 using Substrate.NetApi.Model.Rpc;
 using Substrate.NetApi.Model.Types;
 using Substrate.NetApi.Model.Types.Metadata;
+using Substrate.NetApi.Model.Types.Metadata.V14;
 using Substrate.ServiceLayer.Storage;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Substrate.ServiceLayer
 
       public SubstrateMockupDataProvider(string metadata)
       {
-         var runtimeMetadata = new RuntimeMetadata();
+         var runtimeMetadata = new RuntimeMetadata<RuntimeMetadataV14>();
          runtimeMetadata.Create(metadata);
 
          _metaData = new MetaData(runtimeMetadata, string.Empty);
