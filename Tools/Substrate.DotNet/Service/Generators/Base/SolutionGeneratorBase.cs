@@ -1,16 +1,13 @@
-using Substrate.DotNet.Extensions;
+using Serilog;
 using Substrate.DotNet.Service.Node;
 using Substrate.NetApi.Model.Meta;
-using Substrate.NetApi.Model.Types.Metadata.V14;
-using Substrate.NetApi.Model.Types.Primitive;
-using Serilog;
+using Substrate.NetApi.Model.Types.Metadata.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Substrate.DotNet.Service.Generators.Base
 {
-
    /// <summary>
    /// Contains the common as well as the abstract methods to be implemented
    /// so that the solution and the respective classes are generated
@@ -39,7 +36,7 @@ namespace Substrate.DotNet.Service.Generators.Base
       }
 
       /// <summary>
-      /// Generates the respective classes 
+      /// Generates the respective classes
       /// </summary>
       /// <param name="metadata"></param>
       protected abstract void GenerateClasses(MetaData metadata);
@@ -61,7 +58,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                      StructBuilder.Init(ProjectName, type.Id, type, resolver)
                          .Create()
                          .Build(write: write, out bool success, basePath);
-                     
+
                      if (!success)
                      {
                         Logger.Error($"Could not build type {type.Id}!");
@@ -125,7 +122,7 @@ namespace Substrate.DotNet.Service.Generators.Base
                break;
          }
       }
-      
+
       private static Dictionary<string, int> GetRuntimeIndex(Dictionary<uint, NodeType> nodeTypes, string runtime, string runtimeType)
       {
          NodeType nodeType = nodeTypes.Select(p => p.Value).Where(p => p.Path != null && p.Path.Length == 2 && p.Path[0] == runtime && p.Path[1] == runtimeType).FirstOrDefault();
