@@ -170,7 +170,7 @@ namespace Substrate.DotNet.Service.Node.Base
       protected void AddTargetClassCustomAttributes(CodeTypeDeclaration targetClass, NodeType typeDef)
       {
          // TODO (svnscha): Change version to given metadata version.
-         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Types.Metadata.V14"));
+         ImportsNamespace.Imports.Add(new CodeNamespaceImport("Substrate.NetApi.Model.Types.Metadata.Base"));
          ImportsNamespace.Imports.Add(new CodeNamespaceImport($"Substrate.NetApi.Attributes"));
 
          targetClass.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("SubstrateNodeType"), new CodeAttributeArgument(
