@@ -70,8 +70,8 @@ namespace Substrate.DotNet.Service.Node
             {
                Attributes = MemberAttributes.Public
             };
-            codeConstructor.Comments.Add(new CodeCommentStatement("Initializes a new instance of the class."));
-            codeConstructor.Statements.Add(new CodeSnippetStatement("            // Register decoders"));
+            
+            codeConstructor.Comments.AddRange(GetComments(new string[] { "Initializes a new instance of the class." }, null));
 
             foreach (TypeVariant variant in typeDef.Variants)
             {
