@@ -31,15 +31,18 @@ namespace Substrate.DotNet.Service.Node
 
          ClassName = $"Enum{enumName}";
          ReferenzName = $"{NamespaceName}.{ClassName}";
-         CodeNamespace typeNamespace = new(NamespaceName);
+         var typeNamespace = new CodeNamespace(NamespaceName);
          TargetUnit.Namespaces.Add(typeNamespace);
 
          // Create the enum itself
-         CodeTypeDeclaration enumType = new(enumName)
+         var enumType = new CodeTypeDeclaration(enumName)
          {
             IsEnum = true
          };
          enumType.Comments.AddRange(GetComments(typeDef.Docs, null, enumName));
+
+         // Detect if this enum has associated types
+         bool hasAssociatedTypes = false;
 
          if (typeDef.Variants != null)
          {
@@ -51,11 +54,17 @@ namespace Substrate.DotNet.Service.Node
                };
                enumMember.Comments.AddRange(GetComments(variant.Docs, null, variant.Name));
                enumType.Members.Add(enumMember);
+
+               // Check if this variant has associated types
+               if (variant.TypeFields != null && variant.TypeFields.Length > 0)
+               {
+                  hasAssociatedTypes = true;
+               }
             }
          }
          typeNamespace.Types.Add(enumType);
 
-         // Generate the class based on BaseEnumRust
+         // Generate the appropriate class based on whether there are associated types
          var targetClass = new CodeTypeDeclaration(ClassName)
          {
             IsClass = true,
@@ -63,14 +72,13 @@ namespace Substrate.DotNet.Service.Node
          };
          targetClass.Comments.AddRange(GetComments(typeDef.Docs, typeDef));
 
-         if (typeDef.Variants != null)
+         if (hasAssociatedTypes)
          {
-            // Constructor to register decoders
+            // Generate the class based on BaseEnumRust (with associated types)
             var codeConstructor = new CodeConstructor
             {
                Attributes = MemberAttributes.Public
             };
-            
             codeConstructor.Comments.AddRange(GetComments(new string[] { "Initializes a new instance of the class." }, null));
 
             foreach (TypeVariant variant in typeDef.Variants)
@@ -96,15 +104,18 @@ namespace Substrate.DotNet.Service.Node
                );
             }
 
+            targetClass.BaseTypes.Add(new CodeTypeReference($"BaseEnumRust<{enumName}>"));
             targetClass.Members.Add(codeConstructor);
          }
+         else
+         {
+            // Generate the class based on BaseEnum (without associated types)
+            targetClass.BaseTypes.Add(new CodeTypeReference($"BaseEnum<{enumName}>"));
+         }
 
-         targetClass.BaseTypes.Add(new CodeTypeReference($"BaseEnumRust<{enumName}>"));
          typeNamespace.Types.Add(targetClass);
 
          return this;
       }
-
-
    }
 }

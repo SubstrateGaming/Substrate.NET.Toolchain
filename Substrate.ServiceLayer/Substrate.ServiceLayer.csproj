@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageReference Include="Substrate.NET.API" Version="0.9.24-rc5" />
+		<PackageReference Include="Substrate.NET.API" Version="0.9.24-rc6" />
 		<PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
 	</ItemGroup>
 
