@@ -54,6 +54,9 @@ namespace Substrate.DotNet
 
       [JsonIgnore]
       public string Runtime { get; set; }
+
+      [JsonProperty("refineMetadata")]
+      public bool IsMetadataRefined { get; set; }
    }
 
    public class SubstrateConfigurationRestClientSettings

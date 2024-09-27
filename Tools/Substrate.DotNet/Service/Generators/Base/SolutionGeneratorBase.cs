@@ -5,6 +5,8 @@ using Substrate.NetApi.Model.Types.Metadata.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Substrate.DotNet.Service.Generators.Base
 {
@@ -142,6 +144,9 @@ namespace Substrate.DotNet.Service.Generators.Base
 
       protected static void GetGenericStructs(Dictionary<uint, NodeType> nodeTypes)
       {
+         var metadataNaming = new MetadataNaming(nodeTypes);
+         List<string> rewritedName = new();
+
          Dictionary<string, int> _countPaths = new();
          for (uint id = 0; id < nodeTypes.Keys.Max(); id++)
          {
@@ -193,10 +198,207 @@ namespace Substrate.DotNet.Service.Generators.Base
 
                if (generics.Contains(key))
                {
-                  type.Path[^1] = type.Path[^1] + "T" + (_countPaths.ContainsKey(key) ? _countPaths[key] : 1);
+                  string suggestedClassName = metadataNaming.WriteClassName(type);
+                  if(suggestedClassName != type.Path[^1] && !rewritedName.Any(x => x == suggestedClassName))
+                  {
+                     type.Path[^1] = suggestedClassName;
+                  } else
+                  {
+                     type.Path[^1] = type.Path[^1] + "T" + (_countPaths.ContainsKey(key) ? _countPaths[key] : 1);
+                  }
+                  rewritedName.Add(type.Path[^1]);
                }
             }
          }
+      }
+
+      /// <summary>
+      /// Refine current metadata by removing unecessary classes that encapsulate mostly Rust lists
+      /// C# is more permissive so we don't need to wrap BaseVec<> into a class
+      /// </summary>
+      public static void RefinedUnnecessaryWrapper(MetaData metadata)
+      {
+         Dictionary<uint, NodeType> nodeTypes = metadata.NodeMetadata.Types;
+         var metadataNaming = new MetadataNaming(nodeTypes);
+
+         bool hasSomethingChanged = false;
+         do
+         {
+            IDictionary<uint, uint> wrapperNodes = ExtractWrappers(nodeTypes);
+
+            // Loop over all node types to switch sourceId to new destinationId
+            hasSomethingChanged = MapSourceToDestination(nodeTypes, wrapperNodes);
+
+            if(hasSomethingChanged)
+            {
+               RemoveSourceIds(nodeTypes, metadataNaming, wrapperNodes);
+               RefineModules(metadata, wrapperNodes);
+            }
+         } while (hasSomethingChanged);
+      }
+
+      /// <summary>
+      /// Remove all unecessary id
+      /// </summary>
+      /// <param name="nodeTypes"></param>
+      /// <param name="metadataNaming"></param>
+      /// <param name="wrapperNodes"></param>
+      private static void RemoveSourceIds(Dictionary<uint, NodeType> nodeTypes, MetadataNaming metadataNaming, IDictionary<uint, uint> wrapperNodes)
+      {
+         foreach (KeyValuePair<uint, uint> node in wrapperNodes)
+         {
+            Log.Verbose("\t Replace {sourceType} (id = {sourceKey}) by {destinationType} (id = {destinationKey})", metadataNaming.WriteType(node.Key), node.Key, metadataNaming.WriteType(node.Value), node.Value);
+            nodeTypes.Remove(node.Key);
+         }
+      }
+
+      /// <summary>
+      /// Loop over all modules and replace old occurences
+      /// </summary>
+      /// <param name="metadata"></param>
+      /// <param name="wrapperNodes"></param>
+      private static void RefineModules(MetaData metadata, IDictionary<uint, uint> wrapperNodes)
+      {
+         Dictionary<uint, PalletModule> modules = metadata.NodeMetadata.Modules;
+         foreach (KeyValuePair<uint, PalletModule> module in modules)
+         {
+            PalletStorage storage = module.Value.Storage;
+
+            if (storage == null || storage.Entries == null)
+            {
+               continue;
+            }
+
+            foreach (Entry entry in storage.Entries)
+            {
+               if (wrapperNodes.ContainsKey(entry.TypeMap.Item1))
+               {
+                  entry.TypeMap = new(wrapperNodes[entry.TypeMap.Item1], entry.TypeMap.Item2);
+               }
+               if (entry.TypeMap.Item2 != null && wrapperNodes.ContainsKey(entry.TypeMap.Item2.Key))
+               {
+                  entry.TypeMap.Item2.Key = wrapperNodes[entry.TypeMap.Item2.Key];
+               }
+
+               if (entry.TypeMap.Item2 != null && wrapperNodes.ContainsKey(entry.TypeMap.Item2.Value))
+               {
+                  entry.TypeMap.Item2.Value = wrapperNodes[entry.TypeMap.Item2.Value];
+               }
+
+            }
+         }
+      }
+
+      /// <summary>
+      /// Check every TypeDef composite which have only on TypeDef Sequence as property field.
+      /// Target multi generic references (BoundedVec, WeakBoundedVec etc)
+      /// Return a dictionnary of sourceId, destinationId
+      /// </summary>
+      /// <param name="nodeTypes"></param>
+      /// <returns></returns>
+      private static IDictionary<uint, uint> ExtractWrappers(Dictionary<uint, NodeType> nodeTypes)
+      {
+         var wrappers =
+                     nodeTypes
+                     .Where(x => x.Value.TypeDef == TypeDefEnum.Composite)
+                     .Select(x => (NodeTypeComposite)x.Value)
+                     .Where(x => x.Path != null)
+                     .GroupBy(x => string.Join('.', x.Path))
+                     .Where(x => x.Count() > 1)
+                     .SelectMany(x => x)
+                     .Where(x => x.TypeFields != null && x.TypeFields.Length == 1)
+                     .Where(x => nodeTypes[x.TypeFields[0].TypeId].TypeDef == TypeDefEnum.Sequence)
+                     .Select(x => new
+                     {
+                        sourceId = x.Id,
+                        sourceName = x.Path != null ? string.Join(".", x.Path) : string.Empty,
+                        destinationId = nodeTypes[x.TypeFields[0].TypeId].Id
+                     });
+
+         IDictionary<uint, uint> wrapperNodes = wrappers.ToDictionary(x => x.sourceId, x => x.destinationId);
+         return wrapperNodes;
+      }
+
+      /// <summary>
+      /// Change all occurences of old Id to Destination Id
+      /// </summary>
+      /// <param name="nodeTypes"></param>
+      /// <param name="wrapperNodes"></param>
+      /// <returns>True if a node has been changed</returns>
+      private static bool MapSourceToDestination(Dictionary<uint, NodeType> nodeTypes, IDictionary<uint, uint> wrapperNodes)
+      {
+         bool anyUpdate = false;
+         foreach (KeyValuePair<uint, NodeType> node in nodeTypes)
+         {
+            switch (node.Value)
+            {
+               case NodeTypeVariant detailVariant when detailVariant.Variants is not null:
+                  foreach (NodeTypeField nodeTypeField in detailVariant.Variants
+                     .Where(x => x.TypeFields != null)
+                     .SelectMany(x => x.TypeFields))
+                  {
+                     if (wrapperNodes.ContainsKey(nodeTypeField.TypeId))
+                     {
+                        nodeTypeField.TypeId = wrapperNodes[nodeTypeField.TypeId];
+                        anyUpdate = true;
+                     }
+                  }
+                  break;
+
+               case NodeTypeCompact detailCompact when wrapperNodes.ContainsKey(detailCompact.TypeId):
+                  detailCompact.TypeId = wrapperNodes[detailCompact.TypeId];
+                  anyUpdate = true;
+                  break;
+
+               case NodeTypeComposite detailComposite when detailComposite.TypeFields is not null:
+                  foreach (NodeTypeField typeField in detailComposite.TypeFields)
+                  {
+                     if (wrapperNodes.ContainsKey(typeField.TypeId))
+                     {
+                        typeField.TypeId = wrapperNodes[typeField.TypeId];
+                        anyUpdate = true;
+                     }
+                  }
+                  break;
+
+               case NodeTypeSequence detailSequence when wrapperNodes.ContainsKey(detailSequence.TypeId):
+                  detailSequence.TypeId = wrapperNodes[detailSequence.TypeId];
+                  anyUpdate = true;
+                  break;
+
+               case NodeTypeTuple detailTuple when detailTuple.TypeIds != null:
+                  for (int i = 0; i < detailTuple.TypeIds.Length; i++)
+                  {
+                     if (wrapperNodes.ContainsKey(detailTuple.TypeIds[i]))
+                     {
+                        detailTuple.TypeIds[i] = wrapperNodes[detailTuple.TypeIds[i]];
+                        anyUpdate = true;
+                     }
+                  }
+                  break;
+
+               case NodeTypeArray detailArray when wrapperNodes.ContainsKey(detailArray.TypeId):
+                  detailArray.TypeId = wrapperNodes[detailArray.TypeId];
+                  anyUpdate = true;
+                  break;
+
+               case NodeTypeBitSequence detailBitSequence:
+                  if(wrapperNodes.ContainsKey(detailBitSequence.TypeIdStore))
+                  {
+                     detailBitSequence.TypeIdStore = wrapperNodes[detailBitSequence.TypeIdStore];
+                  }
+
+                  if (wrapperNodes.ContainsKey(detailBitSequence.TypeIdOrder))
+                  {
+                     detailBitSequence.TypeIdOrder = wrapperNodes[detailBitSequence.TypeIdOrder];
+                  }
+
+                  string x = "1";
+                  break;
+            }
+         }
+
+         return anyUpdate;
       }
    }
 }
