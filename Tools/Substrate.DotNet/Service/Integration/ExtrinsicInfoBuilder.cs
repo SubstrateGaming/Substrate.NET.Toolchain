@@ -122,28 +122,28 @@ namespace {NamespaceName}
 
             switch (TransactionEvent)
             {{
-                case NetApi.Model.Rpc.TransactionEvent.Validated:
+                case Substrate.NetApi.Model.Rpc.TransactionEvent.Validated:
                     IsReady = true;
                     break;
 
-                case NetApi.Model.Rpc.TransactionEvent.BestChainBlockIncluded:
+                case Substrate.NetApi.Model.Rpc.TransactionEvent.BestChainBlockIncluded:
                     IsInBlock = true;
                     break;
 
-                case NetApi.Model.Rpc.TransactionEvent.Finalized:
+                case Substrate.NetApi.Model.Rpc.TransactionEvent.Finalized:
                     IsSuccess = true;
                     IsCompleted = true;
                     break;
 
-                case NetApi.Model.Rpc.TransactionEvent.Error:
+                case Substrate.NetApi.Model.Rpc.TransactionEvent.Error:
                     IsCompleted = true;
                     break;
 
-                case NetApi.Model.Rpc.TransactionEvent.Invalid:
+                case Substrate.NetApi.Model.Rpc.TransactionEvent.Invalid:
                     IsCompleted = true;
                     break;
 
-                case NetApi.Model.Rpc.TransactionEvent.Dropped:
+                case Substrate.NetApi.Model.Rpc.TransactionEvent.Dropped:
                     IsCompleted = true;
                     break;
 
