@@ -20,6 +20,30 @@ namespace Substrate.DotNet.Extensions
    internal static class ReflectedEndpointExtensions
    {
       /// <summary>
+      /// Ensure we are importing all model items.
+      /// Not actually required since we use fully qualified items but we want to get rid of that later.
+      /// </summary>
+      /// <param name="currentNamespace"></param>
+      /// <param name="defaultReturnType"></param>
+      public static void ManageNamespace(CodeNamespace currentNamespace, IReflectedEndpointType defaultReturnType)
+      {
+         currentNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
+         foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
+         {
+            currentNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
+
+            // Also import namespace from generic sub arguments
+            if (genericArgument.IsGenericType)
+            {
+               foreach (Type genericSubArgument in genericArgument.GenericTypeArguments)
+               {
+                  currentNamespace.Imports.Add(new CodeNamespaceImport(genericSubArgument.Namespace));
+               }
+            }
+         }
+      }
+
+      /// <summary>
       /// Converts a reflected endpoint to an interface method code element.
       /// The generated method is being implemented by an actual client.
       /// </summary>
@@ -72,13 +96,7 @@ namespace Substrate.DotNet.Extensions
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)
          {
-            // Ensure we are importing all model items.
-            // Not actually required since we use fully qualified items but we want to get rid of that later.
-            currentNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
-            foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
-            {
-               currentNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
-            }
+            ManageNamespace(currentNamespace, defaultReturnType);
             method.Parameters.Add(new CodeParameterDeclarationExpression(defaultReturnType.Type, "value"));
          }
 
@@ -228,13 +246,7 @@ namespace Substrate.DotNet.Extensions
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)
          {
-            // Ensure we are importing all model items.
-            // Not actually required since we use fully qualified items but we want to get rid of that later.
-            clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
-            foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
-            { 
-               clientNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
-            }
+            ManageNamespace(clientNamespace, defaultReturnType);
             method.Parameters.Add(new CodeParameterDeclarationExpression(defaultReturnType.Type, "value"));
          }
 
@@ -316,14 +328,7 @@ namespace Substrate.DotNet.Extensions
          IReflectedEndpointType defaultReturnType = endpoint.GetResponse().GetSuccessReturnType();
          if (defaultReturnType != null)
          {
-            // Ensure we are importing all model items.
-            // Not actually required since we use fully qualified items but we want to get rid of that later.
-            clientNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
-            foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
-            {
-               clientNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
-            }
-
+            ManageNamespace(clientNamespace, defaultReturnType);
             GenerateMockupValueStatement(currentMembers, method, defaultReturnType.Type);
          }
          else

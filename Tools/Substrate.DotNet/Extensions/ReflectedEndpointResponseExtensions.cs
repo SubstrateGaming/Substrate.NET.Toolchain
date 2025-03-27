@@ -27,14 +27,7 @@ namespace Substrate.DotNet.Extensions
             return new CodeTypeReference(typeof(void));
          }
 
-         // Ensure we are importing all model items.
-         // Not actually required since we use fully qualified items but we want to get rid of that later.
-         currentNamespace.Imports.Add(new CodeNamespaceImport(defaultReturnType.Type.Namespace));
-         foreach (Type genericArgument in defaultReturnType.Type.GenericTypeArguments)
-         {
-            currentNamespace.Imports.Add(new CodeNamespaceImport(genericArgument.Namespace));
-         }
-
+         ReflectedEndpointExtensions.ManageNamespace(currentNamespace, defaultReturnType);
          return new CodeTypeReference(typeof(Task<>).MakeGenericType(new[] { defaultReturnType.Type }));
       }
 
